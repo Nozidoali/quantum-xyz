@@ -11,33 +11,30 @@ Last Modified time: 2023-06-18 11:39:16
 from StatePreparator import *
 from Algorithms import *
 import pyzx as zx
-from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
-from qiskit import Aer, execute
-from matplotlib import pyplot as plt
-from qiskit.tools.visualization import plot_histogram
+
 import quantumflow as qf
+from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 
 if __name__ == "__main__":
 
     # U = np.identity(8, dtype=complex)
-    # U[:, 0] = np.array([0, 1, 1, 0, 1, 0, 0, 0])
-    # U[:, 1] = np.array([1, 0, 0, 0, 0, 0, 0, 0])
+    # U[:, 0] = np.array([1, 1, 0, 0, 0, 0, 0, 0])
+    # # U[:, 1] = np.array([1, 0, 0, 0, 0, 0, 0, 0])
     # U = to_unitary(U)
 
-    # U = np.identity(4, dtype=complex)
-    # c1 = np.array([[1, 0], [0, 0]])
-    # c2 = np.array([[0, 0], [0, 1]])
-    # U = np.kron(c1, np.identity(2)) + np.kron(c2, BasicGate.x())
-    # U = to_unitary(U)
-
+    # U = np.kron(np.identity(4, dtype=complex), BasicGate.ry(np.pi/2))
 
     U = np.identity(4, dtype=complex)
-    U[:, 0] = np.array([1, 1, 1, 0])
-
+    c1 = np.array([[1, 0], [0, 0]])
+    c2 = np.array([[0, 0], [0, 1]])
+    U = np.kron(c1, np.identity(2)) + np.kron(c2, BasicGate.x())
     U = to_unitary(U)
 
-    # gate = qf.RandomGate(qubits=range(3))
+    # U = np.identity(4, dtype=complex)
+    # U[:, 0] = np.array([1, 1, 1, 0])
+    # U = to_unitary(U)
 
+    # gate = qf.RandomGate(qubits=range(3))
 
     # circ = qf.translate(qf.quantum_shannon_decomposition(qf.UnitaryGate(U, range(3))))
     # circ = qf.translate(qf.quantum_shannon_decomposition(gate))
@@ -53,23 +50,20 @@ if __name__ == "__main__":
     circuit = quantum_shannon_decomposition(U)
     print(circuit)
 
-    simulator = Aer.get_backend('qasm_simulator')
-    result = execute(circuit, backend=simulator).result()
-    plot_histogram(result.get_counts(circuit))
-    plt.show()
-    exit(0)
+    circuit.simulate()
+    # exit(0)
 
     # print(circuit)
-    with open('circuit.qasm', 'w') as f:
+    with open("circuit.qasm", "w") as f:
         f.write(circuit.qasm())
 
-    circuit = zx.Circuit.from_qasm_file('circuit.qasm')
+    circuit = zx.Circuit.from_qasm_file("circuit.qasm")
     g = circuit.to_basic_gates().to_graph()
-    zx.simplify.full_reduce(g,quiet=True)
+    zx.simplify.full_reduce(g, quiet=True)
     new_circ = zx.extract_circuit(g)
 
-    with open('circuit.qasm', 'w') as f:
+    with open("circuit.qasm", "w") as f:
         f.write(new_circ.to_basic_gates().to_qasm())
 
-    circuit = QuantumCircuit.from_qasm_file('circuit.qasm')
+    circuit = QuantumCircuit.from_qasm_file("circuit.qasm")
     print(circuit)

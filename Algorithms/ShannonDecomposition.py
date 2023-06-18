@@ -15,23 +15,22 @@ from Circuit import QCircuit
 
 from Algorithms.Decompose import *
 
-from qiskit import *
 from qiskit.circuit.library.standard_gates import RYGate
 import math
+
 
 def quantum_shannon_decomposition(matrix: np.ndarray) -> QCircuit:
 
     dim = matrix.shape[0]
     num_qubits = int(math.log(dim, 2))
 
-    qr = QuantumRegister(num_qubits)
-    cr = ClassicalRegister(num_qubits)
-    circuit = QuantumCircuit(qr, cr)
+    circuit = QCircuit(num_qubits)
 
-    quantum_shannon_decomposition_helper(matrix, circuit, qr)
-    circuit.measure(qr, cr)
-
+    quantum_shannon_decomposition_helper(matrix, circuit, circuit.qr)
+    circuit.flush()
+    circuit.measure()
     return circuit
+
 
 def quantum_shannon_decomposition_helper(matrix: np.ndarray, circuit, qubits: list):
 
@@ -40,27 +39,29 @@ def quantum_shannon_decomposition_helper(matrix: np.ndarray, circuit, qubits: li
     if num_qubits == 1:
         qubit = qubits[0]
         alpha, beta, gamma = unitary_zyz_decomposition(matrix)
-            
-        circuit.rz(gamma, qubit)
-        circuit.ry(beta, qubit)
-        circuit.rz(alpha, qubit)
+
+        if not np.isclose(gamma, 0.0):
+            circuit.rz(gamma, qubit)
+        if not np.isclose(beta, 0.0):
+            circuit.ry(beta, qubit)
+        if not np.isclose(alpha, 0.0):
+            circuit.rz(alpha, qubit)
         return
 
     half = int(dim / 2)
 
-    matrix00 = matrix[: half, : half]
-    matrix01 = matrix[: half, half :]
-    matrix10 = matrix[half :, : half]
-    matrix11 = matrix[half :, half :]
+    matrix00 = matrix[:half, :half]
+    matrix01 = matrix[:half, half:]
+    matrix10 = matrix[half:, :half]
+    matrix11 = matrix[half:, half:]
 
     # step 1: cosine-sine decomposition
     U, CS, V = cossin((matrix00, matrix01, matrix10, matrix11))
 
-
-    CS00 = CS[: half, : half]
-    CS01 = CS[: half, half :]
-    CS10 = CS[half :, : half]
-    CS11 = CS[half :, half :]
+    CS00 = CS[:half, :half]
+    CS01 = CS[:half, half:]
+    CS10 = CS[half:, :half]
+    CS11 = CS[half:, half:]
 
     assert np.array_equal(CS00, CS11)
     assert np.array_equal(CS01, -CS10)
