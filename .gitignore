@@ -1,0 +1,6 @@
+*.ipynb
+
+# QASM files
+*.qasm
+
+__pycache__/
