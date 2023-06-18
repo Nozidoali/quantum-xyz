@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-18 14:16:24
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-18 14:52:26
+Last Modified time: 2023-06-18 18:46:32
 '''
 
 import numpy as np
@@ -40,5 +40,16 @@ def unitary_zyz_decomposition(matrix: np.ndarray):
 
     theta0 = (theta0_plus_theta2 + theta0_sub_theta2) / 2
     theta2 = (theta0_plus_theta2 - theta0_sub_theta2) / 2
-        
+
+    if np.isclose(theta1, 0.0):
+        theta2 = theta0 + theta2
+        theta1 = 0.0
+        theta0 = 0.0
+    
+    if theta0 < 0:
+        theta0 += 2 * np.pi
+    if theta1 < 0:
+        theta1 += 2 * np.pi
+    if theta2 < 0:
+        theta2 += 2 * np.pi
     return theta0, theta1, theta2

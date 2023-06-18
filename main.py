@@ -19,23 +19,36 @@ import quantumflow as qf
 
 if __name__ == "__main__":
 
-    U = np.identity(8, dtype=complex)
-    U[:, 0] = np.array([0, 0, 0, 1, 0, 1, 1, 0])
-    U[:, 3] = np.array([1, 0, 0, 0, 0, 0, 0, 0])
+    # U = np.identity(8, dtype=complex)
+    # U[:, 0] = np.array([0, 1, 1, 0, 1, 0, 0, 0])
+    # U[:, 1] = np.array([1, 0, 0, 0, 0, 0, 0, 0])
+    # U = to_unitary(U)
+
+    # U = np.identity(4, dtype=complex)
+    # c1 = np.array([[1, 0], [0, 0]])
+    # c2 = np.array([[0, 0], [0, 1]])
+    # U = np.kron(c1, np.identity(2)) + np.kron(c2, BasicGate.x())
+    # U = to_unitary(U)
+
+
+    U = np.identity(4, dtype=complex)
+    U[:, 0] = np.array([1, 1, 1, 0])
 
     U = to_unitary(U)
-  
-    # circ = qf.Circuit(qf.UnitaryGate(U, range(3)).decompose())
-    # circ = qf.Circuit(qf.QFTGate([0, 1, 2, 3, 4, 5, 6, 7]).decompose())
+
+    # gate = qf.RandomGate(qubits=range(3))
+
+
+    # circ = qf.translate(qf.quantum_shannon_decomposition(qf.UnitaryGate(U, range(3))))
+    # circ = qf.translate(qf.quantum_shannon_decomposition(gate))
     # print(qf.circuit_to_diagram(circ))
 
-    # circ = qf.quantum_shannon_decomposition(gate)
     # circuit = qf.circuit_to_qiskit(circ)
     # print(circuit)
 
     # exit(0)
 
-    print(U)
+    # print(U)
 
     circuit = quantum_shannon_decomposition(U)
     print(circuit)
