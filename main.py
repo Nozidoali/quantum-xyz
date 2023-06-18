@@ -15,13 +15,30 @@ from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 from qiskit import Aer, execute
 from matplotlib import pyplot as plt
 from qiskit.tools.visualization import plot_histogram
+import quantumflow as qf
 
 if __name__ == "__main__":
 
     U = np.identity(8, dtype=complex)
-    U[:, 0] = np.array([0, 0, 0, 1, 0, 1, 1, 0]) * np.sqrt(3) / 3
+    U[:, 0] = np.array([0, 0, 0, 1, 0, 1, 1, 0])
+    U[:, 3] = np.array([1, 0, 0, 0, 0, 0, 0, 0])
+
+    U = to_unitary(U)
+  
+    # circ = qf.Circuit(qf.UnitaryGate(U, range(3)).decompose())
+    # circ = qf.Circuit(qf.QFTGate([0, 1, 2, 3, 4, 5, 6, 7]).decompose())
+    # print(qf.circuit_to_diagram(circ))
+
+    # circ = qf.quantum_shannon_decomposition(gate)
+    # circuit = qf.circuit_to_qiskit(circ)
+    # print(circuit)
+
+    # exit(0)
+
+    print(U)
 
     circuit = quantum_shannon_decomposition(U)
+    print(circuit)
 
     simulator = Aer.get_backend('qasm_simulator')
     result = execute(circuit, backend=simulator).result()

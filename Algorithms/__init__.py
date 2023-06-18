@@ -9,3 +9,4 @@ Last Modified time: 2023-06-18 11:33:28
 """
 
 from Algorithms.Decomposition import *
+from Algorithms.Decompose import *

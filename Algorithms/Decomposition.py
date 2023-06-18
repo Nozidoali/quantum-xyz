@@ -13,6 +13,8 @@ from scipy.linalg import cossin, eig, solve, det
 from scipy.stats import unitary_group
 from Circuit import QCircuit
 
+from Algorithms.Decompose import *
+
 from qiskit import *
 from qiskit.circuit.library.standard_gates import RYGate
 import math
@@ -134,42 +136,19 @@ def quantum_shannon_decomposition(matrix: np.ndarray) -> QCircuit:
 
     return circuit
 
-def unitary_zyz_decomposition(matrix: np.ndarray, circuit, qubit) -> QCircuit:
-    
-    assert matrix.shape == (2, 2)
 
-    # first cancel out the global phase
-    phi = np.arctan(np.imag(det(matrix)) / np.real(det(matrix)))
-
-    SU = np.exp(-1j * phi) * matrix
-
-    A = SU[0, 0]
-    B = SU[0, 1]
-
-    sw = np.sqrt( np.real(A) ** 2 + np.imag(B) ** 2 + np.real(B) ** 2 )
-    wx = np.imag(B) / sw
-    wy = np.real(B) / sw
-    wz = np.imag(A) / sw
-
-    t1 = np.arctan( np.imag(A) / np.real(A) ) if np.real(A) != 0 else 0
-    t2 = np.arctan( np.imag(B) / np.real(B) ) if np.real(B) != 0 else 0
-
-    alpha = t1 + t2
-    gamma = t1 - t2
-    beta = 2 * np.arctan( sw * np.sqrt(wx**2 + wy**2) / np.sqrt(sw**2 + (wx*sw)**2) )
-
-    assert alpha != np.NaN and beta != np.NaN and gamma != np.NaN
-
-    circuit.rz(gamma, qubit)
-    circuit.ry(beta, qubit)
-    circuit.rz(alpha, qubit)
 
 def quantum_shannon_decomposition_helper(matrix: np.ndarray, circuit, qubits: list):
 
     dim = matrix.shape[0]
     num_qubits = len(qubits)
     if num_qubits == 1:
-        unitary_zyz_decomposition(matrix, circuit, qubits[0])
+        qubit = qubits[0]
+        alpha, beta, gamma = unitary_zyz_decomposition(matrix)
+            
+        circuit.rz(gamma, qubit)
+        circuit.ry(beta, qubit)
+        circuit.rz(alpha, qubit)
         return
 
     half = int(dim / 2)
