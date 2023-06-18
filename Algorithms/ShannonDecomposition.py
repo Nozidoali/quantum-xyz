@@ -38,14 +38,11 @@ def quantum_shannon_decomposition_helper(matrix: np.ndarray, circuit, qubits: li
     num_qubits = len(qubits)
     if num_qubits == 1:
         qubit = qubits[0]
-        alpha, beta, gamma = unitary_zyz_decomposition(matrix)
+        alpha, beta, gamma = unitary_zyz_decomposition_legacy(matrix)
 
-        if not np.isclose(gamma, 0.0):
-            circuit.rz(gamma, qubit)
-        if not np.isclose(beta, 0.0):
-            circuit.ry(beta, qubit)
-        if not np.isclose(alpha, 0.0):
-            circuit.rz(alpha, qubit)
+        circuit.rz(gamma, qubit)
+        circuit.ry(beta, qubit)
+        circuit.rz(alpha, qubit)
         return
 
     half = int(dim / 2)
