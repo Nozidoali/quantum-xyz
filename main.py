@@ -23,9 +23,16 @@ if __name__ == "__main__":
     # state = GHZ_state(4)
 
     print(state)
-
-    # circuit = quantum_shannon_decomposition(U)
     circuit = cofactor_decomposition(state)
+
+    # TODO: buggy, need to fix
+    if False:
+        U = np.identity(8, dtype=complex)
+        U[:, 0] = np.array([0, 1, 1, 0, 1, 0, 0, 0])
+        U[:, 1] = np.array([1, 0, 0, 0, 0, 0, 0, 0])
+        U = to_unitary(U)
+        circuit = quantum_shannon_decomposition(U)
+
     print(circuit)
 
     circuit.simulate()

@@ -12,6 +12,15 @@ import numpy as np
 from ..Synthesis import *
 from Circuit import QCircuit
 
+def apply_control_sequence_to_z(
+    circuit: QCircuit, control_sequence: list, control_qubits: list, target_qubit
+) -> None:
+    for control in control_sequence:
+        rotation_theta, control_id = control
+
+        circuit.rz(rotation_theta, target_qubit)
+        circuit.cx(control_qubits[control_id], target_qubit)
+
 
 def decompose_multiple_controlled_rotation_Z_gate(
     matrix: np.ndarray, circuit: QCircuit, control_qubits: list, target_qubit
@@ -20,26 +29,6 @@ def decompose_multiple_controlled_rotation_Z_gate(
     num_qubits = len(control_qubits)
 
     alphas = -2 * np.imag(np.log(matrix.diagonal()))
-    thetas = find_thetas(alphas)
 
-    assert num_qubits == np.log2(len(thetas))
-
-    for i, theta in enumerate(thetas):
-
-        # get the number of gray code
-        # for example, if num_qubits = 3, then the gray code is 000, 001, 011, 010, 110, 111, 101, 100
-        # the control id is 0, 1, 2, 1, 2, 3, 2, 1, respectively
-        # which is determined by the number of 1 in the binary representation of the gray code
-        control_id = bin(i ^ (i >> 1)).count("1") - 1
-
-        # CNOT
-        if control_id >= 0:
-
-            assert control_id < num_qubits
-            circuit.cx(control_qubits[control_id], target_qubit)
-
-        # rotate the target qubit
-        circuit.rz(theta, target_qubit)
-
-    control_id = num_qubits - 1  # reset the control id
-    circuit.cx(control_qubits[control_id], target_qubit)
+    control_sequence = synthesize_multi_controlled_rotations(alphas)
+    apply_control_sequence_to_z(circuit, control_sequence, control_qubits, target_qubit)

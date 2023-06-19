@@ -144,16 +144,6 @@ def get_decision_tree_from_state(matrix: np.array) -> DecisionTree:
     return dt
 
 
-def apply_control_sequence_to_y(
-    circuit: QCircuit, control_sequence: list, control_qubits: list, target_qubit
-) -> None:
-    for control in control_sequence:
-        rotation_theta, control_id = control
-
-        circuit.ry(rotation_theta, target_qubit)
-        circuit.cx(control_qubits[control_id], target_qubit)
-
-
 def get_rotation_Y_theta(ratio: float):
 
     # G(P) = RY(2arccos(sqrt(P)))
