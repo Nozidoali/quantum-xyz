@@ -5,14 +5,14 @@
 Author: Hanyu Wang
 Created time: 2023-06-19 12:06:15
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-19 13:43:10
+Last Modified time: 2023-06-19 21:43:13
 '''
 
 import numpy as np
 from Circuit import QCircuit
-from Util import *
+from Utils import *
 from .Decompose import *
-
+from .Synthesis import *
 
 class PivotQubitPair:
 
@@ -68,14 +68,14 @@ def get_decision_tree_from_state_helper(on_set: np.array, off_set: np.array, qub
     tt = best_qubit.tt
     index = best_qubit.index
 
-    leaf1 = get_decision_tree_from_state_helper(
+    leaf_positive = get_decision_tree_from_state_helper(
         on_set & tt, off_set & tt, qubits, decision_tree)
-    leaf0 = get_decision_tree_from_state_helper(
+    leaf_negative = get_decision_tree_from_state_helper(
         on_set & (~tt), off_set & (~tt), qubits, decision_tree)
 
     node = DecisionTreeNode()
-    node.negative_cofactor = leaf0
-    node.positive_cofactor = leaf1
+    node.negative_cofactor = leaf_negative
+    node.positive_cofactor = leaf_positive
     node.pivot_index = index
     node.pivot_value = np.count_nonzero(on_set & (~tt)) / np.count_nonzero(on_set)
     
@@ -115,7 +115,7 @@ def get_decision_tree_from_state(matrix: np.array) -> DecisionTree:
     num_qubits = int(np.log2(matrix.shape[0]))
 
     basis_vector = np.array([1, 1])
-    non_basis_vector = np.array([1, 0])
+    non_basis_vector = np.array([0, 1])
 
     pivot_qubits = []
 
@@ -138,6 +138,15 @@ def get_decision_tree_from_state(matrix: np.array) -> DecisionTree:
 
     return dt
 
+def apply_control_sequence_to_y(circuit: QCircuit, control_sequence: list, control_qubits: list, target_qubit) -> None:
+    for control in control_sequence:
+        control_id, rotation_theta = control
+
+        if control_id is not None:
+            circuit.cx(control_qubits[control_id], target_qubit)
+        
+        circuit.ry(rotation_theta, target_qubit)
+
 
 def get_rotation_Y_theta(ratio: float):
 
@@ -159,30 +168,43 @@ def retrieve_circuit_from_decision_tree_helper(decision_tree: DecisionTree, deci
     
     theta = get_rotation_Y_theta(ratio)
 
+
     # we need to derive the multi-controlled ry gate
     # number of qubits = control_qubits + 1
-    reindex_qubits: dict = {}
-    for i, value_tuple in enumerate(current_controls):
-        _, phase = value_tuple
-        reindex_qubits[i+1] = phase
 
-    print(f"adding ry gate to qubit {index} with ratio = {ratio}")
-    print(f"current controls = {reindex_qubits}")
-    unitary_matrix = AdvancedGate.mcry(
-        theta, reindex_qubits, 0, len(current_controls) + 1)
-    print(unitary_matrix)
+    effective_theta = theta - 2 * np.pi * np.floor(theta / (2 * np.pi))
+    if np.isclose(effective_theta, 0):
+        effective_theta = 0
 
-    control_qubits = [circuit.qr[i] for i, _ in current_controls]
-    assert circuit.qr[index] not in control_qubits
-    all_qubits = control_qubits + [circuit.qr[index]]
+    else:
+        print(f"theta = {effective_theta}, ratio = {ratio}, index = {index}, controls = {current_controls}")
+        
+        if len(current_controls) == 0:
+            circuit.ry(effective_theta, circuit.qr[index])
 
-    if True:
-        quantum_shannon_decomposition_helper(unitary_matrix, circuit, all_qubits)
-    if False:
-        half = unitary_matrix.shape[0] // 2
-        decompose_multiple_controlled_rotation_Y_gate(
-            unitary_matrix[:half, half:], circuit, control_qubits, circuit.qr[index])
+        else:
 
+            # we prepare the rotation table
+            rotation_table = np.zeros(2 ** (len(current_controls)))
+
+            rotated_index = 0
+            for i, value_tuple in enumerate(current_controls):
+                _, controlled_by_one = value_tuple
+                if controlled_by_one == True:
+                    rotated_index += 2 ** i
+            
+            control_qubits = [circuit.qr[qubit_index] for qubit_index, _ in current_controls]
+
+            # only rotate the target qubit if the control qubits are in the positive phase
+            rotation_table[rotated_index] = effective_theta
+
+            # print(f"rotation table = {rotation_table}")
+            # print(f"control qubits = {control_qubits}")
+
+            control_sequence = synthesize_multi_controlled_rotations(rotation_table)
+
+            apply_control_sequence_to_y(circuit, control_sequence, control_qubits, circuit.qr[index])
+        
     # then we add the control singles to the current controls and start the recursion
 
     new_controls = current_controls.copy()
@@ -213,6 +235,8 @@ def retrieve_circuit_from_decision_tree(decision_tree: DecisionTree, num_qubits:
     return circuit
 
 
+import subprocess
+
 def cofactor_decomposition(matrix: np.ndarray) -> QCircuit:
     """
     Returns the Cofactor decomposition
@@ -221,6 +245,8 @@ def cofactor_decomposition(matrix: np.ndarray) -> QCircuit:
     dt = get_decision_tree_from_state(matrix)
     
     dt.export("decision_tree.dot")
+    subprocess.run(["dot", "-Tpng", "decision_tree.dot", "-o", "decision_tree.png"])
+    
 
     num_qubits = int(np.log2(matrix.shape[0]))
 

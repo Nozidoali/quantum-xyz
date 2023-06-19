@@ -9,7 +9,7 @@ Last Modified time: 2023-06-18 21:47:54
 """
 
 import numpy as np
-from .BGMatrix import *
+from ..Synthesis import *
 
 
 def decompose_multiple_controlled_rotation_Y_gate(

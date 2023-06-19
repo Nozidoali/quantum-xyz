@@ -12,4 +12,4 @@ from Algorithms.Decompose.ZYZ import *
 from Algorithms.Decompose.MCRY import *
 from Algorithms.Decompose.MCRZ import *
 from Algorithms.Decompose.Muxiplier import *
-from Algorithms.Decompose.BGMatrix import *
+from Algorithms.Synthesis.GrayCode import *

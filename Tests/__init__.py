@@ -15,3 +15,4 @@ from .ZYZTest import *
 from .ShannonDecompositionTest import *
 from .CofactorDecompositionTest import *
 from .MCRYGateTest import *
+from .MultiControlTest import *

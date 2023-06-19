@@ -5,8 +5,8 @@
 Author: Hanyu Wang
 Created time: 2023-06-19 11:42:20
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-19 11:46:16
+Last Modified time: 2023-06-19 19:21:13
 '''
 
 from Circuit import *
-from Util import *
+from Utils import *

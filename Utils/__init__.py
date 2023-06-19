@@ -8,5 +8,5 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-17 08:11:27
 """
 
-from Util.Bdd import *
-from Util.Operator import *
+from Utils.Bdd import *
+from Utils.Operator import *

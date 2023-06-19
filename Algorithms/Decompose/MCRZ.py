@@ -9,7 +9,7 @@ Last Modified time: 2023-06-18 21:47:46
 """
 
 import numpy as np
-from .BGMatrix import *
+from ..Synthesis import *
 from Circuit import QCircuit
 
 

@@ -5,11 +5,11 @@
 Author: Hanyu Wang
 Created time: 2023-06-19 12:06:15
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-19 13:43:10
+Last Modified time: 2023-06-19 19:21:13
 '''
 
 from Algorithms import *
-from Util import *
+from Utils import *
 
 import random
 
