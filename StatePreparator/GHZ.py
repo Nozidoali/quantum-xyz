@@ -9,9 +9,13 @@ Last Modified time: 2023-06-17 07:59:22
 """
 
 
-class GhzPreparator(object):
-    def __init__(self, num_qubits=3):
-        pass
+import numpy as np
 
-    def prepare(self, state):
-        return state
+def GHZ_state(num_qubits: int) -> np.ndarray:
+
+    state = np.zeros(2 ** num_qubits)
+
+    state[0] = 1
+    state[-1] = 1
+
+    return state / np.sqrt(2)

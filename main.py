@@ -18,7 +18,9 @@ from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 
 if __name__ == "__main__":
 
-    state = W_state(4)
+    state = D_state(4,2)
+    # state = W_state(15)
+    # state = GHZ_state(4)
 
     print(state)
 
@@ -27,20 +29,20 @@ if __name__ == "__main__":
     print(circuit)
 
     circuit.simulate()
-    exit(0)
+    with open("./tmp/circuit.qasm", "w") as f:
+        f.write(circuit.qasm())
+    # exit(0)
     # exit(0)
 
     # print(circuit)
-    with open("circuit.qasm", "w") as f:
-        f.write(circuit.qasm())
 
-    circuit = zx.Circuit.from_qasm_file("circuit.qasm")
-    g = circuit.to_basic_gates().to_graph()
-    zx.simplify.full_reduce(g, quiet=True)
-    new_circ = zx.extract_circuit(g)
+    # circuit = zx.Circuit.from_qasm_file("./tmp/circuit.qasm")
+    # g = circuit.to_basic_gates().to_graph()
+    # zx.simplify.full_reduce(g, quiet=True)
+    # new_circ = zx.extract_circuit(g)
 
-    with open("circuit.qasm", "w") as f:
-        f.write(new_circ.to_basic_gates().to_qasm())
+    # with open("./tmp/circuit_opt.qasm", "w") as f:
+    #     f.write(new_circ.to_basic_gates().to_qasm())
 
-    circuit = QuantumCircuit.from_qasm_file("circuit.qasm")
-    print(circuit)
+    # circuit = QuantumCircuit.from_qasm_file("./tmp/circuit_opt.qasm")
+    # print(circuit)

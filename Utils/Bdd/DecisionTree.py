@@ -23,11 +23,14 @@ class DecisionTreeNode:
         self.is_leaf: bool = const_value != None
         self.const_value: int = const_value
 
+        self.name = None
+
 
 class DecisionTree:
     def __init__(self) -> None:
         self.root = None
-        self.nodes = []
+
+        self.num_nodes = 0
 
         self.const1 = DecisionTreeNode(const_value=1)
         self.const0 = DecisionTreeNode(const_value=0)
@@ -43,7 +46,7 @@ class DecisionTree:
 
         node_index: int = 0
 
-        def export_helper(graph: pgv.AGraph, node):
+        def export_helper(graph: pgv.AGraph, node: DecisionTreeNode):
             if node.is_leaf:
                 return graph.get_node("const" + str(node.const_value))
 
@@ -52,7 +55,7 @@ class DecisionTree:
                 nonlocal node_index
                 graph.add_node(
                     "node" + str(node_index),
-                    label="x" + str(node.pivot_index) + " = " + str(node.pivot_value),
+                    label= node.name + ": x" + str(node.pivot_index) + " = " + str(node.pivot_value),
                 )
                 new_node = graph.get_node("node" + str(node_index))
                 node_index += 1

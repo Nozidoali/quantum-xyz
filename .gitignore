@@ -1,12 +1,14 @@
 *.ipynb
 
 # QASM files
-*.qasm
+# *.qasm
 
 __pycache__/
 
 .pytest_cache/
 
+tmp
+
 # Visualizations
-*.dot
-*.png
+# *.dot
+# *.png

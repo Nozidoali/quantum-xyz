@@ -83,6 +83,9 @@ def get_decision_tree_from_state_helper(
     node.pivot_index = index
     node.pivot_value = np.count_nonzero(on_set & (~tt)) / np.count_nonzero(on_set)
 
+    decision_tree.num_nodes += 1
+    node.name = f"node_{decision_tree.num_nodes}"
+
     return node
 
 
@@ -181,16 +184,26 @@ def retrieve_circuit_from_decision_tree_helper(
     # number of qubits = control_qubits + 1
 
     effective_theta = theta - 2 * np.pi * np.floor(theta / (2 * np.pi))
+    # print(
+    #     f"node = {decision_tree_node.name} theta = {effective_theta}, ratio = {ratio}, index = {index}, controls = {current_controls}"
+    # )
+
     if np.isclose(effective_theta, 0):
         effective_theta = 0
 
+
     else:
-        print(
-            f"theta = {effective_theta}, ratio = {ratio}, index = {index}, controls = {current_controls}"
-        )
 
         if len(current_controls) == 0:
             circuit.ry(effective_theta, circuit.qr[index])
+
+        elif circuit.has_mcry():
+
+            qubit_indexs, phases = zip(*current_controls)
+            qubits = [circuit.qr[qubit_index] for qubit_index in qubit_indexs]
+            control_qubits = list(zip(qubits, phases))
+
+            circuit.mcry(effective_theta, control_qubits, circuit.qr[index])
 
         else:
 
@@ -214,7 +227,7 @@ def retrieve_circuit_from_decision_tree_helper(
             # print(f"control qubits = {control_qubits}")
 
             control_sequence = synthesize_multi_controlled_rotations(rotation_table)
-            print(f"control sequence = {control_sequence}")
+            # print(f"control sequence = {control_sequence}")
 
             apply_control_sequence_to_y(
                 circuit, control_sequence, control_qubits, circuit.qr[index]
@@ -265,8 +278,8 @@ def cofactor_decomposition(matrix: np.ndarray) -> QCircuit:
 
     dt = get_decision_tree_from_state(matrix)
 
-    dt.export("decision_tree.dot")
-    subprocess.run(["dot", "-Tpng", "decision_tree.dot", "-o", "decision_tree.png"])
+    dt.export("./tmp/decision_tree.dot")
+    subprocess.run(["dot", "-Tpng", "./tmp/decision_tree.dot", "-o", "./tmp/decision_tree.png"])
 
     num_qubits = int(np.log2(matrix.shape[0]))
 

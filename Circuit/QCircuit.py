@@ -17,6 +17,8 @@ from qiskit.tools.visualization import plot_histogram
 
 import numpy as np
 
+from qiskit.circuit.library.standard_gates import *
+
 
 class QCircuit:
     def __init__(self, num_qubits):
@@ -38,6 +40,40 @@ class QCircuit:
 
         self.structural_hashing: bool = True
         self.enable_cnot_queue: bool = True
+
+    def has_mcry(self):
+        return False
+    
+    def mcry(self, theta, control_qubits, target_qubit):
+        if np.isclose(theta, 0) and self.structural_hashing:
+            return False
+        
+        num_control_qubits = len(control_qubits)
+        qubits, phases = zip(*control_qubits)
+
+        # we need to reverse the order of the control qubits
+        # because the qiskit's control gate is in the reverse order
+        control_str = ''.join([str(int(phase)) for phase in phases])[::-1]
+
+        # print("control_str: ", control_str)
+        # print("qubits: ", qubits)
+        
+        mcry_gate=RYGate(theta).control(num_control_qubits, ctrl_state=control_str)
+
+        if self.enable_cnot_queue:
+            if (
+                self.cnot_controls[target_qubit] > 0
+                or self.cnot_targets[target_qubit] > 0
+            ):
+                self.flush_cnot_queue()
+            
+            for qubit in qubits:
+                if self.cnot_controls[qubit] > 0 or self.cnot_targets[qubit] > 0:
+                    self.flush_cnot_queue()
+                    break
+
+        self.circuit.append(mcry_gate, qubits + (target_qubit,))
+        return True
 
     def measure(self):
         self.circuit.measure(self.qr, self.cr)
