@@ -18,7 +18,7 @@ from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 if __name__ == "__main__":
 
     U = np.identity(8, dtype=complex)
-    U[:, 0] = np.array([0, 1, 1, 0, 1, 0, 0, 0])
+    U[:, 0] = np.array([0, 0, 0, 1, 0, 1, 1, 0])
     U[:, 1] = np.array([1, 0, 0, 0, 0, 0, 0, 0])
     U = to_unitary(U)
 
@@ -49,7 +49,8 @@ if __name__ == "__main__":
 
     # print(U)
 
-    circuit = quantum_shannon_decomposition(U)
+    # circuit = quantum_shannon_decomposition(U)
+    circuit = cofactor_decomposition(U[: , 0].flatten())
     print(circuit)
 
     circuit.simulate()

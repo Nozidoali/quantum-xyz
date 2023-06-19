@@ -14,3 +14,4 @@ from .MuxiplierTest import *
 from .ZYZTest import *
 from .ShannonDecompositionTest import *
 from .CofactorDecompositionTest import *
+from .MCRYGateTest import *

@@ -65,6 +65,8 @@ class QCircuit:
         return True
 
     def cx(self, control_qubit, target_qubit):
+        
+        assert control_qubit != target_qubit, "control qubit and target qubit cannot be the same"
 
         if self.enable_cnot_queue:
 

@@ -17,6 +17,14 @@ def decompose_multiple_controlled_rotation_Y_gate(
 ):
 
     num_qubits = len(control_qubits)
+    
+    if num_qubits == 0:
+        
+        assert target_qubit is not None
+        
+        # this is a special case, in this case, we simply apply an RY gate to the target qubit
+        circuit.ry(2 * np.arcsin(matrix[0, 0]), target_qubit)
+        return
 
     alphas = 2 * np.arcsin(matrix.diagonal())
     thetas = find_thetas(alphas)
@@ -39,6 +47,6 @@ def decompose_multiple_controlled_rotation_Y_gate(
 
         # rotate the target qubit
         circuit.ry(theta, target_qubit)
-
-    control_id = num_qubits - 1  # reset the control id
-    circuit.cx(control_qubits[control_id], target_qubit)
+    
+    control_qubit = control_qubits[-1]
+    circuit.cx(control_qubit, target_qubit)

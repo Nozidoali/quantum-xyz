@@ -10,4 +10,4 @@ Last Modified time: 2023-06-18 22:44:57
 
 from Tests import *
 
-test_cofactor_decomposition()
+test_mcry_gate()
