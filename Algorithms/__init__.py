@@ -8,5 +8,6 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-18 11:33:28
 """
 
-from Algorithms.ShannonDecomposition import *
-from Algorithms.Decompose import *
+from .ShannonDecomposition import *
+from .CofactorDecomposition import *
+from .Decompose import *

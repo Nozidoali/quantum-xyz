@@ -8,7 +8,8 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-18 17:32:59
 """
 
-from Util.Operator.SU import *
-from Util.Operator.Unitary import *
-from Util.Operator.RandomOperator import *
-from Util.Operator.BasicGate import *
+from .SU import *
+from .Unitary import *
+from .RandomOperator import *
+from .BasicGate import *
+from .AdvancedGate import *

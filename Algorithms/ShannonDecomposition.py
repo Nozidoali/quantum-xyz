@@ -15,7 +15,6 @@ from Circuit import QCircuit
 
 from Algorithms.Decompose import *
 
-from qiskit.circuit.library.standard_gates import RYGate
 import math
 
 

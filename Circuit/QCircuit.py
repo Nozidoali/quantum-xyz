@@ -20,6 +20,11 @@ import numpy as np
 
 class QCircuit:
     def __init__(self, num_qubits):
+
+        # TODO: make all the attributes private
+
+        self.num_qubits = num_qubits
+
         self.qr = QuantumRegister(num_qubits)
         self.cr = ClassicalRegister(num_qubits)
         self.circuit = QuantumCircuit(self.qr, self.cr)
@@ -68,6 +73,7 @@ class QCircuit:
                 or self.cnot_targets[control_qubit] > 0
             ):
                 # then we need to flush the queue
+                # because the two operators are not commute
                 for control, target in self.cnot_queue:
                     self.circuit.cx(control, target)
                     self.cnot_controls[control] -= 1
@@ -108,7 +114,7 @@ class QCircuit:
 
     def simulate(self):
         simulator = Aer.get_backend("qasm_simulator")
-        result = execute(self.circuit, backend=simulator).result()
+        result = execute(self.circuit, backend=simulator, shots=2**14).result()
         plot_histogram(result.get_counts(self.circuit))
         plt.show()
 

@@ -25,6 +25,7 @@ if __name__ == "__main__":
     # U = np.kron(np.identity(4, dtype=complex), BasicGate.ry(np.pi/2))
     # U = np.kron(BasicGate.ry(np.pi/2), np.identity(4, dtype=complex) )
 
+
     # U = np.identity(4, dtype=complex)
     # c1 = np.array([[1, 0], [0, 0]])
     # c2 = np.array([[0, 0], [0, 1]])
@@ -52,6 +53,7 @@ if __name__ == "__main__":
     print(circuit)
 
     circuit.simulate()
+    exit(0)
     # exit(0)
 
     # print(circuit)
