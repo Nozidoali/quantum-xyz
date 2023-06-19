@@ -37,4 +37,6 @@ def test_zyz():
             print(alpha, beta, gamma)
             pass
 
-        assert np.allclose(to_special_unitary(matrix), to_special_unitary(new_matrix), atol=2e-1)
+        assert np.allclose(
+            to_special_unitary(matrix), to_special_unitary(new_matrix), atol=2e-1
+        )

@@ -34,10 +34,10 @@ def unitary_zyz_decomposition_legacy(matrix: np.ndarray) -> QCircuit:
     B = SU[0, 1]
     C = SU[1, 0]
     D = SU[1, 1]
-    
-    phase = A*D - B*C
+
+    phase = A * D - B * C
     # beta = np.arccos( np.real( np.sqrt(A*D/phase) ))
-    beta = np.arctan2( np.absolute(B), np.absolute(A) )
+    beta = np.arctan2(np.absolute(B), np.absolute(A))
 
     if np.isclose(beta, 0.0, atol=1e-6):
 

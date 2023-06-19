@@ -8,5 +8,6 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-17 07:54:55
 """
 
-from StatePreparator.UniformStatePreparator import UniformStatePreparator
-from StatePreparator.GhzPreparator import GhzPreparator
+from .UniformStatePreparator import *
+from .GhzPreparator import *
+from .W import *
