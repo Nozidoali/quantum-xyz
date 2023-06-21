@@ -18,11 +18,11 @@ from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 
 if __name__ == "__main__":
 
-    state = D_state(4,2)
-    # state = W_state(15)
+    # state = D_state(4,2)
+    state = W_state(4)
     # state = GHZ_state(4)
+    # print(''.join([str(int(x > 0)) for x in state[:]])[::-1])
 
-    print(state)
     circuit = cofactor_decomposition(state)
 
     # TODO: buggy, need to fix
@@ -33,9 +33,15 @@ if __name__ == "__main__":
         U = to_unitary(U)
         circuit = quantum_shannon_decomposition(U)
 
-    print(circuit)
+    # circuit.circuit.add_bits(QuantumRegister(1, 'ancilla'))
+    # circuit.circuit.add_register(QuantumRegister(1, 'ancilla'))
 
+    print(circuit)
     circuit.simulate()
+
+    print(circuit.circuit.count_ops()['cx'])
+
+    # circuit.simulate()
     with open("./tmp/circuit.qasm", "w") as f:
         f.write(circuit.qasm())
     # exit(0)

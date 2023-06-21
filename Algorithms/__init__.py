@@ -12,3 +12,4 @@ from .ShannonDecomposition import *
 from .CofactorDecomposition import *
 from .Decompose import *
 from .Synthesis import *
+from .Solver import *

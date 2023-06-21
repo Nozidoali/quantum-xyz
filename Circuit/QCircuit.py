@@ -41,6 +41,10 @@ class QCircuit:
         self.structural_hashing: bool = True
         self.enable_cnot_queue: bool = True
 
+        self.max_ancilla_qubits: int = 1
+
+        self.ancilla_qubits = []
+
     def has_mcry(self):
         return False
     
@@ -48,6 +52,10 @@ class QCircuit:
         if np.isclose(theta, 0) and self.structural_hashing:
             return False
         
+        if len(control_qubits) == 0:
+            self.circuit.ry(theta, target_qubit)
+            return True
+
         num_control_qubits = len(control_qubits)
         qubits, phases = zip(*control_qubits)
 

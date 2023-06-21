@@ -9,3 +9,5 @@ Last Modified time: 2023-06-18 11:33:02
 """
 
 from Circuit.QCircuit import *
+from .QBit import *
+from .QGate import *
