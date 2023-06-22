@@ -20,15 +20,13 @@ from typing import List
 from qiskit.circuit.library.standard_gates import *
 
 
-from .Gates.Base.QGate import *
-from .Gates.Base.QBit import *
-from .QCircuitBase import *
-from .QCircuitQiskitCompatible import *
+from .Gates import *
+from .QCircuitOptimized import *
 
 class QCircuitParams:
     has_mcry: bool = False
 
-class QCircuit(QCircuitQiskitCompatible):
+class QCircuit(QCircuitOptimized):
     def __init__(self, num_qubits):
 
         super().__init__()

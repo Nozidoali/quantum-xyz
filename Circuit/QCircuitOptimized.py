@@ -5,15 +5,15 @@
 Author: Hanyu Wang
 Created time: 2023-06-22 14:33:21
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-22 20:36:46
+Last Modified time: 2023-06-22 23:43:32
 '''
 
 from typing import List
 from .Gates import *
 
-from .QCircuitBase import *
+from .QCircuitMapping import *
 
-class QCircuitOptimized(QCircuitBase):
+class QCircuitOptimized(QCircuitMapping):
 
     def __init__(self) -> None:
         super().__init__()
@@ -23,12 +23,14 @@ class QCircuitOptimized(QCircuitBase):
         Add a gate to the circuit, with optimization
         '''
 
-        print(f"Adding gate {gate}")
         match gate.type:
 
             case QGateType.RY:
                 if gate.is_trivial():
                     return
+                elif gate.is_pi():
+                    reduced_gate = X(gate.target_qubit)
+                    self.add_gate(reduced_gate)
                 else:
                     super().add_gate(gate)
             case QGateType.CRY:
@@ -46,6 +48,7 @@ class QCircuitOptimized(QCircuitBase):
                 elif gate.has_one_control() and gate.is_pi():
                     reduced_gate = CRY(gate.theta, gate.control_qubits[0], gate.phases[0], gate.target_qubit)
                     self.add_gate(reduced_gate)
+                    
                 else:
                     super().add_gate(gate)
             case _:

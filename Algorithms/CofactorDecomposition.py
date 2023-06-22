@@ -12,7 +12,6 @@ import numpy as np
 from Circuit import QCircuit
 from Utils import *
 from .Decompose import *
-from .Synthesis import *
 
 
 class PivotQubitPair:

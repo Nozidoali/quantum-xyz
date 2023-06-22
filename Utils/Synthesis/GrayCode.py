@@ -11,7 +11,6 @@ Last Modified time: 2023-06-18 17:31:43
 import numpy as np
 from scipy.linalg import solve
 
-
 def find_thetas(alphas):
     size = len(alphas)
     # for the gray code matrix

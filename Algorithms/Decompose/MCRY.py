@@ -9,7 +9,8 @@ Last Modified time: 2023-06-18 21:47:54
 """
 
 import numpy as np
-from ..Synthesis import *
+from Utils import *
+from Circuit import *
 
 def apply_control_sequence_to_y(
     circuit: QCircuit, control_sequence: list, control_qubits: list, target_qubit

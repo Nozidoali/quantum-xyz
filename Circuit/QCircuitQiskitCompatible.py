@@ -5,18 +5,17 @@
 Author: Hanyu Wang
 Created time: 2023-06-22 13:24:31
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-22 20:34:21
+Last Modified time: 2023-06-22 23:39:10
 '''
 
 from .Gates import *
 from .QCircuitBase import *
-from .QCircuitOptimized import *
 from .Qiskit import *
 
 from qiskit.circuit.library.standard_gates import *
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 
-class QCircuitQiskitCompatible(QCircuitOptimized):
+class QCircuitQiskitCompatible(QCircuitBase):
     
     def __init__(self) -> None:
         super().__init__()
@@ -37,8 +36,7 @@ class QCircuitQiskitCompatible(QCircuitOptimized):
             elif isinstance(qubit, list):
                 return [qr[q.index] for q in qubit]
 
-        for gate in self.get_gates():
-            
+        for gate in self.get_gates():            
             match gate.type:
                 case QGateType.MCRY:
 
@@ -60,6 +58,10 @@ class QCircuitQiskitCompatible(QCircuitOptimized):
                     
                 case QGateType.Z:
                     circuit.z(
+                        map(gate.target_qubit))
+                    
+                case QGateType.X:
+                    circuit.x(
                         map(gate.target_qubit))
                     
                 case QGateType.CRY:

@@ -10,3 +10,4 @@ Last Modified time: 2023-06-17 08:11:27
 
 from Utils.Bdd import *
 from Utils.Operator import *
+from .Synthesis import *

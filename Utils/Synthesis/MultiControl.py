@@ -8,8 +8,6 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-19 20:54:16
 """
 
-from Circuit import *
-from Utils import *
 from .GrayCode import *
 
 import numpy as np

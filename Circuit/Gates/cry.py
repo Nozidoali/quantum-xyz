@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-22 13:11:53
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-22 19:58:35
+Last Modified time: 2023-06-22 23:32:05
 '''
 
 from .Base import *
@@ -20,3 +20,6 @@ class CRY(RotationGate, BasicGate, ControlledGate):
         BasicGate.__init__(self, QGateType.CRY, target_qubit)
         RotationGate.__init__(self, theta)
         ControlledGate.__init__(self, control_qubit, phase)
+
+    def __str__(self) -> str:
+        return f"CRY({self.theta:0.02f}, {self.control_qubit}[{self.phase}])"

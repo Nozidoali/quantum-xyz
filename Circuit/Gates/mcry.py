@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-22 13:11:53
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-22 19:56:35
+Last Modified time: 2023-06-22 23:31:33
 '''
 
 from .Base import *
@@ -22,5 +22,5 @@ class MCRY(RotationGate, BasicGate, MultiControlledGate):
         MultiControlledGate.__init__(self, control_qubits, phases)
 
     def __str__(self) -> str:
-        control_str = '+'.join([str(qubit) for qubit in self.control_qubits])
+        control_str = '+'.join([str(qubit) + f"[{phase}]" for qubit, phase in zip(self.control_qubits, self.phases)])
         return f"MCRY({self.theta:0.02f}, {control_str})"

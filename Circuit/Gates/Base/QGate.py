@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-20 18:44:02
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-22 20:14:22
+Last Modified time: 2023-06-22 23:55:41
 '''
 
 from enum import Enum, auto
@@ -28,6 +28,8 @@ class QGateType(Enum):
     CRX = auto()
     
     MCRY = auto()
+
+    MULTIPLEX_Y = auto()
 
     NONE = auto()
     

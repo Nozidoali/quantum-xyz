@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-22 13:22:18
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-22 14:54:34
+Last Modified time: 2023-06-22 23:43:20
 '''
 
 from typing import List
@@ -17,7 +17,7 @@ from llist import dllist
 class QCircuitBase():
 
     def __init__(self) -> None:
-        self.__gates: dllist[QGate] = []
+        self.__gates: List[QGate] = []
         self.__qubits: List[QBit] = []
 
     def get_num_qubits(self) -> int:
