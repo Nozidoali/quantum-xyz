@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-21 14:02:46
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-21 18:43:17
+Last Modified time: 2023-06-22 15:10:10
 '''
 
 import numpy as np
@@ -306,11 +306,16 @@ def solution_to_circuit(num_qubits: int, solution: list) -> QCircuit:
 
         print(f"qubit: {qubit}, control: {control:b}, control_states: {control_states}, theta: {theta}, weights: {weights}")
 
-        control_qubits = [[circuit.qr[i], phase] for i, phase in control_states]
+        control_qubits = [circuit.qubit_at(i) for i, _ in control_states]
+        phases = [phase for _, phase in control_states]
 
-        mcry_gates.append((theta, control_qubits, qubit))
+        gate = MCRY(theta, control_qubits, phases, circuit.qubit_at(qubit))
+        mcry_gates.append(gate)
     
-    for theta, control_qubits, qubit in mcry_gates[::-1]:
+    for gate in mcry_gates[::-1]:
+
+        circuit.add_gate(gate)
+        continue
 
         if circuit.has_mcry():
             circuit.mcry(theta, control_qubits, circuit.qr[qubit])

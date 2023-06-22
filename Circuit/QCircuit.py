@@ -16,12 +16,23 @@ from matplotlib import pyplot as plt
 from qiskit.tools.visualization import plot_histogram
 
 import numpy as np
-
+from typing import List
 from qiskit.circuit.library.standard_gates import *
 
 
-class QCircuit:
+from .Gates.Base.QGate import *
+from .Gates.Base.QBit import *
+from .QCircuitBase import *
+from .QCircuitQiskitCompatible import *
+
+class QCircuitParams:
+    has_mcry: bool = False
+
+class QCircuit(QCircuitQiskitCompatible):
     def __init__(self, num_qubits):
+
+        super().__init__()
+        self.init_qubits(num_qubits)
 
         # TODO: make all the attributes private
 
@@ -45,8 +56,9 @@ class QCircuit:
 
         self.ancilla_qubits = []
 
+
     def has_mcry(self):
-        return False
+        return QCircuitParams.has_mcry
     
     def mcry(self, theta, control_qubits, target_qubit):
         if np.isclose(theta, 0) and self.structural_hashing:
