@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-22 14:39:56
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-22 14:48:33
+Last Modified time: 2023-06-22 19:45:34
 '''
 
 import numpy as np
@@ -20,3 +20,6 @@ class RotationGate:
 
     def is_trivial(self) -> bool:
         return np.isclose(self.theta, 0) or np.isclose(self.theta, 2 * np.pi)
+    
+    def is_pi(self) -> bool:
+        return np.isclose(self.theta, np.pi)

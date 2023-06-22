@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-21 14:02:46
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-22 15:10:10
+Last Modified time: 2023-06-22 20:53:56
 '''
 
 import numpy as np
@@ -17,88 +17,10 @@ from Circuit import *
 
 from Algorithms.Synthesis import *
 from Algorithms.Decompose import *
+from .Detail import *
 
-class CnRyState:
 
-    def __init__(self, states: List[int] = [0], num_controls: int = 0) -> None:
-        self.states = set(states[:]) # deep copy
-        self.cost = num_controls
-
-    def __lt__(self, other) -> bool:
-        return self.cost < other.cost
-    
-    def __hash__(self) -> int:
-        return hash(self.__str__())
-
-    def __str__(self) -> str:
-        sorted_states = sorted(list(self.states))
-        return "-".join([f"{state:b}" for state in sorted_states])
-
-    def __eq__(self, __value: object) -> bool:
-        return self.__str__() == __value.__str__()
-    
-def to_cnry_state(state: np.ndarray) -> CnRyState:
-
-    num_qubits = int(np.log2(len(state)))
-
-    cnry_states = []
-
-    for i in range(2 ** num_qubits):
-        
-        if state[i] != 0:
-
-            curr_state = 0
-            for j in range(num_qubits):
-                if (i >> j) & 1 == 1:
-                    curr_state |= (1 << j)
-        
-            cnry_states.append(curr_state)
-
-    return CnRyState(cnry_states)
-    
-
-def move_to_neighbour(curr_state: CnRyState, num_controls: int, pivot_qubit: int, control_state: int, direction: int) -> CnRyState:
-
-    new_states = set()
-
-    for state in curr_state.states:
-        # check the unateness
-        if (control_state >> state) & 1 == 0:
-            new_states.add(state)
-            continue
-        
-        # get the neg state
-        neg_state = state & (~(1 << pivot_qubit))
-        pos_state = state | (1 << pivot_qubit)
-
-        # we handle the case where both pos_state and neg_state are in the curr_state
-
-        if state == neg_state and pos_state in curr_state.states:
-            continue
-        
-        
-        # zero to one, one to zero
-        if direction == 1:
-            if neg_state in curr_state.states and pos_state not in curr_state.states:
-                new_states.add(pos_state)
-            elif pos_state in curr_state.states and neg_state not in curr_state.states:
-                new_states.add(neg_state)
-            elif pos_state in curr_state.states and neg_state in curr_state.states:
-                new_states.add(pos_state)
-                new_states.add(neg_state)
-            else:
-                assert False
-            continue
-        
-        # both
-        else:
-            new_states.add(pos_state)
-            new_states.add(neg_state)
-            continue
-    
-    return CnRyState(list(new_states), curr_state.cost + num_controls)
-
-def get_all_control_states(num_qubits: int, pivot_qubit: int) -> List[int]:
+def get_all_control_states(num_qubits: int, pivot_qubit: int, max_controls: int = None) -> List[int]:
     '''
     return all the control states that can be used to control the pivot_qubit
     
@@ -134,6 +56,11 @@ def get_all_control_states(num_qubits: int, pivot_qubit: int) -> List[int]:
         # print("curr_bit: ", curr_bit)
         # print("neg_state: ", bin(neg_state))
         # print("pos_state: ", bin(pos_state))
+
+        nonlocal max_controls        
+        
+        if max_controls is not None and curr_num_controls >= max_controls:
+            return
         
         # 2. the curr_bit is controlled by 0
         next_control_states = curr_control_states[:]
@@ -167,6 +94,8 @@ def cnry_solver(final_state: np.ndarray):
 
     prev_cost = 0
 
+    final_state_ones = np.count_nonzero(final_state)
+
     while not q.empty():
         
         curr_state = q.get()
@@ -187,14 +116,14 @@ def cnry_solver(final_state: np.ndarray):
                     break
                 prev_state, qubit, control, control_states, direction = prev[prev_state]
 
-                if False:
+                if True:
                     print(f"state: {prev_state.states}, qubit: {qubit}, control: {control:b}, direction: {direction}")
                 solution.append((prev_state, (qubit, control, control_states, direction)))
             return solution
 
         for qubit in range(num_qubits):
             
-            states = get_all_control_states(num_qubits, qubit)
+            states = get_all_control_states(num_qubits, qubit, 1)
 
             for control, num_controls, control_states in states:
                 for direction in [1, 2]:
@@ -202,9 +131,15 @@ def cnry_solver(final_state: np.ndarray):
                     def cost_function(num_controls: int):
                         if num_controls == 0:
                             return 0
+                        if direction == 1 and num_controls == 1:
+                            return 1
                         return 1 << num_controls
                 
                     new_state = move_to_neighbour(curr_state, cost_function(num_controls), qubit, control, direction)
+
+                    # this only works for the non-split
+                    if len(new_state.states) > final_state_ones:
+                        continue
                     
                     if new_state in visited:
                         continue

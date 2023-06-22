@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-22 14:39:56
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-22 14:57:39
+Last Modified time: 2023-06-22 19:40:46
 '''
 
 import numpy as np
@@ -23,3 +23,6 @@ class MultiControlledGate:
 
     def has_zero_controls(self) -> bool:
         return len(self.control_qubits) == 0
+    
+    def has_one_control(self) -> bool:
+        return len(self.control_qubits) == 1

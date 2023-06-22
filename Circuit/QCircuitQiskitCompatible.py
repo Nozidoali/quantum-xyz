@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-22 13:24:31
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-22 15:01:45
+Last Modified time: 2023-06-22 20:34:21
 '''
 
 from .Gates import *
@@ -50,12 +50,24 @@ class QCircuitQiskitCompatible(QCircuitOptimized):
                 case QGateType.CX:
                     circuit.cx(
                         map(gate.control_qubit), 
-                        map(gate.target_qubit))
+                        map(gate.target_qubit), 
+                        ctrl_state=gate.phase)
 
                 case QGateType.RY:
                     circuit.ry(
                         gate.theta, 
                         map(gate.target_qubit))
+                    
+                case QGateType.Z:
+                    circuit.z(
+                        map(gate.target_qubit))
+                    
+                case QGateType.CRY:
+                    circuit.cry(
+                        gate.theta, 
+                        map(gate.control_qubit), 
+                        map(gate.target_qubit),
+                        ctrl_state=gate.phase)
                 
         if with_measurement:
             circuit.measure(qr, cr)

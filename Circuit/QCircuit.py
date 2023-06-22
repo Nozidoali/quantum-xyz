@@ -175,8 +175,9 @@ class QCircuit(QCircuitQiskitCompatible):
     def simulate(self):
         simulator = Aer.get_backend("qasm_simulator")
         result = execute(self.circuit, backend=simulator, shots=2 ** 14).result()
-        plot_histogram(result.get_counts(self.circuit))
-        plt.show()
+        return result.get_counts(self.circuit)
+        # plot_histogram(result.get_counts(self.circuit))
+        # plt.show()
 
     def __str__(self) -> str:
         return self.circuit.__str__()

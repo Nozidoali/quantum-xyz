@@ -13,3 +13,4 @@ from .CofactorDecomposition import *
 from .Decompose import *
 from .Synthesis import *
 from .Solver import *
+from .Simulate import *
