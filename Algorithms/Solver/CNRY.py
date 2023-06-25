@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-21 14:02:46
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-23 00:06:26
+Last Modified time: 2023-06-23 11:24:56
 '''
 
 import numpy as np
@@ -17,6 +17,8 @@ from Circuit import *
 
 from Algorithms.Decompose import *
 from .Detail import *
+
+from Visualization import *
 
 
 def get_all_control_states(num_qubits: int, pivot_qubit: int, max_controls: int = None) -> List[int]:
@@ -166,9 +168,17 @@ def solution_to_circuit(num_qubits: int, solution: list) -> QCircuit:
 
     mcry_gates = []
 
+    idx: int = 0
+
     for step in solution:
 
+        states: CnRyState
         states, op = step
+
+        # save the figure
+        print_cube(states.states, f"step_{idx}.pdf")
+        idx += 1
+        
         if op is None:
 
             # this is the initial state

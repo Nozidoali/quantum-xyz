@@ -1,7 +1,7 @@
 from Algorithms import *
 from StatePreparator import *
 
-num_qubits = 4
+num_qubits = 3
 
 # solution = cnry_solver(W_state(num_qubits))
 solution = cnry_solver(D_state(num_qubits, 2))
