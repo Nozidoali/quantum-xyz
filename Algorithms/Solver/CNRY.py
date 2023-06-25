@@ -5,19 +5,18 @@
 Author: Hanyu Wang
 Created time: 2023-06-21 14:02:46
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-25 12:37:48
+Last Modified time: 2023-06-25 13:08:41
 '''
 
 import numpy as np
-from queue import PriorityQueue
 
 from typing import List
 
 from Circuit import *
 
 from Algorithms.Decompose import *
-from .Detail import *
 
+from .SolverImpl import *
 from Visualization import *
 import logging
 
@@ -29,71 +28,11 @@ def cnry_solver(final_state: np.ndarray):
     handler.setLevel(logging.INFO)
     logger.addHandler(handler)
     
-    init_state = CnRyState()
-    num_qubits = int(np.log2(len(final_state)))
-    
-    visited = set()
-    enqueued = {}
-    prev = {}
-    
-    q = PriorityQueue()
+    solver = CnRYSolver(final_state)
+    solver.solve()
+    solution = solver.retrieve_solution()
 
-    enqueued[init_state] = init_state.cost
-    prev[init_state] = None
-    q.put(init_state)
-
-    prev_cost = 0
-
-    final_state_ones = np.count_nonzero(final_state)
-
-    while not q.empty():
-        
-        curr_state = q.get()
-        visited.add(curr_state)
-
-        logger.info(f"curr_state: {curr_state.states}, cost: {curr_state.cost}, qsize: {q.qsize()}")
-
-        if curr_state == to_cnry_state(final_state):
-            print("Solution found, cost = ", curr_state.cost)
-
-            solution = []
-            solution.append((curr_state, None))
-            prev_state = curr_state
-            while True:
-                if prev[prev_state] is None:
-                    break
-                prev_state, move = prev[prev_state]
-                solution.append((prev_state, move))
-
-            return solution
-
-        for qubit in range(num_qubits):
-            
-            states = get_all_moves(num_qubits, qubit, 1)
-
-            for move in states:
-
-                new_state = move(curr_state)
-
-                # this only works for the non-split
-                if len(new_state.states) > final_state_ones:
-                    continue
-                
-                if new_state in visited:
-                    continue
-                
-                if new_state in enqueued:
-                    if new_state.cost >= enqueued[new_state]:
-                        continue
-
-                enqueued[new_state] = new_state.cost
-                prev[new_state] = curr_state, move
-                q.put(new_state)
-
-    # we should not reach here
-    print("Error: no solution found")
-    
-    return None
+    return solution
 
 def solution_to_circuit(num_qubits: int, solution: list) -> QCircuit:
 
@@ -130,7 +69,7 @@ def solution_to_circuit(num_qubits: int, solution: list) -> QCircuit:
         direction: int = move.direction
         control_states: List[int] = move.control_states
 
-        print(f"qubit: {qubit}, control: {control:b}, control_states: {control_states}, direction: {direction}, weights: {weights}")
+        print(f"qubit: {qubit}, control: {control:b}, direction: {direction}, control_states: {control_states}")
 
         thetas: dict = {}
 
@@ -193,8 +132,6 @@ def solution_to_circuit(num_qubits: int, solution: list) -> QCircuit:
                 weights[src_index] = 0
 
         assert qubit < num_qubits
-
-        # print(f"qubit: {qubit}, control: {control:b}, control_states: {control_states}, theta: {theta}, weights: {weights}")
 
         control_qubits = [circuit.qubit_at(i) for i, _ in control_states]
         phases = [phase for _, phase in control_states]

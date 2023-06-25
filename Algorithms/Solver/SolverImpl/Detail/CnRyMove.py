@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-25 12:11:13
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-25 12:36:07
+Last Modified time: 2023-06-25 13:09:12
 '''
 
 from typing import Any
@@ -70,7 +70,6 @@ def move_to_neighbour(curr_state: CnRyState, num_controls: int, pivot_qubit: int
 
         if state == neg_state and pos_state in curr_state.states:
             continue
-        
         
         # zero to one, one to zero
         if direction == CnRYDirection.SWAP:
