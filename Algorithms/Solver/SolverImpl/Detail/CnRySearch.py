@@ -5,11 +5,20 @@
 Author: Hanyu Wang
 Created time: 2023-06-25 12:17:22
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-25 12:34:56
+Last Modified time: 2023-06-25 17:05:25
 '''
 
 from typing import List
 from .CnRyMove import *
+
+def get_all_cnot_moves(num_qubits: int) -> List[CnRyMove]:
+
+    moves = []
+
+    for pivot_qubits in range(num_qubits):
+        moves += get_all_moves(num_qubits, pivot_qubits, 1)
+
+    return moves
 
 def get_all_moves(num_qubits: int, pivot_qubit: int, max_controls: int = None) -> List[CnRyMove]:
     '''

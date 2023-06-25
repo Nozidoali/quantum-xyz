@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-25 13:35:16
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-25 14:49:02
+Last Modified time: 2023-06-25 16:50:09
 '''
 
 from .Detail import *
@@ -27,7 +27,7 @@ def lt(state1: List[int], state2: List[int]):
     
     return False
 
-def X_equivalence(state: List[int], num_qubits: int) -> List[CnRyMove]:
+def X_equivalence(state: List[int], num_qubits: int) -> Tuple[CnRyCanonicalState, List[Tuple[CnRyCanonicalState, CnRyMove]]]:
 
     # Pauli-X equivalence
     #  note that the following properties hold:
@@ -44,6 +44,30 @@ def X_equivalence(state: List[int], num_qubits: int) -> List[CnRyMove]:
             transitions.append((curr_state, CnRyMove(pivot_qubit, None, 0, [], CnRYDirection.SWAP)))   
     return curr_state, transitions
 
+def P_equivalence(state: List[int], num_qubits: int) -> Tuple[CnRyCanonicalState, List[Tuple[CnRyCanonicalState, CnRyMove]]]:
+    
+    curr_state = list(state)[:]
+    transitions = []
+
+    # bubble sort
+    for i in range(num_qubits):
+        for j in range(i+1, num_qubits):
+            permuted_state = __apply_P__(curr_state, i, j)
+            if lt(permuted_state, curr_state):
+                curr_state = permuted_state[:]
+                transitions.append((curr_state, CnRyMove(i, None, 0, [], CnRYDirection.SWAP)))
+    return curr_state, transitions
+
+def __apply_P__(states: List[int], pivot_qubit1: int, pivot_qubit2: int) -> List[int]:
+    new_states = []
+    for state in states:
+        if (state >> pivot_qubit1) & 1 != (state >> pivot_qubit2) & 1:
+            new_states.append(state ^ ((1 << pivot_qubit1) | (1 << pivot_qubit2)))
+        else:
+            new_states.append(state)
+    return new_states
+            
+
 def __apply_X__(states: List[int], pivot_qubit: int) -> List[int]:
     new_states = []
     for state in states:
@@ -51,5 +75,16 @@ def __apply_X__(states: List[int], pivot_qubit: int) -> List[int]:
     return new_states
 
 def to_canonical_state(state: List[int], num_qubits: int) -> Tuple[CnRyCanonicalState, List[CnRyMove]]:
+
+    if num_qubits == 0:
+        return state, []
     
-    return X_equivalence(state, num_qubits)
+
+    if False:
+        new_state, transitions = X_equivalence(state, num_qubits)
+        return new_state, transitions
+
+    new_state, transitions1 = X_equivalence(state, num_qubits)
+    new_state, transitions2 = P_equivalence(new_state, num_qubits)
+    
+    return new_state, transitions1 + transitions2

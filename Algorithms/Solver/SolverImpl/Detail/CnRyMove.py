@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-25 12:11:13
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-25 14:08:45
+Last Modified time: 2023-06-25 16:53:23
 '''
 
 from typing import Any
@@ -37,20 +37,42 @@ class CnRyMove:
         self.control_states = control_states[:]
         self.direction = direction
 
-    def __call__(self, state: CnRyState) -> Any:
+    def __call__(self, states: List[int]) -> Any:
+
+        if isinstance(states, CnRyState):
+            return move_to_neighbour(states, self.pivot_qubit, self.control_state, self.direction)
+            
+        new_states = set()
+
+        for state in states:
+            # check the unateness
+            if self.control_state == None or (self.control_state >> state) & 1 == 0:
+                new_states.add(state)
+                continue
+            
+            # zero to one, one to zero
+            if self.direction == CnRYDirection.SWAP:
+                new_states.add(state ^ (1 << self.pivot_qubit))
+            
+            # both
+            if self.direction == CnRYDirection.MERGE:
+                new_states.add(state)
+                new_states.add(state ^ (1 << self.pivot_qubit))
+                continue
+
+        return new_states
         
-        return move_to_neighbour(state, self.num_controls, self.pivot_qubit, self.control_state, self.direction)
     
     def __cost_function__(num_controls: int, direction: int):
         if num_controls == 0:
             return 0
-        if direction == 1 and num_controls == 1:
+        if direction == CnRYDirection.SWAP and num_controls == 1:
             return 1
         return 1 << num_controls
 
     def cost(self) -> int:
         return CnRyMove.__cost_function__(self.num_controls, self.direction)
-    
+
 
 def move_to_neighbour(curr_state: CnRyState, num_controls: int, pivot_qubit: int, control_state: int, direction: int) -> CnRyState:
 
