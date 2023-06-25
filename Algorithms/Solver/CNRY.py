@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-21 14:02:46
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-25 13:08:41
+Last Modified time: 2023-06-25 14:54:07
 '''
 
 import numpy as np
@@ -22,11 +22,6 @@ import logging
 
 
 def cnry_solver(final_state: np.ndarray):
-
-    logger = logging.getLogger(__name__)
-    handler = logging.FileHandler("cnry_solver.log")
-    handler.setLevel(logging.INFO)
-    logger.addHandler(handler)
     
     solver = CnRYSolver(final_state)
     solver.solve()
@@ -43,18 +38,11 @@ def solution_to_circuit(num_qubits: int, solution: list) -> QCircuit:
 
     mcry_gates = []
 
-    idx: int = 0
-
     for step in solution:
 
         states: CnRyState
         move: CnRyMove
         states, move = step
-
-        # save the figure
-        if num_qubits == 3 and False:
-            print_cube(states.states, f"step_{idx}.pdf")
-        idx += 1
         
         if move is None:
 
@@ -69,15 +57,13 @@ def solution_to_circuit(num_qubits: int, solution: list) -> QCircuit:
         direction: int = move.direction
         control_states: List[int] = move.control_states
 
-        print(f"qubit: {qubit}, control: {control:b}, direction: {direction}, control_states: {control_states}")
-
         thetas: dict = {}
 
         # we adjust the weights according to the operation        
         for i in range(1<<num_qubits):
 
             # this bit is not mapped in this iteration
-            if (control >> i) & 1 == 0:
+            if control is None or (control >> i) & 1 == 0:
                 continue
 
             if (i >> qubit) & 1 == 1:
@@ -117,9 +103,7 @@ def solution_to_circuit(num_qubits: int, solution: list) -> QCircuit:
                     dst_index = pos_index
                 
                 curr_theta = None
-                try:
-                    print(f"src weight = {weights[src_index]}, dst weight = {weights[dst_index]}")
-                    
+                try:                    
                     curr_theta = 2 * np.arccos(np.sqrt(weights[dst_index] / (weights[src_index] + weights[dst_index])))
 
                 except:

@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-25 12:11:13
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-25 13:09:12
+Last Modified time: 2023-06-25 14:08:45
 '''
 
 from typing import Any
@@ -58,7 +58,7 @@ def move_to_neighbour(curr_state: CnRyState, num_controls: int, pivot_qubit: int
 
     for state in curr_state.states:
         # check the unateness
-        if (control_state >> state) & 1 == 0:
+        if control_state != None and (control_state >> state) & 1 == 0:
             new_states.add(state)
             continue
         
