@@ -2,14 +2,14 @@ from Algorithms import *
 from StatePreparator import *
 
 LOG_FILE = "test.log"
-logging.basicConfig(filename = LOG_FILE, level = logging.DEBUG)
+logging.basicConfig(filename=LOG_FILE, level=logging.DEBUG)
 logger = logging.getLogger("test")
+
 
 @add_log(logger)
 def exp():
     num_qubits = 3
     with stopwatch("cnry_solver"):
-
         state = D_state(num_qubits, 1)
 
         solution = cnry_solver(state)
@@ -19,5 +19,6 @@ def exp():
     circ = circuit.to_qiskit(with_measurement=True)
     print(circ)
     print(simulate(circ))
+
 
 exp()

@@ -17,7 +17,6 @@ num_test: int = 100
 
 
 def test_mcry_gate():
-
     theta = random.random() * np.pi
     theta = 0.5 * np.pi
 

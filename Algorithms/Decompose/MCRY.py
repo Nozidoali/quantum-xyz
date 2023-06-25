@@ -12,6 +12,7 @@ import numpy as np
 from Utils import *
 from Circuit import *
 
+
 def apply_control_sequence_to_y(
     circuit: QCircuit, control_sequence: list, control_qubits: list, target_qubit
 ) -> None:
@@ -25,11 +26,9 @@ def apply_control_sequence_to_y(
 def decompose_multiple_controlled_rotation_Y_gate(
     matrix: np.ndarray, circuit, control_qubits: list, target_qubit
 ):
-
     num_qubits = len(control_qubits)
 
     if num_qubits == 0:
-
         assert target_qubit is not None
 
         # this is a special case, in this case, we simply apply an RY gate to the target qubit

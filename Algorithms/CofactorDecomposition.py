@@ -31,7 +31,6 @@ def get_gibbs(on: np.ndarray, off: np.ndarray) -> float:
 
 
 def select_pivot_qubit(on_set: np.ndarray, off_set: np.ndarray, qubits) -> int:
-
     num_qubits = len(qubits)
 
     # print("on_set: ", on_set)
@@ -58,7 +57,6 @@ def select_pivot_qubit(on_set: np.ndarray, off_set: np.ndarray, qubits) -> int:
 def get_decision_tree_from_state_helper(
     on_set: np.array, off_set: np.array, qubits, decision_tree: DecisionTree
 ) -> DecisionTree:
-
     if np.count_nonzero(on_set == 1) == 0:
         return decision_tree.const0
     if np.count_nonzero(off_set == 1) == 0:
@@ -89,7 +87,6 @@ def get_decision_tree_from_state_helper(
 
 
 def get_decision_tree_from_state(matrix: np.array) -> DecisionTree:
-
     dt = DecisionTree()
 
     weight: float = None
@@ -144,7 +141,6 @@ def get_decision_tree_from_state(matrix: np.array) -> DecisionTree:
 
 
 def get_rotation_Y_theta(ratio: float):
-
     # G(P) = RY(2arccos(sqrt(P)))
     # where G(P) Ket(0) = sqrt(P) Ket(0) + sqrt(1 - P(0)) Ket(1)
     return 2 * np.arccos(np.sqrt(ratio))
@@ -159,7 +155,6 @@ def retrieve_circuit_from_decision_tree_helper(
     circuit: QCircuit,
     current_controls: list,
 ) -> None:
-
     if decision_tree_node.is_leaf:
         return
 
@@ -180,14 +175,11 @@ def retrieve_circuit_from_decision_tree_helper(
     if np.isclose(effective_theta, 0):
         effective_theta = 0
 
-
     else:
-
         if len(current_controls) == 0:
             circuit.ry(effective_theta, circuit.qr[index])
 
         elif circuit.has_mcry():
-
             qubit_indexs, phases = zip(*current_controls)
             qubits = [circuit.qr[qubit_index] for qubit_index in qubit_indexs]
             control_qubits = list(zip(qubits, phases))
@@ -195,7 +187,6 @@ def retrieve_circuit_from_decision_tree_helper(
             circuit.mcry(effective_theta, control_qubits, circuit.qr[index])
 
         else:
-
             # we prepare the rotation table
             rotation_table = np.zeros(2 ** (len(current_controls)))
 
@@ -203,7 +194,7 @@ def retrieve_circuit_from_decision_tree_helper(
             for i, value_tuple in enumerate(current_controls):
                 _, controlled_by_one = value_tuple
                 if controlled_by_one == True:
-                    rotated_index += 2 ** i
+                    rotated_index += 2**i
 
             control_qubits = [
                 circuit.qr[qubit_index] for qubit_index, _ in current_controls
@@ -244,7 +235,6 @@ def retrieve_circuit_from_decision_tree_helper(
 def retrieve_circuit_from_decision_tree(
     decision_tree: DecisionTree, num_qubits: int
 ) -> QCircuit:
-
     circuit = QCircuit(num_qubits)
 
     retrieve_circuit_from_decision_tree_helper(
@@ -268,7 +258,9 @@ def cofactor_decomposition(matrix: np.ndarray) -> QCircuit:
     dt = get_decision_tree_from_state(matrix)
 
     dt.export("./tmp/decision_tree.dot")
-    subprocess.run(["dot", "-Tpng", "./tmp/decision_tree.dot", "-o", "./tmp/decision_tree.png"])
+    subprocess.run(
+        ["dot", "-Tpng", "./tmp/decision_tree.dot", "-o", "./tmp/decision_tree.png"]
+    )
 
     num_qubits = int(np.log2(matrix.shape[0]))
 

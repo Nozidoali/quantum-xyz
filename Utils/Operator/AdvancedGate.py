@@ -14,7 +14,6 @@ from .BasicGate import *
 
 class AdvancedGate:
     def mcry(theta, control_qubits: dict, target_index, num_qubits: int):
-
         c1 = np.array([[1, 0], [0, 0]])
         c2 = np.array([[0, 0], [0, 1]])
 
@@ -24,10 +23,9 @@ class AdvancedGate:
         ry10 = ry[1, 0]
         ry11 = ry[1, 1]
 
-        matrix = np.zeros((2 ** num_qubits, 2 ** num_qubits))
+        matrix = np.zeros((2**num_qubits, 2**num_qubits))
 
-        for j in range(2 ** num_qubits):
-
+        for j in range(2**num_qubits):
             control_state = True
 
             target_val = (j >> target_index) & 1

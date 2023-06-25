@@ -12,7 +12,6 @@ from Algorithms import *
 
 
 def test_mcrz():
-
     # identity matrix
     c1 = np.array([[1, 0], [0, 0]])
     c2 = np.array([[0, 0], [0, 1]])
@@ -33,9 +32,8 @@ def test_mcrz():
     thetas = find_thetas(alphas)
 
     num_qubits = 3
-    new_matrix = np.identity(2 ** num_qubits)
+    new_matrix = np.identity(2**num_qubits)
     for i, theta in enumerate(thetas):
-
         # get the number of gray code
         # for example, if num_qubits = 3, then the gray code is 000, 001, 011, 010, 110, 111, 101, 100
         # the control id is 0, 1, 2, 1, 2, 3, 2, 1, respectively
@@ -44,8 +42,7 @@ def test_mcrz():
 
         # CNOT
         if control_id >= 0:
-
-            op_matrix = np.zeros((2 ** num_qubits, 2 ** num_qubits))
+            op_matrix = np.zeros((2**num_qubits, 2**num_qubits))
             for op, cond in zip([np.identity(2), BasicGate.x()], [c1, c2]):
                 curr_matrix = op
                 for qubit_id in range(num_qubits - 1):
@@ -65,7 +62,7 @@ def test_mcrz():
         # print("new matrix = \n", new_matrix)
 
     control_id = num_qubits - 2  # reset the control id
-    op_matrix = np.zeros((2 ** num_qubits, 2 ** num_qubits))
+    op_matrix = np.zeros((2**num_qubits, 2**num_qubits))
     for op, cond in zip([np.identity(2), BasicGate.x()], [c1, c2]):
         curr_matrix = op
         for qubit_id in range(num_qubits - 1):
@@ -86,7 +83,6 @@ def test_mcrz():
 
 
 def test_mcrz_2():
-
     # identity matrix
     c1 = np.array([[1, 0], [0, 0]])
     c2 = np.array([[0, 0], [0, 1]])
@@ -106,10 +102,9 @@ def test_mcrz_2():
     print(thetas)
 
     num_qubits = 2
-    new_matrix = np.identity(2 ** num_qubits)
+    new_matrix = np.identity(2**num_qubits)
 
     for i, theta in enumerate(thetas):
-
         # get the number of gray code
         # for example, if num_qubits = 3, then the gray code is 000, 001, 011, 010, 110, 111, 101, 100
         # the control id is 0, 1, 2, 1, 2, 3, 2, 1, respectively
@@ -118,8 +113,7 @@ def test_mcrz_2():
 
         # CNOT
         if control_id >= 0:
-
-            op_matrix = np.zeros((2 ** num_qubits, 2 ** num_qubits))
+            op_matrix = np.zeros((2**num_qubits, 2**num_qubits))
             for op, cond in zip([np.identity(2), BasicGate.x()], [c1, c2]):
                 curr_matrix = op
                 for qubit_id in range(num_qubits - 1):
@@ -139,7 +133,7 @@ def test_mcrz_2():
         # print("new matrix = \n", new_matrix)
 
     control_id = num_qubits - 2  # reset the control id
-    op_matrix = np.zeros((2 ** num_qubits, 2 ** num_qubits))
+    op_matrix = np.zeros((2**num_qubits, 2**num_qubits))
     for op, cond in zip([np.identity(2), BasicGate.x()], [c1, c2]):
         curr_matrix = op
         for qubit_id in range(num_qubits - 1):

@@ -16,9 +16,7 @@ num_tests = 100
 
 
 def test_zyz():
-
     for _ in range(num_tests):
-
         matrix = unitary_group.rvs(2)
         # matrix = np.array([[1, 1], [1, -1]]) * np.sqrt(0.5)
         # matrix = BasicGate.rz( random.random() * 2 * np.pi )

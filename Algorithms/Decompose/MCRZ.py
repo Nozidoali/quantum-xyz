@@ -12,6 +12,7 @@ import numpy as np
 from Utils import *
 from Circuit import *
 
+
 def apply_control_sequence_to_z(
     circuit: QCircuit, control_sequence: list, control_qubits: list, target_qubit
 ) -> None:
@@ -25,7 +26,6 @@ def apply_control_sequence_to_z(
 def decompose_multiple_controlled_rotation_Z_gate(
     matrix: np.ndarray, circuit: QCircuit, control_qubits: list, target_qubit
 ):
-
     num_qubits = len(control_qubits)
 
     alphas = -2 * np.imag(np.log(matrix.diagonal()))

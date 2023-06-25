@@ -13,5 +13,4 @@ from scipy import stats
 
 
 def random_operator(num_qubits: int) -> np.ndarray:
-
-    return stats.unitary_group.rvs(2 ** num_qubits)
+    return stats.unitary_group.rvs(2**num_qubits)

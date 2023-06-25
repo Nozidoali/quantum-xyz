@@ -13,8 +13,7 @@ from Algorithms import *
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 
 if __name__ == "__main__":
-
-    state = D_state(5,2)
+    state = D_state(5, 2)
     # state = W_state(6)
     # state = GHZ_state(4)
     # print(''.join([str(int(x > 0)) for x in state[:]])[::-1])
@@ -35,7 +34,7 @@ if __name__ == "__main__":
     print(circuit)
     circuit.simulate()
 
-    print(circuit.circuit.count_ops()['cx'])
+    print(circuit.circuit.count_ops()["cx"])
 
     # circuit.simulate()
     with open("./tmp/circuit.qasm", "w") as f:

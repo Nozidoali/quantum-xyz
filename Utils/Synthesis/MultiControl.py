@@ -14,7 +14,6 @@ import numpy as np
 
 
 def synthesize_multi_controlled_rotations(rotation_table: list):
-
     num_controls = int(np.log2(len(rotation_table)))
 
     alphas = rotation_table[:]
@@ -26,12 +25,13 @@ def synthesize_multi_controlled_rotations(rotation_table: list):
     prev_gray_code = 0
 
     for i, theta in enumerate(thetas):
-
         # get the bit that changed in the i of gray code
         # for example, if num_qubits = 3, then the gray code is 000, 001, 011, 010, 110, 111, 101, 100
         # the control id is 0, 1, 0, 2, 0, 1, 0, 2, respectively
         # which is determined by the number of 1 in the binary representation of the gray code
-        curr_gray_code = ((i+1) ^ ((i+1) >> 1)) if i < (2 ** num_controls) - 1 else 0
+        curr_gray_code = (
+            ((i + 1) ^ ((i + 1) >> 1)) if i < (2**num_controls) - 1 else 0
+        )
 
         diff = curr_gray_code ^ prev_gray_code
         # print(f"i: {i}, curr_gray_code: {curr_gray_code}, prev_gray_code: {prev_gray_code}, diff: {diff}")

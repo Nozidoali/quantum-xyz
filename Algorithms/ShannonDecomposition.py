@@ -19,7 +19,6 @@ import math
 
 
 def quantum_shannon_decomposition(matrix: np.ndarray) -> QCircuit:
-
     dim = matrix.shape[0]
     num_qubits = int(math.log(dim, 2))
 
@@ -32,7 +31,6 @@ def quantum_shannon_decomposition(matrix: np.ndarray) -> QCircuit:
 
 
 def quantum_shannon_decomposition_helper(matrix: np.ndarray, circuit, qubits: list):
-
     dim = matrix.shape[0]
     num_qubits = len(qubits)
     if num_qubits == 1:

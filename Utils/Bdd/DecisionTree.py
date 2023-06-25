@@ -13,7 +13,6 @@ import pygraphviz as pgv
 
 class DecisionTreeNode:
     def __init__(self, const_value: int = None) -> None:
-
         self.negative_cofactor = None
         self.positive_cofactor = None
 
@@ -39,7 +38,6 @@ class DecisionTree:
         pass
 
     def export(self, filename: str) -> None:
-
         graph = pgv.AGraph()
         graph.add_node("const0", label="0")
         graph.add_node("const1", label="1")
@@ -51,11 +49,14 @@ class DecisionTree:
                 return graph.get_node("const" + str(node.const_value))
 
             else:
-
                 nonlocal node_index
                 graph.add_node(
                     "node" + str(node_index),
-                    label= node.name + ": x" + str(node.pivot_index) + " = " + str(node.pivot_value),
+                    label=node.name
+                    + ": x"
+                    + str(node.pivot_index)
+                    + " = "
+                    + str(node.pivot_value),
                 )
                 new_node = graph.get_node("node" + str(node_index))
                 node_index += 1

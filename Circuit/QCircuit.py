@@ -23,12 +23,13 @@ from qiskit.circuit.library.standard_gates import *
 from .Gates import *
 from .QCircuitOptimized import *
 
+
 class QCircuitParams:
     has_mcry: bool = False
 
+
 class QCircuit(QCircuitOptimized):
     def __init__(self, num_qubits):
-
         super().__init__()
         self.init_qubits(num_qubits)
 
@@ -54,14 +55,13 @@ class QCircuit(QCircuitOptimized):
 
         self.ancilla_qubits = []
 
-
     def has_mcry(self):
         return QCircuitParams.has_mcry
-    
+
     def mcry(self, theta, control_qubits, target_qubit):
         if np.isclose(theta, 0) and self.structural_hashing:
             return False
-        
+
         if len(control_qubits) == 0:
             self.circuit.ry(theta, target_qubit)
             return True
@@ -71,12 +71,12 @@ class QCircuit(QCircuitOptimized):
 
         # we need to reverse the order of the control qubits
         # because the qiskit's control gate is in the reverse order
-        control_str = ''.join([str(int(phase)) for phase in phases])[::-1]
+        control_str = "".join([str(int(phase)) for phase in phases])[::-1]
 
         # print("control_str: ", control_str)
         # print("qubits: ", qubits)
-        
-        mcry_gate=RYGate(theta).control(num_control_qubits, ctrl_state=control_str)
+
+        mcry_gate = RYGate(theta).control(num_control_qubits, ctrl_state=control_str)
 
         if self.enable_cnot_queue:
             if (
@@ -84,7 +84,7 @@ class QCircuit(QCircuitOptimized):
                 or self.cnot_targets[target_qubit] > 0
             ):
                 self.flush_cnot_queue()
-            
+
             for qubit in qubits:
                 if self.cnot_controls[qubit] > 0 or self.cnot_targets[qubit] > 0:
                     self.flush_cnot_queue()
@@ -119,13 +119,11 @@ class QCircuit(QCircuitOptimized):
         return True
 
     def cx(self, control_qubit, target_qubit):
-
         assert (
             control_qubit != target_qubit
         ), "control qubit and target qubit cannot be the same"
 
         if self.enable_cnot_queue:
-
             if (
                 self.cnot_controls[target_qubit] > 0
                 or self.cnot_targets[control_qubit] > 0
@@ -141,7 +139,6 @@ class QCircuit(QCircuitOptimized):
             else:
                 # check if the current cnot is in the queue
                 if (control_qubit, target_qubit) in self.cnot_queue:
-
                     # we don't need to add this cnot to the queue
                     # because it is already in the queue
                     # besides, we can remove it from the queue
@@ -172,7 +169,7 @@ class QCircuit(QCircuitOptimized):
 
     def simulate(self):
         simulator = Aer.get_backend("qasm_simulator")
-        result = execute(self.circuit, backend=simulator, shots=2 ** 14).result()
+        result = execute(self.circuit, backend=simulator, shots=2**14).result()
         return result.get_counts(self.circuit)
         # plot_histogram(result.get_counts(self.circuit))
         # plt.show()

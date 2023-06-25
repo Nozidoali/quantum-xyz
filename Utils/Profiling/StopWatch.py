@@ -15,16 +15,17 @@ import time
 
 from ..ColorPrint import *
 
+
 class stopwatch:
 
-    '''
+    """
     Usage:
     with stopwatch("name"):
         do_something()
 
     Output:
     name                     :     0.00 sec
-    '''
+    """
 
     # name the functions run inside this context
     def __init__(self, name: str):

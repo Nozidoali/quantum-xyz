@@ -11,9 +11,9 @@ Last Modified time: 2023-06-17 07:59:22
 
 import numpy as np
 
-def GHZ_state(num_qubits: int) -> np.ndarray:
 
-    state = np.zeros(2 ** num_qubits)
+def GHZ_state(num_qubits: int) -> np.ndarray:
+    state = np.zeros(2**num_qubits)
 
     state[0] = 1
     state[-1] = 1

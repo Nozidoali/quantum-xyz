@@ -15,7 +15,6 @@ from Utils import *
 
 
 def unitary_zyz_decomposition_legacy(matrix: np.ndarray) -> QCircuit:
-
     # https://quantumcomputing.stackexchange.com/questions/16256/what-is-the-procedure-of-finding-z-y-decomposition-of-unitary-matrices
 
     print(f"matrix = \n{matrix}")
@@ -40,7 +39,6 @@ def unitary_zyz_decomposition_legacy(matrix: np.ndarray) -> QCircuit:
     beta = np.arctan2(np.absolute(B), np.absolute(A))
 
     if np.isclose(beta, 0.0, atol=1e-6):
-
         # basically, now alpha and gamma can be merged
         # also, no unique solution can be found
         beta = 0.0
@@ -49,7 +47,6 @@ def unitary_zyz_decomposition_legacy(matrix: np.ndarray) -> QCircuit:
         return alpha, beta, gamma
 
     if np.isclose(beta, np.pi, atol=1e-6):
-
         # basically, now alpha and gamma can be merged
         # also, no unique solution can be found
         beta = np.pi

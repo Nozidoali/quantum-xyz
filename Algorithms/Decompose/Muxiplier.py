@@ -13,7 +13,6 @@ from scipy.linalg import eig
 
 
 def decompose_uniformly_controlled_gate(matrix: np.ndarray):
-
     dim = matrix.shape[0]
     half = int(dim / 2)
 
@@ -56,7 +55,6 @@ def decompose_uniformly_controlled_gate(matrix: np.ndarray):
     D_matrix = np.kron(c1, D) + np.kron(c2, D.conj().T)
 
     if not np.allclose(V_matrix @ D_matrix @ W_matrix, matrix):
-
         diff = matrix @ (V_matrix @ D_matrix @ W_matrix).conj().T
 
         print(f"difference \n {diff}")

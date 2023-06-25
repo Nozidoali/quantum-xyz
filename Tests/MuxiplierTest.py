@@ -14,7 +14,6 @@ num_tests = 10
 
 
 def test_muxiplier():
-
     # identity matrix
     c1 = np.array([[1, 0], [0, 0]])
     c2 = np.array([[0, 0], [0, 1]])

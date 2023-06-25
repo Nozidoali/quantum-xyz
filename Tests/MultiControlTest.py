@@ -13,7 +13,6 @@ from Utils import *
 
 
 def test_multi_control():
-
     matrix = AdvancedGate.mcry(
         theta=np.pi, control_qubits={0: False, 1: False}, target_index=2, num_qubits=3
     )

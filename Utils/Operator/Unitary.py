@@ -12,7 +12,6 @@ import numpy as np
 
 
 def to_unitary(matrix: np.ndarray) -> np.ndarray:
-
     # for each column, orthogonalize it with the previous columns
     for i in range(matrix.shape[1]):
         for j in range(i):
