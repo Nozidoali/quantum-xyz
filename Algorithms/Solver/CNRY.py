@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-21 14:02:46
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-25 11:39:06
+Last Modified time: 2023-06-25 12:37:48
 '''
 
 import numpy as np
@@ -21,63 +21,6 @@ from .Detail import *
 from Visualization import *
 import logging
 
-
-def get_all_control_states(num_qubits: int, pivot_qubit: int, max_controls: int = None) -> List[int]:
-    '''
-    return all the control states that can be used to control the pivot_qubit
-    
-    Args:
-        num_qubits: the number of qubits
-        pivot_qubit: the qubit to be controlled
-
-    the pivot qubit cannot be controlled by itself
-    '''
-
-    def dfs(num_qubits: int, curr_bit: int, curr_state: int, curr_num_controls: int, curr_control_states: list, control_states: List[int]):
-
-        if curr_bit == num_qubits:
-            control_states.append((curr_state, curr_num_controls, curr_control_states))
-            return
-        
-        if curr_bit == pivot_qubit:
-            dfs(num_qubits, curr_bit + 1, curr_state, curr_num_controls, curr_control_states, control_states)
-            return
-        
-        # we have 3 cases
-        # 1. the curr_bit is not controlled
-        dfs(num_qubits, curr_bit + 1, curr_state, curr_num_controls, curr_control_states, control_states)
-
-        new_state = 0
-        for i in range(1<<num_qubits):
-            if (i >> curr_bit) & 1 == 0:
-                new_state |= (1 << i)
-
-        neg_state = new_state
-        pos_state = (~new_state) & ((1 << (1<<num_qubits)) - 1)
-
-        # print("curr_bit: ", curr_bit)
-        # print("neg_state: ", bin(neg_state))
-        # print("pos_state: ", bin(pos_state))
-
-        nonlocal max_controls        
-        
-        if max_controls is not None and curr_num_controls >= max_controls:
-            return
-        
-        # 2. the curr_bit is controlled by 0
-        next_control_states = curr_control_states[:]
-        next_control_states.append((curr_bit, 0))
-        dfs(num_qubits, curr_bit + 1, neg_state & curr_state, curr_num_controls+1, next_control_states, control_states)
-
-        # 3. the curr_bit is controlled by 1
-        next_control_states = curr_control_states[:]
-        next_control_states.append((curr_bit, 1))
-        dfs(num_qubits, curr_bit + 1, pos_state & curr_state, curr_num_controls+1, next_control_states, control_states)
-
-    control_states = []
-    init_state = (1 << (1<<num_qubits)) - 1 
-    dfs(num_qubits, 0, init_state, 0, [], control_states)
-    return control_states
 
 def cnry_solver(final_state: np.ndarray):
 
@@ -108,7 +51,6 @@ def cnry_solver(final_state: np.ndarray):
         curr_state = q.get()
         visited.add(curr_state)
 
-        curr_state_cost = curr_state.cost
         logger.info(f"curr_state: {curr_state.states}, cost: {curr_state.cost}, qsize: {q.qsize()}")
 
         if curr_state == to_cnry_state(final_state):
@@ -120,44 +62,33 @@ def cnry_solver(final_state: np.ndarray):
             while True:
                 if prev[prev_state] is None:
                     break
-                prev_state, qubit, control, control_states, direction = prev[prev_state]
+                prev_state, move = prev[prev_state]
+                solution.append((prev_state, move))
 
-                if True:
-                    state_str = [f"{i:b}" for i in prev_state.states]
-                    print(f"state: {state_str}, qubit: {qubit}, control: {control:b}, direction: {direction}")
-                solution.append((prev_state, (qubit, control, control_states, direction)))
             return solution
 
         for qubit in range(num_qubits):
             
-            states = get_all_control_states(num_qubits, qubit, 1)
+            states = get_all_moves(num_qubits, qubit, 1)
 
-            for control, num_controls, control_states in states:
-                for direction in [1, 2]:
+            for move in states:
 
-                    def cost_function(num_controls: int):
-                        if num_controls == 0:
-                            return 0
-                        if direction == 1 and num_controls == 1:
-                            return 1
-                        return 1 << num_controls
+                new_state = move(curr_state)
+
+                # this only works for the non-split
+                if len(new_state.states) > final_state_ones:
+                    continue
                 
-                    new_state = move_to_neighbour(curr_state, cost_function(num_controls), qubit, control, direction)
-
-                    # this only works for the non-split
-                    if len(new_state.states) > final_state_ones:
+                if new_state in visited:
+                    continue
+                
+                if new_state in enqueued:
+                    if new_state.cost >= enqueued[new_state]:
                         continue
-                    
-                    if new_state in visited:
-                        continue
-                    
-                    if new_state in enqueued:
-                        if new_state.cost >= enqueued[new_state]:
-                            continue
 
-                    enqueued[new_state] = new_state.cost
-                    prev[new_state] = curr_state, qubit, control, control_states, direction
-                    q.put(new_state)
+                enqueued[new_state] = new_state.cost
+                prev[new_state] = curr_state, move
+                q.put(new_state)
 
     # we should not reach here
     print("Error: no solution found")
@@ -178,14 +109,15 @@ def solution_to_circuit(num_qubits: int, solution: list) -> QCircuit:
     for step in solution:
 
         states: CnRyState
-        states, op = step
+        move: CnRyMove
+        states, move = step
 
         # save the figure
         if num_qubits == 3 and False:
             print_cube(states.states, f"step_{idx}.pdf")
         idx += 1
         
-        if op is None:
+        if move is None:
 
             # this is the initial state
             # we initialize the weights
@@ -193,7 +125,12 @@ def solution_to_circuit(num_qubits: int, solution: list) -> QCircuit:
                 weights[state] = 1
             continue
         
-        qubit, control, control_states, direction = op
+        qubit: int = move.pivot_qubit
+        control: int = move.control_state
+        direction: int = move.direction
+        control_states: List[int] = move.control_states
+
+        print(f"qubit: {qubit}, control: {control:b}, control_states: {control_states}, direction: {direction}, weights: {weights}")
 
         thetas: dict = {}
 
@@ -215,7 +152,7 @@ def solution_to_circuit(num_qubits: int, solution: list) -> QCircuit:
                 continue
             
             
-            if direction == 1:
+            if direction == CnRYDirection.SWAP:
 
                 # we need to figure out which bit is the src and which bit is the dst
                 if weights[neg_index] == 0:
@@ -226,11 +163,10 @@ def solution_to_circuit(num_qubits: int, solution: list) -> QCircuit:
                     dst_index = pos_index
 
                 # we need to flip the bit (from the src to dst)
-                assert weights[dst_index] == 0
-                weights[dst_index] += weights[src_index]
-                weights[src_index] = 0
+                # assert weights[dst_index] == 0
+                weights[dst_index], weights[src_index] = weights[src_index], weights[dst_index]
 
-            if direction == 2:
+            if direction == CnRYDirection.MERGE:
 
                 # we need to merge the weights (from the src to dst)
 
@@ -263,12 +199,12 @@ def solution_to_circuit(num_qubits: int, solution: list) -> QCircuit:
         control_qubits = [circuit.qubit_at(i) for i, _ in control_states]
         phases = [phase for _, phase in control_states]
 
-        if direction == 1:
+        if direction == CnRYDirection.SWAP:
             theta = -np.pi
             gate = MCRY(theta, control_qubits, phases, circuit.qubit_at(qubit))
             mcry_gates.append(gate)
 
-        if direction == 2:
+        if direction == CnRYDirection.MERGE:
             if len(thetas) == 0:
                 assert False, "no theta found"
             elif len(thetas) == 1:

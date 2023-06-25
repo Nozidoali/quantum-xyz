@@ -9,6 +9,5 @@ Last Modified time: 2023-06-17 07:54:55
 """
 
 from .UniformStatePreparator import *
-from .GHZ import *
-from .W import *
-from .D import *
+from .State import *
+from .StateOp import *

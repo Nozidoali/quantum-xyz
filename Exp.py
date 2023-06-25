@@ -11,10 +11,9 @@ def exp():
     num_qubits = 3
     with stopwatch("cnry_solver"):
 
-        # solution = cnry_solver(W_state(num_qubits))
-        # solution = cnry_solver(GHZ_state(num_qubits))
-
-        solution = cnry_solver(D_state(num_qubits, 2))
+        state = D_state(num_qubits, 1)
+        print(state)
+        solution = cnry_solver(state)
 
     circuit = solution_to_circuit(num_qubits, solution)
 
