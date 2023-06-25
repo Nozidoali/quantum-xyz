@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-21 14:02:46
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-23 11:24:56
+Last Modified time: 2023-06-25 11:39:06
 '''
 
 import numpy as np
@@ -19,6 +19,7 @@ from Algorithms.Decompose import *
 from .Detail import *
 
 from Visualization import *
+import logging
 
 
 def get_all_control_states(num_qubits: int, pivot_qubit: int, max_controls: int = None) -> List[int]:
@@ -79,6 +80,11 @@ def get_all_control_states(num_qubits: int, pivot_qubit: int, max_controls: int 
     return control_states
 
 def cnry_solver(final_state: np.ndarray):
+
+    logger = logging.getLogger(__name__)
+    handler = logging.FileHandler("cnry_solver.log")
+    handler.setLevel(logging.INFO)
+    logger.addHandler(handler)
     
     init_state = CnRyState()
     num_qubits = int(np.log2(len(final_state)))
@@ -102,9 +108,8 @@ def cnry_solver(final_state: np.ndarray):
         curr_state = q.get()
         visited.add(curr_state)
 
-        if False:
-            curr_state_cost = curr_state.cost
-            print(f"curr_state: {curr_state.states}, cost: {curr_state_cost}, qsize: {q.qsize()}")            
+        curr_state_cost = curr_state.cost
+        logger.info(f"curr_state: {curr_state.states}, cost: {curr_state.cost}, qsize: {q.qsize()}")
 
         if curr_state == to_cnry_state(final_state):
             print("Solution found, cost = ", curr_state.cost)
@@ -176,7 +181,8 @@ def solution_to_circuit(num_qubits: int, solution: list) -> QCircuit:
         states, op = step
 
         # save the figure
-        print_cube(states.states, f"step_{idx}.pdf")
+        if num_qubits == 3 and False:
+            print_cube(states.states, f"step_{idx}.pdf")
         idx += 1
         
         if op is None:

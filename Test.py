@@ -10,4 +10,3 @@ Last Modified time: 2023-06-18 22:44:57
 
 from Tests import *
 
-test_multi_control()
