@@ -8,8 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-25 18:06:35
 """
 
-from Algorithms import *
-from StatePreparator import *
+from QuantumXYZ import *
 
 num_qubits = 4
 state = QState(D_state(num_qubits, 1), num_qubits, is_quantized=False)

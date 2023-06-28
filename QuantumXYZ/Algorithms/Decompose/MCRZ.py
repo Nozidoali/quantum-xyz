@@ -9,8 +9,8 @@ Last Modified time: 2023-06-18 21:47:46
 """
 
 import numpy as np
-from Utils import *
-from Circuit import *
+from QuantumXYZ.Utils import *
+from QuantumXYZ.Circuit import *
 
 
 def apply_control_sequence_to_z(

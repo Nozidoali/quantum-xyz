@@ -8,7 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-22 20:08:00
 """
 
-from Circuit import *
+from QuantumXYZ.Circuit import *
 
 
 def simulate(circuit):

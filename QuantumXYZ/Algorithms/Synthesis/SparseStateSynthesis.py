@@ -10,7 +10,7 @@ Last Modified time: 2023-06-28 11:17:55
 
 from typing import Any
 from .SearchBasedStateSynthesis import *
-from Circuit import *
+from QuantumXYZ import *
 
 from typing import List
 

@@ -9,8 +9,8 @@ Last Modified time: 2023-06-19 21:43:13
 """
 
 import numpy as np
-from Circuit import QCircuit
-from Utils import *
+from QuantumXYZ.Circuit import QCircuit
+from QuantumXYZ.Utils import *
 from .Decompose import *
 
 

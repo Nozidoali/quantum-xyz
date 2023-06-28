@@ -8,7 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 11:17:45
 """
 
-from Circuit import *
+from QuantumXYZ.Circuit import *
 from .StateSynthesisBase import *
 
 from queue import PriorityQueue
