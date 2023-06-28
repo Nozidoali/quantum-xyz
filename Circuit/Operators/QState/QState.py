@@ -14,6 +14,6 @@ from .QStateQuantized import *
 
 
 class QState(QStateQuantized):
-    def __init__(self, state_array: np.ndarray, num_qubits: int) -> None:
-        QStateQuantized.__init__(self, state_array, num_qubits)
+    def __init__(self, state_array: np.ndarray, num_qubits: int, is_quantized: bool = True) -> None:
+        QStateQuantized.__init__(self, state_array, num_qubits, is_quantized)
 

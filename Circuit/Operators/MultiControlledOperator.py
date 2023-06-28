@@ -9,7 +9,7 @@ Last Modified time: 2023-06-28 11:29:03
 """
 
 from typing import List
-
+from .QState import *
 
 class MultiControlledOperator:
     def __init__(
@@ -18,5 +18,10 @@ class MultiControlledOperator:
         self.control_qubit_indices = control_qubit_indices
         self.control_qubit_phases = control_qubit_phases
 
-    def is_controlled(self, pure_state: int) -> bool:
-        return len(self.control_qubit_indices) > 0
+    def is_controlled(self, pure_state: PureState) -> bool:
+        
+        for index, phase in zip(self.control_qubit_indices, self.control_qubit_phases):
+            if (int(pure_state) >> index) & 1 != phase:
+                return False
+        
+        return True

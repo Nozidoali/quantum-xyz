@@ -12,7 +12,7 @@ from Algorithms import *
 from StatePreparator import *
 
 num_qubits = 4
-state = QState(D_state(num_qubits, 1), num_qubits)
+state = QState(D_state(num_qubits, 1), num_qubits, is_quantized=False)
 
 print(state)
 

@@ -47,6 +47,3 @@ class SearchBasedStateSynthesis(StateSynthesisBase):
 
     def search_done(self) -> bool:
         return self.state_queue.empty()
-
-    def get_next_states(self, curr_state: QState) -> List[QState]:
-        raise NotImplementedError

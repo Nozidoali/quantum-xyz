@@ -13,7 +13,9 @@ from enum import Enum, auto
 
 class QuantizedRotationType(Enum):
     SWAP = auto()
-    MERGE = auto()
+    MERGE0 = auto()
+    MERGE1 = auto()
+    SPLIT = auto()
 
 
 class QuantizedRotation:
