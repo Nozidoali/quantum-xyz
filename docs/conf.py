@@ -28,7 +28,6 @@ author = 'Hanyu Wang'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "myst_parser"
 ]
 
 
