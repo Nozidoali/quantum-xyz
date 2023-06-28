@@ -14,6 +14,7 @@ from QuantumXYZ.Circuit import *
 class StateSynthesisBase:
     def __init__(self, target_state: QStateBase) -> None:
         self.target_state = target_state
+        self.num_qubits = target_state.num_qubits
 
     def run(self) -> None:
         raise NotImplementedError

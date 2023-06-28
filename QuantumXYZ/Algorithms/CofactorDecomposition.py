@@ -168,50 +168,15 @@ def retrieve_circuit_from_decision_tree_helper(
     # number of qubits = control_qubits + 1
 
     effective_theta = theta - 2 * np.pi * np.floor(theta / (2 * np.pi))
-    # print(
-    #     f"node = {decision_tree_node.name} theta = {effective_theta}, ratio = {ratio}, index = {index}, controls = {current_controls}"
-    # )
 
-    if np.isclose(effective_theta, 0):
-        effective_theta = 0
+    control_qubit_indices = [i for i, _ in current_controls]
+    control_qubit_phases = [phase for _, phase in current_controls]
 
-    else:
-        if len(current_controls) == 0:
-            circuit.ry(effective_theta, circuit.qr[index])
+    control_qubits = [circuit.qubit_at(i) for i in control_qubit_indices]
 
-        elif circuit.has_mcry():
-            qubit_indexs, phases = zip(*current_controls)
-            qubits = [circuit.qr[qubit_index] for qubit_index in qubit_indexs]
-            control_qubits = list(zip(qubits, phases))
-
-            circuit.mcry(effective_theta, control_qubits, circuit.qr[index])
-
-        else:
-            # we prepare the rotation table
-            rotation_table = np.zeros(2 ** (len(current_controls)))
-
-            rotated_index = 0
-            for i, value_tuple in enumerate(current_controls):
-                _, controlled_by_one = value_tuple
-                if controlled_by_one == True:
-                    rotated_index += 2**i
-
-            control_qubits = [
-                circuit.qr[qubit_index] for qubit_index, _ in current_controls
-            ]
-
-            # only rotate the target qubit if the control qubits are in the positive phase
-            rotation_table[rotated_index] = effective_theta
-
-            # print(f"rotation table = {rotation_table}")
-            # print(f"control qubits = {control_qubits}")
-
-            control_sequence = synthesize_multi_controlled_rotations(rotation_table)
-            # print(f"control sequence = {control_sequence}")
-
-            apply_control_sequence_to_y(
-                circuit, control_sequence, control_qubits, circuit.qr[index]
-            )
+    circuit.add_gate(
+        MCRY(effective_theta, control_qubits, control_qubit_phases, circuit.qubit_at(index))
+    )
 
     # then we add the control singles to the current controls and start the recursion
 
@@ -235,14 +200,12 @@ def retrieve_circuit_from_decision_tree_helper(
 def retrieve_circuit_from_decision_tree(
     decision_tree: DecisionTree, num_qubits: int
 ) -> QCircuit:
+    
     circuit = QCircuit(num_qubits)
 
     retrieve_circuit_from_decision_tree_helper(
         decision_tree, decision_tree.root, circuit, []
     )
-
-    circuit.flush()
-    circuit.measure()
 
     return circuit
 
@@ -257,10 +220,10 @@ def cofactor_decomposition(matrix: np.ndarray) -> QCircuit:
 
     dt = get_decision_tree_from_state(matrix)
 
-    dt.export("./tmp/decision_tree.dot")
-    subprocess.run(
-        ["dot", "-Tpng", "./tmp/decision_tree.dot", "-o", "./tmp/decision_tree.png"]
-    )
+    # dt.export("./tmp/decision_tree.dot")
+    # subprocess.run(
+    #     ["dot", "-Tpng", "./tmp/decision_tree.dot", "-o", "./tmp/decision_tree.png"]
+    # )
 
     num_qubits = int(np.log2(matrix.shape[0]))
 

@@ -9,21 +9,20 @@ Last Modified time: 2023-06-28 11:17:55
 """
 
 from typing import Any
-from .SearchBasedStateSynthesis import *
+from .CanonicalStateSynthesis import *
 from QuantumXYZ import *
 
 from typing import List
 
 
-class SparseStateSynthesis(SearchBasedStateSynthesis):
+class SparseStateSynthesis(CanonicalStateSynthesis):
     def __init__(self, target_state: QState) -> None:
         """
          @brief Initializes the search based state synthesis. This is called by __init__ and should not be called directly
          @param target_state The state to synthesize from
          @return The synthesized state as a QState object or None if there was an error synthesizing
         """
-        SearchBasedStateSynthesis.__init__(self, target_state)
-        self.num_qubits = target_state.num_qubits
+        CanonicalStateSynthesis.__init__(self, target_state)
 
     def run(self) -> None:
         """
@@ -39,6 +38,7 @@ class SparseStateSynthesis(SearchBasedStateSynthesis):
 
             if len(curr_state) == 1:
                 break
+
             prev_ones = len(curr_state)
 
             self.init_search()
@@ -77,40 +77,7 @@ class SparseStateSynthesis(SearchBasedStateSynthesis):
         
             transitions = curr_transitions + transitions
         
-        return transitions
+        zero_state, initial_transitions = get_representative(curr_state, self.num_qubits)
+        assert zero_state == ground_state(self.num_qubits)
 
-    def get_ops(self, state: QState):
-        # yields the state of the pivot qubit.
-        for pivot_qubit_index in range(self.num_qubits):
-
-            # yields the rotation state of the current state.
-            for rotation_type in [QuantizedRotationType.SWAP, QuantizedRotationType.MERGE0, QuantizedRotationType.MERGE1]:
-
-                # first we try the case where no control qubit is used
-                op = MCRYOperator(
-                    target_qubit_index=pivot_qubit_index,
-                    rotation_type=rotation_type,
-                    control_qubit_indices=[],
-                    control_qubit_phases=[],
-                )
-                
-                yield op
-
-                # Yields the state of the current state of the MCRY operator.
-                for control_qubit_index in range(self.num_qubits):
-
-                    # If control_qubit_index is pivot_qubit_index control_qubit_index pivot_qubit_index.
-                    if control_qubit_index == pivot_qubit_index:
-                        continue
-
-                    # Yields the state of the current state.
-                    for control_qubit_phase in [False, True]:
-
-                        op = MCRYOperator(
-                            target_qubit_index=pivot_qubit_index,
-                            rotation_type=rotation_type,
-                            control_qubit_indices=[control_qubit_index],
-                            control_qubit_phases=[control_qubit_phase],
-                        )
-
-                        yield op
+        return initial_transitions + transitions
