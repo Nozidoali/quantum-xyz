@@ -12,6 +12,7 @@ import numpy as np
 from typing import Any
 from .PureState import *
 
+
 class QStateBase:
     def __init__(self, state_array: np.ndarray = []) -> None:
         self.state_array: set = set([PureState(x) for x in state_array])
@@ -26,14 +27,13 @@ class QStateBase:
         return QStateBase(self.state_array.copy())
 
     def __call__(self) -> Any:
-        
         for state in self.state_array:
             yield state
 
     def add_pure_state(self, pure_state: PureState) -> None:
         self.state_array.add(pure_state)
-        return 
-    
+        return
+
     def __lt__(self, other: Any) -> bool:
         sorted_self = sorted(self.state_array)
         sorted_other = sorted(other.state_array)
@@ -44,19 +44,18 @@ class QStateBase:
                 return True
             elif sorted_self[i] > sorted_other[i]:
                 return False
-        
+
         return False
-    
+
     def __iter__(self) -> Any:
         return self.state_array.__iter__()
-    
-    def __eq__(self, __value: object) -> bool:
 
+    def __eq__(self, __value: object) -> bool:
         if not isinstance(__value, QStateBase):
             return False
 
         if len(self) != len(__value):
-            return False    
+            return False
 
         sorted_self = sorted(self.state_array)
         sorted_other = sorted(__value.state_array)
@@ -64,9 +63,9 @@ class QStateBase:
         for i in range(len(self)):
             if sorted_self[i] != sorted_other[i]:
                 return False
-            
+
         return True
-    
+
     def __hash__(self) -> int:
         sorted_self = sorted(self.state_array)
         return hash(tuple(sorted_self))

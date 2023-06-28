@@ -12,6 +12,7 @@ import numpy as np
 from .QStateBase import *
 from typing import List
 
+
 class QStateFramed(QStateBase):
     def __init__(self, state_array: List[PureState], num_qubits: int) -> None:
         QStateBase.__init__(self, state_array)

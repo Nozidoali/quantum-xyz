@@ -14,6 +14,7 @@ from .QuantizedRotation import *
 from .MultiControlledOperator import *
 from .QState import *
 
+
 class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):
     def __init__(
         self,
@@ -45,24 +46,23 @@ class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):
                 continue
 
             match self.rotation_type:
-
                 case QuantizedRotationType.SWAP:
                     new_states.add_pure_state(pure_state.flip(self.target_qubit_index))
-                
+
                 case QuantizedRotationType.MERGE0:
                     if pure_state.flip(self.target_qubit_index) not in qstate:
                         raise ValueError("The target state is not in the qstate")
-                    
+
                     new_states.add_pure_state(pure_state.set0(self.target_qubit_index))
-                
+
                 case QuantizedRotationType.MERGE1:
                     if pure_state.flip(self.target_qubit_index) not in qstate:
                         raise ValueError("The target state is not in the qstate")
-                    
+
                     new_states.add_pure_state(pure_state.set1(self.target_qubit_index))
-                    
+
         return new_states
-    
+
     def get_cost(self) -> int:
         num_controls: int = len(self.control_qubit_indices)
         if num_controls is 0:
@@ -73,9 +73,15 @@ class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):
             return 1 << (num_controls)
 
     def __str__(self) -> str:
-        rotation_str = 'SWAP' if self.rotation_type is QuantizedRotationType.SWAP else 'MERGE0' if self.rotation_type is QuantizedRotationType.MERGE0 else 'MERGE1'
+        rotation_str = (
+            "SWAP"
+            if self.rotation_type is QuantizedRotationType.SWAP
+            else "MERGE0"
+            if self.rotation_type is QuantizedRotationType.MERGE0
+            else "MERGE1"
+        )
         return f"MCRY({self.target_qubit_index}, {rotation_str}, {self.control_qubit_indices}, {self.control_qubit_phases})"
-    
+
     def __invert__(self):
         match self.rotation_type:
             case QuantizedRotationType.SWAP:
@@ -83,10 +89,10 @@ class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):
 
             case QuantizedRotationType.MERGE0:
                 self.rotation_type = QuantizedRotationType.SPLIT0
-            
+
             case QuantizedRotationType.MERGE1:
                 self.rotation_type = QuantizedRotationType.SPLIT1
-            
+
             case QuantizedRotationType.SPLIT0:
                 self.rotation_type = QuantizedRotationType.MERGE0
 

@@ -15,6 +15,7 @@ class QOperatorType(Enum):
     MCRY = auto()
     X = auto()
 
+
 class QOperator:
     def __init__(self, type: QOperatorType) -> None:
         self.type = type

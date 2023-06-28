@@ -13,6 +13,7 @@ from .QOperatorBase import *
 from .QuantizedRotation import *
 from .QState import *
 
+
 class XOperator(QOperatorBase, QuantizedRotation):
     def __init__(
         self,
@@ -32,8 +33,6 @@ class XOperator(QOperatorBase, QuantizedRotation):
         pure_state: PureState
 
         for pure_state in qstate():
-
             new_states.add_pure_state(pure_state.flip(self.target_qubit_index))
-                
+
         return new_states
-    

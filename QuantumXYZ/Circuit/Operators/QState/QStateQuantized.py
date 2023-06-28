@@ -34,7 +34,9 @@ def quantize(state_array: np.ndarray, num_qubits: int) -> np.ndarray:
 
 
 class QStateQuantized(QStateFramed):
-    def __init__(self, state_array: np.ndarray, num_qubits: int, is_quantized: bool = True) -> None:
+    def __init__(
+        self, state_array: np.ndarray, num_qubits: int, is_quantized: bool = True
+    ) -> None:
         if not is_quantized:
             quantized_state_array = quantize(state_array, num_qubits)
         else:

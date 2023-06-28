@@ -47,14 +47,15 @@ class SearchBasedStateSynthesis(StateSynthesisBase):
         self.enquened_states.clear()
         self.record.clear()
 
-    def record_operation(self, state_before: QState, op: QOperator, state_after: QState) -> None:
+    def record_operation(
+        self, state_before: QState, op: QOperator, state_after: QState
+    ) -> None:
         self.record[state_after] = state_before, op
 
     def search_done(self) -> bool:
         return self.state_queue.empty()
 
     def backtrace_state(self, state: QState):
-
         curr_state = state
         while curr_state in self.record:
             prev_state, op = self.record[curr_state]
@@ -63,15 +64,16 @@ class SearchBasedStateSynthesis(StateSynthesisBase):
 
     def is_visited(self, state: QState):
         return state in self.visited_states
-    
 
     def get_ops(self, state: QState):
         # yields the state of the pivot qubit.
         for pivot_qubit_index in range(self.num_qubits):
-
             # yields the rotation state of the current state.
-            for rotation_type in [QuantizedRotationType.SWAP, QuantizedRotationType.MERGE0, QuantizedRotationType.MERGE1]:
-
+            for rotation_type in [
+                QuantizedRotationType.SWAP,
+                QuantizedRotationType.MERGE0,
+                QuantizedRotationType.MERGE1,
+            ]:
                 # first we try the case where no control qubit is used
                 op = MCRYOperator(
                     target_qubit_index=pivot_qubit_index,
@@ -79,19 +81,17 @@ class SearchBasedStateSynthesis(StateSynthesisBase):
                     control_qubit_indices=[],
                     control_qubit_phases=[],
                 )
-                
+
                 yield op
 
                 # Yields the state of the current state of the MCRY operator.
                 for control_qubit_index in range(self.num_qubits):
-
                     # If control_qubit_index is pivot_qubit_index control_qubit_index pivot_qubit_index.
                     if control_qubit_index == pivot_qubit_index:
                         continue
 
                     # Yields the state of the current state.
                     for control_qubit_phase in [False, True]:
-
                         op = MCRYOperator(
                             target_qubit_index=pivot_qubit_index,
                             rotation_type=rotation_type,

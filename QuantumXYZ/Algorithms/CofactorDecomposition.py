@@ -175,7 +175,12 @@ def retrieve_circuit_from_decision_tree_helper(
     control_qubits = [circuit.qubit_at(i) for i in control_qubit_indices]
 
     circuit.add_gate(
-        MCRY(effective_theta, control_qubits, control_qubit_phases, circuit.qubit_at(index))
+        MCRY(
+            effective_theta,
+            control_qubits,
+            control_qubit_phases,
+            circuit.qubit_at(index),
+        )
     )
 
     # then we add the control singles to the current controls and start the recursion
@@ -200,7 +205,6 @@ def retrieve_circuit_from_decision_tree_helper(
 def retrieve_circuit_from_decision_tree(
     decision_tree: DecisionTree, num_qubits: int
 ) -> QCircuit:
-    
     circuit = QCircuit(num_qubits)
 
     retrieve_circuit_from_decision_tree_helper(

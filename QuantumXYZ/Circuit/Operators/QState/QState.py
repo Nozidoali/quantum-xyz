@@ -14,12 +14,15 @@ from .QStateQuantized import *
 
 
 class QState(QStateQuantized):
-    def __init__(self, state_array: np.ndarray, num_qubits: int, is_quantized: bool = True) -> None:
+    def __init__(
+        self, state_array: np.ndarray, num_qubits: int, is_quantized: bool = True
+    ) -> None:
         QStateQuantized.__init__(self, state_array, num_qubits, is_quantized)
 
     def copy(self) -> Any:
         state_array = [int(x) for x in self.state_array]
         return QState(state_array, self.num_qubits, True)
+
 
 def ground_state(num_qubits: int) -> QState:
     """
