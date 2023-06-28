@@ -41,3 +41,6 @@ class QGate:
 
     def __str__(self) -> str:
         return self.type.name
+
+    def get_type(self) -> QGateType:
+        return self.type

@@ -71,7 +71,7 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
             curr_transitions = QTransition(self.num_qubits)
             state_before = curr_state
             for state, op in self.backtrace_state(state_before):
-                print(f"state: {state}, cost = {op.get_cost()}, state_before: {state_before}")
+                print(f"state: {state}, op = {op}, cost = {op.get_cost()}, state_before: {state_before}")
                 curr_transitions.add_transition_to_back(state_before, ~op, state)
                 state_before = state
         

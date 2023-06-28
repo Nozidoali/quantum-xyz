@@ -23,7 +23,14 @@ from qiskit.circuit.library.standard_gates import *
 from .Gates import *
 from .QCircuitOptimized import *
 
+class QCircuitParams:
+    do_mapping: bool = True
+
+    def set_mapping(do_mapping: bool):
+        QCircuitParams.do_mapping = do_mapping
+
 class QCircuit(QCircuitOptimized):
     def __init__(self, num_qubits):
         super().__init__()
         self.init_qubits(num_qubits)
+        self.set_mapping(QCircuitParams.do_mapping)

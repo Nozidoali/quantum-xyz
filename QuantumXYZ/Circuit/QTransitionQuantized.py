@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-28 16:33:40
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-28 19:48:47
+Last Modified time: 2023-06-28 20:05:52
 '''
 
 from .Operators import *
@@ -36,6 +36,7 @@ class QTransitionQuantized(QTransitionBase):
 
             if operator.type == QOperatorType.X:
                 gate = X(circuit.qubit_at(operator.target_qubit_index))
+                gates.append(gate)
             
             else:
                 new_weights = np.zeros(1 << self.num_qubits)
@@ -61,7 +62,7 @@ class QTransitionQuantized(QTransitionBase):
                     
                     weights = new_weights
                     
-                    gate = MCRY(-np.pi, control_qubits, phases, target_qubit)
+                    gate = MCRY(np.pi, control_qubits, phases, target_qubit)
 
                     gates.append(gate)
 

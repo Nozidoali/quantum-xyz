@@ -68,3 +68,12 @@ class QCircuitBase:
         """
         for i in range(num_qubits):
             self.add_qubit(QBit(i))
+
+    def num_gates(self, gate_type: QGateType = None) -> int:
+        """
+        Get the number of gates in the circuit
+        """
+        if gate_type is None:
+            return len(self.__gates)
+        else:
+            return len([gate for gate in self.__gates if gate.get_type() == gate_type])
