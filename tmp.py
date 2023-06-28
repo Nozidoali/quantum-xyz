@@ -15,3 +15,5 @@ num_qubits = 4
 state = QState(D_state(num_qubits, 1), num_qubits)
 
 print(state)
+
+SparseStateSynthesis(state).run()

@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
 
-'''
+"""
 Author: Hanyu Wang
 Created time: 2023-06-28 10:50:44
 Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 10:53:40
-'''
+"""
 
 import numpy as np
-from Algorithms.Synthesis.QState.QStateBase import np
 from .QStateFramed import *
+
 
 def quantize(state_array: np.ndarray, num_qubits: int) -> np.ndarray:
     """
@@ -32,10 +32,8 @@ def quantize(state_array: np.ndarray, num_qubits: int) -> np.ndarray:
 
     return quantized_states
 
-class QStateQuantized(QStateFramed):
-    
-    def __init__(self, state_array: np.ndarray, num_qubits: int) -> None:
 
+class QStateQuantized(QStateFramed):
+    def __init__(self, state_array: np.ndarray, num_qubits: int) -> None:
         quantized_state_array = quantize(state_array, num_qubits)
         QStateFramed.__init__(self, quantized_state_array, num_qubits)
-
