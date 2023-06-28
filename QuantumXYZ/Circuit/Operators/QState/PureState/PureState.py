@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-06-28 11:55:00
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-28 13:13:28
+Last Modified time: 2023-06-28 15:58:57
 '''
 
 class PureState:
@@ -24,6 +24,9 @@ class PureState:
     
     def __hash__(self) -> int:
         return hash(self.state)
+    
+    def __lt__(self, other: object) -> bool:
+        return self.state < other.state
     
     def to_string(self, num_qubits: int = None) -> str:
         if num_qubits is None:

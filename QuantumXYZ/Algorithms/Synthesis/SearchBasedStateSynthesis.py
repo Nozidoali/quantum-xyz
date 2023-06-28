@@ -22,6 +22,7 @@ class SearchBasedStateSynthesis(StateSynthesisBase):
         self.visited_states = set()
         self.state_queue = PriorityQueue()
         self.enquened_states = {}
+        self.record = {}
 
     def run(self) -> None:
         raise NotImplementedError
@@ -44,6 +45,21 @@ class SearchBasedStateSynthesis(StateSynthesisBase):
         self.visited_states.clear()
         self.state_queue = PriorityQueue()
         self.enquened_states.clear()
+        self.record.clear()
+
+    def record_operation(self, state_before: QState, op: QOperator, state_after: QState) -> None:
+        self.record[state_after] = state_before, op
 
     def search_done(self) -> bool:
         return self.state_queue.empty()
+
+    def backtrace_state(self, state: QState):
+
+        curr_state = state
+        while curr_state in self.record:
+            prev_state, op = self.record[curr_state]
+            yield prev_state, op
+            curr_state = prev_state
+
+    def is_visited(self, state: QState):
+        return state in self.visited_states

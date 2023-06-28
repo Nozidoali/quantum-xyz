@@ -15,7 +15,8 @@ class QuantizedRotationType(Enum):
     SWAP = auto()
     MERGE0 = auto()
     MERGE1 = auto()
-    SPLIT = auto()
+    SPLIT0 = auto()
+    SPLIT1 = auto()
 
 
 class QuantizedRotation:

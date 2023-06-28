@@ -35,7 +35,38 @@ class QStateBase:
         return 
     
     def __lt__(self, other: Any) -> bool:
+        sorted_self = sorted(self.state_array)
+        sorted_other = sorted(other.state_array)
+        for i in range(len(sorted_other)):
+            if i >= len(sorted_self):
+                return True
+            if sorted_self[i] < sorted_other[i]:
+                return True
+            elif sorted_self[i] > sorted_other[i]:
+                return False
+        
         return False
     
     def __iter__(self) -> Any:
         return self.state_array.__iter__()
+    
+    def __eq__(self, __value: object) -> bool:
+
+        if not isinstance(__value, QStateBase):
+            return False
+
+        if len(self) != len(__value):
+            return False    
+
+        sorted_self = sorted(self.state_array)
+        sorted_other = sorted(__value.state_array)
+
+        for i in range(len(self)):
+            if sorted_self[i] != sorted_other[i]:
+                return False
+            
+        return True
+    
+    def __hash__(self) -> int:
+        sorted_self = sorted(self.state_array)
+        return hash(tuple(sorted_self))

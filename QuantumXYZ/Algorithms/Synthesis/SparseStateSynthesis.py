@@ -29,11 +29,14 @@ class SparseStateSynthesis(SearchBasedStateSynthesis):
         """
          @brief Runs the Bayesian network. This is the main loop of the Bayesian network. It will loop until there is nothing left to do
         """
+        
+        transitions = QTransition(self.num_qubits)
+
         curr_state = self.target_state
         # This function is called by the search loop.
         while True:
             print(f"remaining ones: {len(curr_state)}")
-            # If there is only one state in the current state we can t break.
+
             if len(curr_state) == 1:
                 break
             prev_ones = len(curr_state)
@@ -41,7 +44,6 @@ class SparseStateSynthesis(SearchBasedStateSynthesis):
             self.init_search()
             self.add_state(curr_state, cost=0)
 
-            # This method is called by the search loop.
             while not self.search_done():
                 curr_cost, curr_state = self.state_queue.get()
                 self.visit(curr_state)
@@ -52,15 +54,32 @@ class SparseStateSynthesis(SearchBasedStateSynthesis):
                     break
 
                 # Add next state to the list of states.
-                for next_state in self.get_next_states(curr_state):
-                    self.add_state(next_state, cost=curr_cost + 1)
+                for operator in self.get_ops(curr_state):
 
-    def get_next_states(self, state: QState):
-        """
-         @brief Generate the next possible states given a current state. @param state The current state. @return A generator that yields the next possible states
-         @param state
-        """
+                    try:
+                        next_state = operator(curr_state)
+                        cost = operator.get_cost()
+                        success = self.add_state(next_state, cost=curr_cost + cost)
+                        
+                        if success:
+                            self.record_operation(curr_state, operator, next_state)
+                    except:
+                        continue
+            
+            assert self.is_visited(curr_state)
+
+            curr_transitions = QTransition(self.num_qubits)
+            state_before = curr_state
+            for state, op in self.backtrace_state(state_before):
+                print(f"state: {state}, cost = {op.get_cost()}, state_before: {state_before}")
+                curr_transitions.add_transition_to_back(state_before, ~op, state)
+                state_before = state
         
+            transitions = curr_transitions + transitions
+        
+        return transitions
+
+    def get_ops(self, state: QState):
         # yields the state of the pivot qubit.
         for pivot_qubit_index in range(self.num_qubits):
 
@@ -75,6 +94,8 @@ class SparseStateSynthesis(SearchBasedStateSynthesis):
                     control_qubit_phases=[],
                 )
                 
+                yield op
+
                 # Yields the state of the current state of the MCRY operator.
                 for control_qubit_index in range(self.num_qubits):
 
@@ -92,8 +113,4 @@ class SparseStateSynthesis(SearchBasedStateSynthesis):
                             control_qubit_phases=[control_qubit_phase],
                         )
 
-                        try:
-                            yield op(state)
-
-                        except Exception as e:
-                            pass
+                        yield op

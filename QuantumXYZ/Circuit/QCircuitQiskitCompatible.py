@@ -20,7 +20,7 @@ class QCircuitQiskitCompatible(QCircuitBase):
     def __init__(self) -> None:
         super().__init__()
 
-    def to_qiskit(self, with_measurement: bool = False) -> QuantumCircuit:
+    def to_qiskit(self, with_measurement: bool = True) -> QuantumCircuit:
         num_qubits = self.get_num_qubits()
 
         qr = QuantumRegister(num_qubits)
