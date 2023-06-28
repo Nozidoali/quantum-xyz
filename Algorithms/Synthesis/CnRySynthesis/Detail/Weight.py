@@ -21,6 +21,7 @@ class WeightTracer:
         self.weights = np.zeros(1 << num_qubits)
         self.mrcy_gates = []
         self.circuit = QCircuit(num_qubits)
+        self.circuit.set_mapping(False)
 
         for state in initial_state:
             self.weights[state] = 1

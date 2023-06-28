@@ -8,5 +8,5 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-25 12:59:39
 """
 
-from .CNRY import *
-from .SolverImpl import *
+from .SparseStateSynthesis import *
+from .CnRySynthesis import *
