@@ -42,7 +42,7 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
             prev_ones = len(curr_state)
 
             self.init_search()
-            self.add_state(curr_state, cost=0)
+            self.add_state(curr_state, cost=self.get_lower_bound(curr_state))
 
             while not self.search_done():
                 curr_cost, curr_state = self.state_queue.get()
@@ -58,7 +58,9 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
                     try:
                         next_state = operator(curr_state)
                         cost = operator.get_cost()
-                        success = self.add_state(next_state, cost=curr_cost + cost)
+                        astar_cost = self.get_lower_bound(next_state)
+                        next_cost = curr_cost + cost + astar_cost
+                        success = self.add_state(next_state, cost=next_cost)
 
                         if success:
                             self.record_operation(curr_state, operator, next_state)
@@ -66,6 +68,7 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
                         continue
 
             assert self.is_visited(curr_state)
+            assert len(curr_state) < prev_ones
 
             curr_transitions = QTransition(self.num_qubits)
             state_before = curr_state

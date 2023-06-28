@@ -72,8 +72,6 @@ def map_mcry(gate: QGate) -> List[QGate]:
 
     gates = control_sequence_to_gates(control_sequence, control_qubits, target_qubit)
 
-    for gate in gates:
-        print(f"Generated gate: {gate}")
 
     return gates
 

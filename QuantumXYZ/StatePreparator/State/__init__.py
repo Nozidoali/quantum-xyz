@@ -11,3 +11,4 @@ Last Modified time: 2023-06-25 12:04:43
 from .W import *
 from .D import *
 from .GHZ import *
+from .C import *

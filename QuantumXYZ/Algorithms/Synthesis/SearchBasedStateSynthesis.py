@@ -64,7 +64,15 @@ class SearchBasedStateSynthesis(StateSynthesisBase):
 
     def is_visited(self, state: QState):
         return state in self.visited_states
-
+    
+    def get_lower_bound(self, state: QState) -> int:
+        """
+        Get the lower bound for a given state in a QState object.
+        @param state - the state for which to calculate the lower bound
+        @return The lower bound as an integer
+        """
+        return 0
+    
     def get_ops(self, state: QState):
         # yields the state of the pivot qubit.
         for pivot_qubit_index in range(self.num_qubits):

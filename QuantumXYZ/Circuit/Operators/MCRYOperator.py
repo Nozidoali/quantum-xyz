@@ -65,9 +65,9 @@ class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):
 
     def get_cost(self) -> int:
         num_controls: int = len(self.control_qubit_indices)
-        if num_controls is 0:
+        if num_controls == 0:
             return 0
-        elif num_controls is 1 and self.rotation_type is QuantizedRotationType.SWAP:
+        elif num_controls == 1 and self.rotation_type == QuantizedRotationType.SWAP:
             return 1
         else:
             return 1 << (num_controls)
