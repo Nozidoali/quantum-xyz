@@ -29,14 +29,13 @@ class QStateFramed(QStateBase):
                 if (int(pure_state) >> pivot_qubit) & 1 == 1:
                     num_ones += 1
             one_count[pivot_qubit] = num_ones
-        
+
         return one_count
-    
+
     def num_supports(self) -> int:
         num_supports = 0
 
         for pivot_qubit in range(self.num_qubits):
-
             array = list(self.state_array)
 
             curr_value = (int(array[0]) >> pivot_qubit) & 1
@@ -45,5 +44,5 @@ class QStateFramed(QStateBase):
                 if (int(pure_state) >> pivot_qubit) & 1 != curr_value:
                     num_supports += 1
                     break
-        
+
         return num_supports

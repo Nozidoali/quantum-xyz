@@ -48,18 +48,18 @@ def get_representative(
                 if (int(pure_state) >> pivot_qubit) & 1 == 1:
                     num_ones += 1
             one_count.append((num_ones, pivot_qubit))
-        
+
         one_count.sort(reverse=True)
 
         new_state = QState([], num_qubits)
         for pure_state in curr_state:
             new_idx = 0
-            
+
             i = 0
             for num_ones, pivot_qubit in one_count:
                 new_idx |= ((int(pure_state) >> pivot_qubit) & 1) << i
                 i += 1
-            
+
             new_state.add_pure_state(PureState(new_idx))
         return new_state, transitions
 
@@ -94,7 +94,7 @@ class CanonicalStateSynthesis(SearchBasedStateSynthesis):
     def is_visited(self, state: QState):
         state_repr, _ = get_representative(state, self.num_qubits)
         return state_repr in self.visited_states
-    
+
     def get_lower_bound(self, state: QState) -> int:
         """
         Get the lower bound for a given state in a QState object.
@@ -104,14 +104,14 @@ class CanonicalStateSynthesis(SearchBasedStateSynthesis):
         return state.num_supports()
 
     def get_ops(self, state: QState):
-
         one_counts = state.count_ones()
 
         # yields the state of the pivot qubit.
         for pivot_qubit_index in range(self.num_qubits):
-
             # this qubit is a dont care qubit.
-            if one_counts[pivot_qubit_index] == 0 or one_counts[pivot_qubit_index] == len(state):
+            if one_counts[pivot_qubit_index] == 0 or one_counts[
+                pivot_qubit_index
+            ] == len(state):
                 continue
 
             # yields the rotation state of the current state.
