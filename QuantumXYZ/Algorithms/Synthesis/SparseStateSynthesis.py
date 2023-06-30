@@ -36,6 +36,8 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
         while True:
             print(f"remaining ones: {len(curr_state)}")
 
+            print(f"curr_state: \n{curr_state}")
+
             if len(curr_state) == 1:
                 break
 

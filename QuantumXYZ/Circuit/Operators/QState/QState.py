@@ -10,14 +10,13 @@ Last Modified time: 2023-06-28 11:15:29
 
 from typing import Any
 import numpy as np
-from .QStateQuantized import *
+from .QStateCanonical import *
 
-
-class QState(QStateQuantized):
+class QState(QStateCanonical):
     def __init__(
         self, state_array: np.ndarray, num_qubits: int, is_quantized: bool = True
     ) -> None:
-        QStateQuantized.__init__(self, state_array, num_qubits, is_quantized)
+        QStateCanonical.__init__(self, state_array, num_qubits, is_quantized)
 
     def copy(self) -> Any:
         state_array = [int(x) for x in self.state_array]

@@ -8,10 +8,9 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 10:57:47
 """
 
-import numpy as np
 from .QStateBase import *
 from typing import List
-
+import numpy as np
 
 class QStateFramed(QStateBase):
     def __init__(self, state_array: List[PureState], num_qubits: int) -> None:
