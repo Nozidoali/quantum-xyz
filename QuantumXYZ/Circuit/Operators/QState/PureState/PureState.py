@@ -45,3 +45,7 @@ class PureState:
 
     def count_ones(self) -> int:
         return bin(self.state).count("1")
+    
+def find_first_diff_qubit_index(state1: PureState, state2: PureState):
+
+    return (state1.state ^ state2.state).bit_length() - 1

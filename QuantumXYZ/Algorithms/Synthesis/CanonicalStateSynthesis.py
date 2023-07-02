@@ -13,6 +13,9 @@ from .SearchBasedStateSynthesis import *
 
 from typing import List, Tuple
 
+class CanonicalizationParams:
+    run_once: bool = True
+    use_swap: bool = True
 
 def get_representative(
     state: QState, num_qubits: int, enable_swap: bool = True, verbose: bool = False
@@ -47,18 +50,7 @@ def get_representative(
 
         prev_state = curr_state.copy()
 
-        for pivot_qubit in range(num_qubits):
-            op = XOperator(pivot_qubit)
-            x_state = op(curr_state)
-
-            if x_state < curr_state:
-                transitions.add_transition_to_front(x_state, op, curr_state)
-                curr_state = x_state
-
-        if verbose:
-            print(f"after X, prev_state = \n{prev_state}\n, curr_state = \n{curr_state}\n")
-
-        if enable_swap:
+        if CanonicalizationParams.use_swap:
             column_values_dict = {pivot_qubit:0 for pivot_qubit in range(num_qubits)}
 
             sorted_state_array = curr_state.get_sorted_state_array(
@@ -96,7 +88,16 @@ def get_representative(
 
             curr_state = new_state
 
-        if curr_state == prev_state:
+
+        for pivot_qubit in range(num_qubits):
+            op = XOperator(pivot_qubit)
+            x_state = op(curr_state)
+
+            if x_state < curr_state:
+                transitions.add_transition_to_front(x_state, op, curr_state)
+                curr_state = x_state
+
+        if CanonicalizationParams.run_once or curr_state == prev_state:
             break
 
     return curr_state, transitions

@@ -19,7 +19,7 @@ class QTransitionQuantized(QTransitionBase):
     def __init__(self, num_qubits: int) -> None:
         QTransitionBase.__init__(self, num_qubits)
 
-    def recover_circuit(self, _weights: List[float]) -> QCircuit:
+    def recover_circuit(self, _weights: List[float], verbose: bool = False) -> QCircuit:
         circuit = QCircuit(self.num_qubits)
 
         # first we assign the weights to the last state
@@ -69,7 +69,8 @@ class QTransitionQuantized(QTransitionBase):
                 else:
                     thetas = {}
 
-                    print(f"state_before: {state_before}, state_after: {state_after}")
+                    if verbose:
+                        print(f"state_before: {state_before}, state_after: {state_after}")
 
                     pure_state: PureState
                     for pure_state in state_before:
@@ -106,15 +107,13 @@ class QTransitionQuantized(QTransitionBase):
                         if len(thetas) == 2:
                             state1, state2 = list(thetas.values())
 
-                            decision_variable: int = int(
-                                np.floor(np.log2(state1 ^ state2))
-                            )
+                            decision_variable: int = find_first_diff_qubit_index(state1, state2)
 
                             phase1 = (int(state1) >> decision_variable) & 1
                             phase2 = (int(state2) >> decision_variable) & 1
 
                             control_qubits.append(
-                                self.circuit.qubit_at(decision_variable)
+                                circuit.qubit_at(decision_variable)
                             )
 
                             phases1 = phases + [phase1]

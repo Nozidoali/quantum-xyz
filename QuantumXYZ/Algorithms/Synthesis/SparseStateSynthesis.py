@@ -14,6 +14,8 @@ from QuantumXYZ import *
 
 from typing import List
 
+class SparseStateSynthesisParams:
+    enable_step_by_step: bool = True
 
 class SparseStateSynthesis(CanonicalStateSynthesis):
     def __init__(self, target_state: QState) -> None:
@@ -24,7 +26,7 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
         """
         CanonicalStateSynthesis.__init__(self, target_state)
 
-    def run(self) -> None:
+    def run(self, verbose: bool = False) -> None:
         """
         @brief Runs the Bayesian network. This is the main loop of the Bayesian network. It will loop until there is nothing left to do
         """
@@ -38,7 +40,8 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
         while True:
             print(f"remaining ones: {len(curr_state)}")
 
-            print(f"curr_state: \n{curr_state}")
+            if verbose:
+                print(f"curr_state: \n{curr_state}")
 
             if len(curr_state) == 1:
                 break
@@ -59,8 +62,8 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
                     # we have found a better state
                     break
 
-                # if len(curr_state) < prev_ones:
-                #     break
+                if SparseStateSynthesisParams.enable_step_by_step and len(curr_state) < prev_ones:
+                    break
 
                 # Add next state to the list of states.
                 for operator in self.get_ops(curr_state):
@@ -69,7 +72,8 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
                         cost = operator.get_cost()
                         curr_astar_cost = self.get_lower_bound(curr_state)
                         astar_cost = self.get_lower_bound(next_state)
-                        next_cost = curr_cost + cost + astar_cost - curr_astar_cost
+                        # next_cost = curr_cost + cost + astar_cost - curr_astar_cost
+                        next_cost = curr_cost + cost + astar_cost
                         success = self.add_state(next_state, cost=next_cost)
 
                         if success:
@@ -80,21 +84,24 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
             assert self.is_visited(curr_state)
             assert len(curr_state) < prev_ones
 
-            print(f"num_visited_states: {num_visited_states}")
-            
-            state_index: int = 0
-            for state in self.enquened_states:
-                state_index += 1
-                canonical_state, _ = get_representative(state, self.num_qubits)
-                state_cost = self.enquened_states[state] - self.get_lower_bound(state)
-                print(f"state{state_index}, cost = {state_cost}: \n{canonical_state}")
+            if verbose:
+                print(f"num_visited_states: {num_visited_states}")
+                
+                state_index: int = 0
+                for state in self.enquened_states:
+                    state_index += 1
+                    canonical_state, _ = get_representative(state, self.num_qubits)
+                    state_cost = self.enquened_states[state] - self.get_lower_bound(state)
+                    print(f"state{state_index}, cost = {state_cost}: \n{canonical_state}")
             
             curr_transitions = QTransition(self.num_qubits)
             state_before = curr_state
             for state, op in self.backtrace_state(state_before):
-                print(
-                    f"state: \n{state}\n\t, op = {op}, cost = {op.get_cost()}, state_before: {state_before}"
-                )
+
+                if verbose:
+                    print(
+                        f"state: \n{state}\n\t, op = {op}, cost = {op.get_cost()}, state_before: {state_before}"
+                    )
                 curr_transitions.add_transition_to_back(state_before, ~op, state)
                 state_before = state
 
