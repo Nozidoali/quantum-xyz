@@ -72,6 +72,11 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
                         cost = operator.get_cost()
                         curr_astar_cost = self.get_lower_bound(curr_state)
                         astar_cost = self.get_lower_bound(next_state)
+
+                        # This is buggy here, the correct function is shown below.
+                        # However, the correct function is not working as good as this one.
+                        # This is probably because we need to use MCRY instead of CNRY, and the cost function is incorrect.
+                        #
                         # next_cost = curr_cost + cost + astar_cost - curr_astar_cost
                         next_cost = curr_cost + cost + astar_cost
                         success = self.add_state(next_state, cost=next_cost)
