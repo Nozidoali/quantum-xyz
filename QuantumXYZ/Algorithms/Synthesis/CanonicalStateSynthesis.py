@@ -15,7 +15,7 @@ from typing import List, Tuple
 
 
 def get_representative(
-    state: QState, num_qubits: int, enable_swap: bool = True
+    state: QState, num_qubits: int, enable_swap: bool = True, verbose: bool = False
 ) -> Tuple[QState, List[QOperator]]:
     """
     Given a quantum state and the number of qubits, find a representative state and a list of quantum operators that transform the initial state to the representative state.
@@ -30,38 +30,74 @@ def get_representative(
         return state, []
 
     curr_state = state.copy()
+    prev_state = None
     transitions = QTransition(num_qubits)
 
-    for pivot_qubit in range(num_qubits):
-        op = XOperator(pivot_qubit)
-        x_state = op(curr_state)
+    counter: int = 0
 
-        if x_state < curr_state:
-            transitions.add_transition_to_front(x_state, op, curr_state)
-            curr_state = x_state
+    while True:
 
-    if enable_swap:
-        one_count = []
+        counter += 1
+        if counter > 100:
+            print(f"counter > 100, prev_state = \n{prev_state}\n, curr_state = \n{curr_state}\n")
+            exit(0)
+
+        if verbose:
+            print(f"prev_state = \n{prev_state}\n, curr_state = \n{curr_state}\n")
+
+        prev_state = curr_state.copy()
+
         for pivot_qubit in range(num_qubits):
-            num_ones: int = 0
+            op = XOperator(pivot_qubit)
+            x_state = op(curr_state)
+
+            if x_state < curr_state:
+                transitions.add_transition_to_front(x_state, op, curr_state)
+                curr_state = x_state
+
+        if verbose:
+            print(f"after X, prev_state = \n{prev_state}\n, curr_state = \n{curr_state}\n")
+
+        if enable_swap:
+            column_values_dict = {pivot_qubit:0 for pivot_qubit in range(num_qubits)}
+
+            sorted_state_array = curr_state.get_sorted_state_array(
+                key=lambda x: (x.count_ones(), x),
+                reverse=True)
+            for i, pure_state in enumerate(sorted_state_array):
+                if verbose:
+                    print(f"i = {i}, pure_state = {pure_state}")
+                for pivot_qubit in range(num_qubits):
+                    column_values_dict[pivot_qubit] += ((int(pure_state) >> pivot_qubit) & 1) << i
+
+            column_values = []
+            for pivot_qubit in range(num_qubits):
+                if verbose:
+                    print(f"pivot_qubit = {pivot_qubit}, column_values_dict[pivot_qubit] = {column_values_dict[pivot_qubit]:b}")
+                column_values.append((column_values_dict[pivot_qubit], pivot_qubit))
+
+            column_values.sort(reverse=True)
+
+            if verbose:
+                print(f"column_values = {column_values}")
+
+            new_state = QState([], num_qubits)
             for pure_state in curr_state:
-                if (int(pure_state) >> pivot_qubit) & 1 == 1:
-                    num_ones += 1
-            one_count.append((num_ones, pivot_qubit))
+                new_idx = 0
 
-        one_count.sort(reverse=True)
+                i = 0
+                for num_ones, pivot_qubit in column_values:
+                    new_idx |= ((int(pure_state) >> pivot_qubit) & 1) << i
+                    i += 1
 
-        new_state = QState([], num_qubits)
-        for pure_state in curr_state:
-            new_idx = 0
+                if verbose:
+                    print(f"pure_state = {pure_state}, new_idx = {new_idx}")
+                new_state.add_pure_state(PureState(new_idx))
 
-            i = 0
-            for num_ones, pivot_qubit in one_count:
-                new_idx |= ((int(pure_state) >> pivot_qubit) & 1) << i
-                i += 1
+            curr_state = new_state
 
-            new_state.add_pure_state(PureState(new_idx))
-        return new_state, transitions
+        if curr_state == prev_state:
+            break
 
     return curr_state, transitions
 

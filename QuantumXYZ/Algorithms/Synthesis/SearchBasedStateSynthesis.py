@@ -52,6 +52,12 @@ class SearchBasedStateSynthesis(StateSynthesisBase):
     ) -> None:
         self.record[state_after] = state_before, op
 
+    def get_prev_state(self, state: QState) -> QState:
+        try:
+            return self.record[state][0]
+        except:
+            return None
+
     def search_done(self) -> bool:
         return self.state_queue.empty()
 

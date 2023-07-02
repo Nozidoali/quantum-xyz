@@ -42,3 +42,6 @@ class PureState:
 
     def set1(self, index: int) -> None:
         return PureState(self.state | (1 << index))
+
+    def count_ones(self) -> int:
+        return bin(self.state).count("1")

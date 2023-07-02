@@ -9,7 +9,7 @@ Last Modified time: 2023-06-28 11:14:34
 """
 
 import numpy as np
-from typing import Any
+from typing import Any, List
 from .PureState import *
 
 
@@ -48,7 +48,11 @@ class QStateBase:
         return False
 
     def __iter__(self) -> Any:
-        return self.state_array.__iter__()
+        sorted_self = sorted(list(self.state_array))
+        return sorted_self.__iter__()
+    
+    def get_sorted_state_array(self, key, reverse: bool = False) -> List[PureState]:
+        return sorted(list(self.state_array), key=key, reverse=reverse)
 
     def __eq__(self, __value: object) -> bool:
         if not isinstance(__value, QStateBase):
