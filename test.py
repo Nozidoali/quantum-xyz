@@ -9,6 +9,6 @@ state = QState(
 )
 
 
-canonical_state, _ = get_representative(state, 3, True, True)
+canonical_state = canonicalize(state)
 
-print(str(canonical_state))
+print(canonical_state)

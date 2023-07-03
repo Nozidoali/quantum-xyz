@@ -10,3 +10,4 @@ Last Modified time: 2023-06-25 12:59:39
 
 from .SparseStateSynthesis import *
 from .CnRySynthesis import *
+from .Canonical import *

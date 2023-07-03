@@ -45,3 +45,6 @@ class QStateFramed(QStateBase):
                     break
 
         return num_supports
+    
+    def get_num_qubits(self) -> int:
+        return self.num_qubits

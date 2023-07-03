@@ -15,7 +15,16 @@ from .PureState import *
 
 class QStateBase:
     def __init__(self, state_array: np.ndarray = []) -> None:
-        self.state_array: set = set([PureState(x) for x in state_array])
+        if len(state_array) == 0:
+            self.state_array: set = set()
+            return
+        assert len(state_array) > 0
+        first_state = list(state_array)[0]
+        if isinstance(first_state, PureState):
+            self.state_array: set = set(state_array)
+        else:
+            assert isinstance(first_state, int)
+            self.state_array: set = set([PureState(x) for x in state_array])
 
     def __str__(self) -> str:
         return "-".join([f"{x:b}" for x in self.state_array])
@@ -51,7 +60,7 @@ class QStateBase:
         sorted_self = sorted(list(self.state_array))
         return sorted_self.__iter__()
     
-    def get_sorted_state_array(self, key, reverse: bool = False) -> List[PureState]:
+    def get_sorted_state_array(self, key = None, reverse: bool = False) -> List[PureState]:
         return sorted(list(self.state_array), key=key, reverse=reverse)
 
     def __eq__(self, __value: object) -> bool:
