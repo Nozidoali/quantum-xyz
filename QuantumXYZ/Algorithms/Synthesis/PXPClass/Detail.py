@@ -15,7 +15,7 @@ def get_representative(
 
     @param state - the initial quantum state
     @param num_qubits - the number of qubits
-    @return A tuple containing the representative state and a list of quantum operators
+    @return A tuple containing the representative state and a list of quantum operators, in the class of the QTransition class.
     """
     if num_qubits == 0:
         return state, []
@@ -81,6 +81,9 @@ def get_representative(
             op = XOperator(pivot_qubit)
             x_state = op(curr_state)
 
+            # This is problematic.
+            # Because basically we might be able to find a better state if we flip multiple qubits.
+            # However, this method now only allow us to find the solution that can be found by flipping one qubit.
             if x_state < curr_state:
                 transitions.add_transition_to_front(x_state, op, curr_state)
                 curr_state = x_state
