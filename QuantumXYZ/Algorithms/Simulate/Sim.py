@@ -9,9 +9,16 @@ Last Modified time: 2023-06-22 20:08:00
 """
 
 from QuantumXYZ.Circuit import *
+from typing import List, Any
 
+def simulate(circuit: QCircuit):
+    if not isinstance(circuit, QCircuit):
+        simulator = Aer.get_backend("qasm_simulator")
+        result = execute(circuit, backend=simulator, shots=2**14).result()
+        return result.get_counts(circuit)
 
-def simulate(circuit):
-    simulator = Aer.get_backend("qasm_simulator")
-    result = execute(circuit, backend=simulator, shots=2**14).result()
-    return result.get_counts(circuit)
+    else:
+        circ = circuit.to_qiskit_circuit()
+        simulator = Aer.get_backend("qasm_simulator")
+        result = execute(circ, backend=simulator, shots=2**14).result()
+        return result.get_counts(circ)
