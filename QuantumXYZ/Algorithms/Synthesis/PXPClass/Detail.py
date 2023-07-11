@@ -2,7 +2,7 @@ from QuantumXYZ.Circuit import *
 from typing import List, Tuple
 
 class CanonicalizationParams:
-    run_once: bool = True
+    run_once: bool = False
     use_swap: bool = True
 
 def get_representative(
@@ -17,8 +17,10 @@ def get_representative(
     @param num_qubits - the number of qubits
     @return A tuple containing the representative state and a list of quantum operators, in the class of the QTransition class.
     """
+    
+    # if the state is empty, return the empty state.
     if num_qubits == 0:
-        return state, []
+        return state, None
 
     curr_state = state.copy()
     prev_state = None
@@ -38,7 +40,7 @@ def get_representative(
 
         prev_state = curr_state.copy()
 
-        if CanonicalizationParams.use_swap:
+        if CanonicalizationParams.use_swap and enable_swap:
             column_values_dict = {pivot_qubit:0 for pivot_qubit in range(num_qubits)}
 
             sorted_state_array = curr_state.get_sorted_state_array(
@@ -76,19 +78,40 @@ def get_representative(
 
             curr_state = new_state
 
-
-        for pivot_qubit in range(num_qubits):
-            op = XOperator(pivot_qubit)
-            x_state = op(curr_state)
+        # we need to exhaustively try all the possible flips
+        original_state = curr_state.copy()
+        best_state = curr_state.copy()
+        best_x_index = 0 # 0 means nothing is flipped.
+        
+        for x_index in range(1<<num_qubits):
+            
+            curr_state = original_state.copy()
+            for pivot_qubit in range(num_qubits):
+                qubit_is_flipped = ((x_index >> pivot_qubit) & 1) == 1
+                
+                if qubit_is_flipped:
+                    op = XOperator(pivot_qubit)
+                    curr_state = op(curr_state)
 
             # This is problematic.
             # Because basically we might be able to find a better state if we flip multiple qubits.
             # However, this method now only allow us to find the solution that can be found by flipping one qubit.
-            if x_state < curr_state:
-                transitions.add_transition_to_front(x_state, op, curr_state)
-                curr_state = x_state
+            if curr_state < best_state:
+                # transitions.add_transition_to_front(x_state, op, curr_state)
+                best_state = curr_state.copy()
+                best_x_index = x_index
+        
+        curr_state = original_state.copy()
+        for pivot_qubit in range(num_qubits):
+            qubit_is_flipped = ((best_x_index >> pivot_qubit) & 1) == 1
+            
+            if qubit_is_flipped:
+                op = XOperator(pivot_qubit)
+                new_state = op(curr_state)
+                transitions.add_transition_to_front(new_state, op, curr_state)
+                curr_state = new_state
 
-        if CanonicalizationParams.run_once or curr_state == prev_state:
+        if CanonicalizationParams.run_once or not enable_swap or not CanonicalizationParams.use_swap or curr_state == prev_state:
             break
 
     return curr_state, transitions

@@ -25,12 +25,13 @@ class QTransitionBase:
     def add_transition(
         self, state_before: QState, operator: QOperator, state_after: QState
     ) -> None:
+        if self.num_transitions() == 0:
+            self.__states[0] = state_before
+            
         self.__operators.append(operator)
         self.__states.append(state_after)
 
-        if self.num_transitions == 0:
-            self.__states[0] = state_before
-
+            
     def add_transition_to_front(
         self, state_before: QState, operator: QOperator, state_after: QState
     ) -> None:
@@ -38,7 +39,7 @@ class QTransitionBase:
         self.__states.insert(1, state_after)
 
         self.__states[0] = state_before
-
+        
     def add_transition_to_back(
         self, state_before: QState, operator: QOperator, state_after: QState
     ) -> None:
