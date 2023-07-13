@@ -5,6 +5,7 @@ class CanonicalizationParams:
     run_once: bool = False
     use_swap: bool = True
 
+@call_with_global_timer
 def get_representative(
     state: QState, num_qubits: int, enable_swap: bool = True, verbose: bool = False
 ) -> Tuple[QState, List[QOperator]]:

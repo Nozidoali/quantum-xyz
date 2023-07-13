@@ -1,47 +1,29 @@
 from QuantumXYZ import *
 
-num_qubits: int = 5
+num_qubits: int = 4
 
-state = None
+weighted_state = D_state(num_qubits, 2)
+    
+quantized_state = QState(
+    weighted_state,
+    num_qubits=num_qubits,
+    is_quantized=False
+)
 
-if num_qubits == 3:
-    state = QState(
-        [
-            0b001, 
-            0b010, 
-            0b100, 
-        ], num_qubits, True
-    )
+canonical_state, _ = get_representative(quantized_state, num_qubits)
 
-if num_qubits == 4:
-    state = QState(
-        [
-            0b0001, 
-            0b0010, 
-            0b0100, 
-            0b1000, 
-        ], num_qubits, True
-    )
+with stopwatch("synthesis"):
+    transitions = SparseStateSynthesis(quantized_state).run(verbose=True)
 
-if num_qubits == 5:
-    state = QState(
-        [
-            0b00001, 
-            0b00010, 
-            0b00100, 
-            0b01000, 
-            0b10000, 
-        ], num_qubits, True
-    )
-
-canonical_state, _ = get_representative(state, num_qubits)
-
-transitions = SparseStateSynthesis(state).run(verbose=True)
-
-circuit = transitions.recover_circuit(W_state(num_qubits), verbose=True)
-
+with stopwatch("recover circuit"):
+    circuit = transitions.recover_circuit(weighted_state, verbose=True)
 
 simulation_result = simulate(circuit)
 print(simulation_result)
 
 print(circuit.to_qiskit_circuit())
+
+print(circuit.num_gates(QGateType.CX))
+
+canonicalization_time: float = get_time("get_representative")
+print(f"get representative: {canonicalization_time:0.02f} sec")

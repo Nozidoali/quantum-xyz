@@ -15,7 +15,7 @@ from typing import List
 import subprocess
 
 class SparseStateSynthesisParams:
-    enable_step_by_step: bool = False
+    enable_step_by_step: bool = True
 
 class SparseStateSynthesis(CanonicalStateSynthesis):
     def __init__(self, target_state: QState) -> None:
@@ -118,8 +118,8 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
         )
         assert zero_state == ground_state(self.num_qubits)
 
-        graph = self.export_record()
-        graph.write("search_graph.dot")
-        subprocess.call(["dot", "-Tpng", "search_graph.dot", "-o", "search_graph.png"])
+        # graph = self.export_record()
+        # graph.write("search_graph.dot")
+        # subprocess.call(["dot", "-Tpng", "search_graph.dot", "-o", "search_graph.png"])
         
         return initial_transitions + transitions
