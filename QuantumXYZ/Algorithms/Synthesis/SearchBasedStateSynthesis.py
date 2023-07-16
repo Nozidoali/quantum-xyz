@@ -55,7 +55,7 @@ class SearchBasedStateSynthesis(StateSynthesisBase):
     ) -> None:
         self.record[state_after] = state_before, op
         
-    def export_record(self) -> pgv.AGraph:
+    def export_record(self, use_canonical: bool = False, verbose: bool = False) -> pgv.AGraph:
         """export the search graph
 
         Returns:
@@ -67,7 +67,9 @@ class SearchBasedStateSynthesis(StateSynthesisBase):
         def get_node(state: QState) -> pgv.Node:
             nonlocal state_to_node
             nonlocal graph
-            state, _ = get_representative(state, self.num_qubits, True, True)
+            
+            if use_canonical:
+                state, _ = get_representative(state, self.num_qubits, True, True)
             if state not in state_to_node:
                 graph.add_node(str(state))
                 state_to_node[state] = graph.get_node(str(state))
@@ -82,7 +84,8 @@ class SearchBasedStateSynthesis(StateSynthesisBase):
             node_after = get_node(state_after)
             ndoe_before = get_node(state_before)
             
-            print(f"adding edge {ndoe_before} -> {node_after}")
+            if verbose:
+                print(f"adding edge {ndoe_before} -> {node_after}")
             
             graph.add_edge(ndoe_before, node_after, label = str(op))
         

@@ -1,8 +1,8 @@
 from QuantumXYZ import *
 
-num_qubits: int = 4
+num_qubits: int = 5
 
-weighted_state = D_state(num_qubits, 2)
+weighted_state = D_state(num_qubits, 1)
     
 quantized_state = QState(
     weighted_state,
@@ -16,7 +16,7 @@ with stopwatch("synthesis"):
     transitions = SparseStateSynthesis(quantized_state).run(verbose=True)
 
 with stopwatch("recover circuit"):
-    circuit = transitions.recover_circuit(weighted_state, verbose=True)
+    circuit = transitions.recover_circuit(weighted_state, verbose=False)
 
 simulation_result = simulate(circuit)
 print(simulation_result)

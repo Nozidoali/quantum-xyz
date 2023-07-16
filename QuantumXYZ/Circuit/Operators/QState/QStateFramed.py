@@ -30,6 +30,39 @@ class QStateFramed(QStateBase):
             one_count[pivot_qubit] = num_ones
 
         return one_count
+    
+    def column_at(self, column_index: int, control_phase: bool = True) -> int:
+        ret_val: int = 0
+        for row_index, pure_state in enumerate(self.state_array):
+            phase = ((int(pure_state) >> column_index) & 1) == 1
+            
+            if phase == control_phase:
+                ret_val |= row_index
+            
+        return ret_val
+    
+    def column_count_ones(self, column_index: int) -> int:
+        ret_val: int = 0
+        for row_index, pure_state in enumerate(self.state_array):
+            ret_val += ((int(pure_state) >> column_index) & 1)
+            
+        return ret_val
+    
+    def column_is_mixed(self, column_index: int) -> bool:
+        if len(self.state_array) <= 2:
+            return False
+        prev_val: int = None
+        for pure_state in self.state_array:
+            curr_val = ((int(pure_state) >> column_index) & 1)
+            
+            if prev_val == None:
+                prev_val = curr_val
+            
+            else:
+                if prev_val != curr_val:
+                    return True
+        
+        return False
 
     def num_supports(self) -> int:
         num_supports = 0

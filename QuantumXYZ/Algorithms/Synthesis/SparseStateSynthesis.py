@@ -15,7 +15,7 @@ from typing import List
 import subprocess
 
 class SparseStateSynthesisParams:
-    enable_step_by_step: bool = True
+    enable_step_by_step: bool = False
 
 class SparseStateSynthesis(CanonicalStateSynthesis):
     def __init__(self, target_state: QState) -> None:
@@ -37,11 +37,15 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
         num_visited_states: int = 0
 
         curr_state = self.target_state
+
         # This function is called by the search loop.
+        #
+        # the outer loop stands for the step-by-step searching
+        # the inner while loop is for the bfs searching
         while True:
-            print(f"remaining ones: {len(curr_state)}")
 
             if verbose:
+                print(f"remaining ones: {len(curr_state)}")
                 print(f"curr_state: \n{curr_state}")
 
             if len(curr_state) == 1:
@@ -114,12 +118,14 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
             transitions = curr_transitions + transitions
 
         zero_state, initial_transitions = get_representative(
-            curr_state, self.num_qubits
+            curr_state, self.num_qubits, enable_swap=False
         )
         assert zero_state == ground_state(self.num_qubits)
 
-        # graph = self.export_record()
+        # graph = self.export_record(use_canonical= False, verbose= False)
         # graph.write("search_graph.dot")
         # subprocess.call(["dot", "-Tpng", "search_graph.dot", "-o", "search_graph.png"])
         
+        # here the initial_transitions is the quantized versione
+        # 
         return initial_transitions + transitions

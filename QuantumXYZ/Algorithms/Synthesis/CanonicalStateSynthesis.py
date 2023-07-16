@@ -52,15 +52,9 @@ class CanonicalStateSynthesis(SearchBasedStateSynthesis):
         return state.num_supports()
 
     def get_ops(self, state: QState):
-        one_counts = state.count_ones()
 
         # yields the state of the pivot qubit.
-        for pivot_qubit_index in range(self.num_qubits):
-            # this qubit is a dont care qubit.
-            if one_counts[pivot_qubit_index] == 0 or one_counts[
-                pivot_qubit_index
-            ] == len(state):
-                continue
+        for pivot_qubit_index in get_care_set(state):
 
             # yields the rotation state of the current state.
             for rotation_type in [
@@ -76,21 +70,20 @@ class CanonicalStateSynthesis(SearchBasedStateSynthesis):
                     control_qubit_phases=[],
                 )
 
-                yield op
+                if rotation_type != QuantizedRotationType.SWAP:
+                    yield op
 
                 # Yields the state of the current state of the MCRY operator.
-                for control_qubit_index in range(self.num_qubits):
-                    # If control_qubit_index is pivot_qubit_index control_qubit_index pivot_qubit_index.
-                    if control_qubit_index == pivot_qubit_index:
-                        continue
+                for control_lit in get_controls(state, pivot_qubit_index, rotation_type=rotation_type):
+                    
+                    control_qubit_index = control_lit.control_qubit_index
+                    control_phase = control_lit.control_phase
+                    
+                    op = MCRYOperator(
+                        target_qubit_index=pivot_qubit_index,
+                        rotation_type=rotation_type,
+                        control_qubit_indices=[control_qubit_index],
+                        control_qubit_phases=[control_phase],
+                    )
 
-                    # Yields the state of the current state.
-                    for control_qubit_phase in [False, True]:
-                        op = MCRYOperator(
-                            target_qubit_index=pivot_qubit_index,
-                            rotation_type=rotation_type,
-                            control_qubit_indices=[control_qubit_index],
-                            control_qubit_phases=[control_qubit_phase],
-                        )
-
-                        yield op
+                    yield op
