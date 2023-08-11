@@ -10,7 +10,6 @@ Last Modified time: 2023-06-28 17:21:23
 
 from .operators import QOperator, QState, ground_state
 
-
 class QTransition:
     """Class method to call the transition class ."""
 

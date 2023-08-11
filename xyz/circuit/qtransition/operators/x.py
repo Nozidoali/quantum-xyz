@@ -9,12 +9,20 @@ Last Modified time: 2023-06-28 11:42:30
 """
 
 from typing import Any
-from .QOperatorBase import *
-from .QuantizedRotation import *
-from .qstate import *
+from .operator import QOperatorBase, QOperatorType
+from .rotation import QuantizedRotation, QuantizedRotationType
+from .qstate import QState, PureState
 
 
 class XOperator(QOperatorBase, QuantizedRotation):
+    """Creates an XOperator class with XOperator .
+
+    :param QOperatorBase: [description]
+    :type QOperatorBase: [type]
+    :param QuantizedRotation: [description]
+    :type QuantizedRotation: [type]
+    """
+
     def __init__(
         self,
         target_qubit_index: int,

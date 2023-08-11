@@ -8,14 +8,24 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 11:42:30
 """
 
-from typing import Any
-from .QOperatorBase import *
-from .QuantizedRotation import *
-from .MultiControlledOperator import *
-from .qstate import *
+from typing import Any, List
+from .operator import QOperatorBase, QOperatorType
+from .rotation import QuantizedRotation, QuantizedRotationType
+from .control import MultiControlledOperator
+from .qstate import QState, PureState
 
 
 class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):
+    """Construct a multi - controlledOperator .
+
+    :param QOperatorBase: [description]
+    :type QOperatorBase: [type]
+    :param QuantizedRotation: [description]
+    :type QuantizedRotation: [type]
+    :param MultiControlledOperator: [description]
+    :type MultiControlledOperator: [type]
+    """
+
     def __init__(
         self,
         target_qubit_index: int,
@@ -64,6 +74,11 @@ class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):
         return new_states
 
     def get_cost(self) -> int:
+        """Returns the cost of the gate .
+
+        :return: [description]
+        :rtype: int
+        """
         num_controls: int = len(self.control_qubit_indices)
         if num_controls == 0:
             return 0

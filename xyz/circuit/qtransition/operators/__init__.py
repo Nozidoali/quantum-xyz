@@ -8,7 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 11:23:03
 """
 
-from .QOperatorBase import *
 from .qstate import *
-from .MCRYOperator import *
-from .XOperator import *
+from .mcry import *
+from .x import *
+from .operator import *

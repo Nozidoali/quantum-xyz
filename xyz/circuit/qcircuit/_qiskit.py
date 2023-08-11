@@ -45,7 +45,7 @@ def _to_qiskit(
         nonlocal quantum_registers
         if isinstance(qubit, QBit):
             return quantum_registers[qubit.index]
-        elif isinstance(qubit, list):
+        if isinstance(qubit, list):
             return [quantum_registers[q.index] for q in qubit]
 
     gate: QGate
