@@ -9,8 +9,8 @@ Last Modified time: 2023-06-18 21:47:54
 """
 
 import numpy as np
-from quantum_xyz.Utils import *
-from quantum_xyz.Circuit import *
+from xyz.Utils import *
+from xyz.Circuit import *
 
 
 def apply_control_sequence_to_y(

@@ -13,7 +13,7 @@ from typing import List
 from .Detail import *
 from queue import PriorityQueue
 from .XPClass import *
-from quantum_xyz.Utils import *
+from xyz.Utils import *
 import numpy as np
 
 

@@ -12,7 +12,7 @@ from typing import List
 from .Gates import *
 
 from .QCircuitQiskitCompatible import *
-from quantum_xyz.Utils import *
+from xyz.Utils import *
 
 
 def control_sequence_to_gates(

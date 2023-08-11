@@ -9,7 +9,7 @@ Last Modified time: 2023-06-19 21:27:44
 """
 
 from Algorithms import *
-from quantum_xyz.Utils import *
+from xyz.Utils import *
 
 
 def test_multi_control():

@@ -8,7 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 19:46:24
 """
 
-from quantum_xyz.Circuit import *
+from xyz.Circuit import *
 from .SearchBasedStateSynthesis import *
 
 from typing import List, Tuple

@@ -8,7 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-22 20:08:00
 """
 
-from quantum_xyz.Circuit import *
+from xyz.Circuit import *
 from typing import List, Any
 
 def simulate(circuit: QCircuit):

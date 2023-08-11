@@ -8,7 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 11:17:45
 """
 
-from quantum_xyz.Circuit import *
+from xyz.Circuit import *
 from .StateSynthesisBase import *
 from .PXPClass import *
 
