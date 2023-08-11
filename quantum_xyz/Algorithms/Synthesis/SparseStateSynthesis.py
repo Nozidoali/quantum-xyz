@@ -10,8 +10,9 @@ Last Modified time: 2023-06-28 11:17:55
 
 from typing import Any
 from .CanonicalStateSynthesis import *
-
+from ...Circuit import *
 from typing import List
+import subprocess
 
 class SparseStateSynthesisParams:
     enable_step_by_step: bool = False
@@ -25,9 +26,10 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
         """
         CanonicalStateSynthesis.__init__(self, target_state)
 
-    def run(self, verbose: bool = False) -> None:
+    def run(self, verbose: bool = False) -> QTransition:
         """
-        @brief Runs the Bayesian network. This is the main loop of the Bayesian network. It will loop until there is nothing left to do
+        @brief Runs the search based state synthesis
+        @param verbose Whether to print out the state of the search
         """
 
         transitions = QTransition(self.num_qubits)
@@ -117,4 +119,8 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
         )
         assert zero_state == ground_state(self.num_qubits)
 
+        # graph = self.export_record()
+        # graph.write("search_graph.dot")
+        # subprocess.call(["dot", "-Tpng", "search_graph.dot", "-o", "search_graph.png"])
+        
         return initial_transitions + transitions

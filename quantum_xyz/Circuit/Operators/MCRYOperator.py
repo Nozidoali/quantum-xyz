@@ -74,11 +74,11 @@ class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):
 
     def __str__(self) -> str:
         rotation_str = (
-            "SWAP"
+            "X"
             if self.rotation_type is QuantizedRotationType.SWAP
-            else "MERGE0"
+            else "Y"
             if self.rotation_type is QuantizedRotationType.MERGE0
-            else "MERGE1"
+            else "Y"
         )
         return f"MCRY({self.target_qubit_index}, {rotation_str}, {self.control_qubit_indices}, {self.control_qubit_phases})"
 

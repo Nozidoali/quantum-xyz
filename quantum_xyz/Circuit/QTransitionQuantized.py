@@ -70,7 +70,7 @@ class QTransitionQuantized(QTransitionBase):
                     thetas = {}
 
                     if verbose:
-                        print(f"state_before: {state_before}, state_after: {state_after}")
+                        print(f"state_before: \n{state_before}\n, state_after: \n{state_after}\n")
 
                     pure_state: PureState
                     for pure_state in state_before:

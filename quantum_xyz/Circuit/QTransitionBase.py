@@ -38,7 +38,7 @@ class QTransitionBase:
         self.__states.insert(1, state_after)
 
         self.__states[0] = state_before
-
+        
     def add_transition_to_back(
         self, state_before: QState, operator: QOperator, state_after: QState
     ) -> None:

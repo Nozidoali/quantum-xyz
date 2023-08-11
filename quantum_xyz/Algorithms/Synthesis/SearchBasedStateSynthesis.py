@@ -10,9 +10,12 @@ Last Modified time: 2023-06-28 11:17:45
 
 from quantum_xyz.Circuit import *
 from .StateSynthesisBase import *
+from .PXPClass import *
 
 from queue import PriorityQueue
 from typing import List
+
+import pygraphviz as pgv
 
 
 class SearchBasedStateSynthesis(StateSynthesisBase):
@@ -51,6 +54,39 @@ class SearchBasedStateSynthesis(StateSynthesisBase):
         self, state_before: QState, op: QOperator, state_after: QState
     ) -> None:
         self.record[state_after] = state_before, op
+        
+    def export_record(self) -> pgv.AGraph:
+        """export the search graph
+
+        Returns:
+            pgv.AGraph: the search graph
+        """
+        state_to_node = {}
+        graph = pgv.AGraph(directed=True)
+        
+        def get_node(state: QState) -> pgv.Node:
+            nonlocal state_to_node
+            nonlocal graph
+            state, _ = get_representative(state, self.num_qubits, True, True)
+            if state not in state_to_node:
+                graph.add_node(str(state))
+                state_to_node[state] = graph.get_node(str(state))
+            return state_to_node[state]
+        
+        for state_after in self.record:
+            if state_after is None:
+                continue
+            state_before = self.record[state_after][0]
+            op = self.record[state_after][1]
+            
+            node_after = get_node(state_after)
+            ndoe_before = get_node(state_before)
+            
+            print(f"adding edge {ndoe_before} -> {node_after}")
+            
+            graph.add_edge(ndoe_before, node_after, label = str(op))
+        
+        return graph
 
     def get_prev_state(self, state: QState) -> QState:
         try:
