@@ -1,4 +1,4 @@
-from quantum_xyz.Circuit import *
+from QuantumXYZ.Circuit import *
 from typing import List, Tuple
 
 class CanonicalizationParams:
