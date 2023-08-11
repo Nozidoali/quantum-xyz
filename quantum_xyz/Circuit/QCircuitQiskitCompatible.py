@@ -14,19 +14,24 @@ from .Qiskit import *
 
 from qiskit.circuit.library.standard_gates import *
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
+from qiskit_experiments.library import StateTomography
+from qiskit.quantum_info import state_fidelity
 
 
 class QCircuitQiskitCompatible(QCircuitBase):
     def __init__(self) -> None:
         super().__init__()
 
-    def to_qiskit(self, with_measurement: bool = True) -> QuantumCircuit:
+    def to_qiskit(self, with_measurement: bool = True, with_tomography: bool = False) -> QuantumCircuit:
         num_qubits = self.get_num_qubits()
 
         qr = QuantumRegister(num_qubits)
         cr = ClassicalRegister(num_qubits)
 
-        circuit = QuantumCircuit(qr, cr)
+        if not with_tomography:
+            circuit = QuantumCircuit(qr, cr)
+        else:
+            circuit = QuantumCircuit(qr)
 
         def map(qubit: QBit | List[QBit]):
             nonlocal qr
@@ -69,5 +74,9 @@ class QCircuitQiskitCompatible(QCircuitBase):
 
         if with_measurement:
             circuit.measure(qr, cr)
+            return circuit
+
+        if with_tomography:
+            return circuit
 
         return circuit

@@ -5,10 +5,10 @@
 Author: Hanyu Wang
 Created time: 2023-07-03 13:48:49
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-07-03 14:24:04
+Last Modified time: 2023-08-11 22:17:45
 '''
 
-from QuantumXYZ.Circuit import *
+from quantum_xyz.Circuit import *
 from .StateGraph import *
 
 def canonicalize(state: QState) -> QState:

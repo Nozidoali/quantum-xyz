@@ -9,7 +9,7 @@ Last Modified time: 2023-06-19 19:21:13
 """
 
 from Algorithms import *
-from QuantumXYZ.Utils import *
+from quantum_xyz.Utils import *
 
 import random
 

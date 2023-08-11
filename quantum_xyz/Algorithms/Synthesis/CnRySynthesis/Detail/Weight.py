@@ -12,7 +12,7 @@ import numpy as np
 
 from typing import List
 from .CnRyMove import *
-from QuantumXYZ.Circuit import *
+from quantum_xyz.Circuit import *
 
 
 class WeightTracer:

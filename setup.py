@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name="quantum-xyz",
     version="0.1.0",
-    packages=find_packages(include=["QuantumXYZ", "QuantumXYZ.*"]),
+    packages=find_packages(include=["quantum_xyz", "quantum_xyz.*"]),
     install_requires=["""
                             llist==0.7.1
                             matplotlib==3.7.1

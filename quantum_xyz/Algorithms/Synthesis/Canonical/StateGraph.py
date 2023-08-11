@@ -5,10 +5,10 @@
 Author: Hanyu Wang
 Created time: 2023-07-03 10:06:02
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-07-03 14:20:13
+Last Modified time: 2023-08-11 22:17:45
 '''
 
-from QuantumXYZ.Circuit import *
+from quantum_xyz.Circuit import *
 
 class StateGraph:
 

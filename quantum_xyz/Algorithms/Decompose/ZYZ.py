@@ -10,8 +10,8 @@ Last Modified time: 2023-06-18 23:01:09
 
 import numpy as np
 from numpy.linalg import det
-from QuantumXYZ.Circuit import QCircuit
-from QuantumXYZ.Utils import *
+from quantum_xyz.Circuit import QCircuit
+from quantum_xyz.Utils import *
 
 
 def unitary_zyz_decomposition_legacy(matrix: np.ndarray) -> QCircuit:

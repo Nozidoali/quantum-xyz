@@ -10,12 +10,11 @@ Last Modified time: 2023-06-28 11:17:55
 
 from typing import Any
 from .CanonicalStateSynthesis import *
-from QuantumXYZ import *
 
 from typing import List
 
 class SparseStateSynthesisParams:
-    enable_step_by_step: bool = True
+    enable_step_by_step: bool = False
 
 class SparseStateSynthesis(CanonicalStateSynthesis):
     def __init__(self, target_state: QState) -> None:
@@ -70,6 +69,7 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
                     try:
                         next_state = operator(curr_state)
                         cost = operator.get_cost()
+
                         curr_astar_cost = self.get_lower_bound(curr_state)
                         astar_cost = self.get_lower_bound(next_state)
 

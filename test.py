@@ -1,4 +1,4 @@
-from QuantumXYZ import *
+from quantum_xyz import *
 
 state = QState(
     [
@@ -7,8 +7,3 @@ state = QState(
         0b111, 
     ], 3, True
 )
-
-
-canonical_state = canonicalize(state)
-
-print(canonical_state)

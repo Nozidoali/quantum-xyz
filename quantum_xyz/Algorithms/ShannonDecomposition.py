@@ -11,7 +11,7 @@ Last Modified time: 2023-06-18 11:47:11
 import numpy as np
 from scipy.linalg import cossin, eig, solve, det
 from scipy.stats import unitary_group
-from QuantumXYZ.Circuit import *
+from quantum_xyz.Circuit import *
 
 from .Decompose import *
 
