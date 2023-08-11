@@ -47,11 +47,6 @@ def get_representative(
 
     while True:
         counter += 1
-        if counter > 100:
-            print(
-                f"counter > 100, prev_state = \n{prev_state}\n, curr_state = \n{curr_state}\n"
-            )
-            exit(0)
 
         if verbose:
             print(f"prev_state = \n{prev_state}\n, curr_state = \n{curr_state}\n")

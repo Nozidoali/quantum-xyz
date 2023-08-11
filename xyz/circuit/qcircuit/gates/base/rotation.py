@@ -9,17 +9,33 @@ Last Modified time: 2023-06-22 23:25:35
 """
 
 import numpy as np
-
-from .QGate import *
-from .QBit import *
-
+from typing import List
 
 class RotationGate:
+    """Classmethod to handle RotationGate .
+    """
     def __init__(self, theta: float) -> None:
         self.theta = theta
 
     def is_trivial(self) -> bool:
+        """Whether the model is trivial to be trivial .
+
+        :return: [description]
+        :rtype: bool
+        """
         return np.isclose(self.theta, 0) or np.isclose(self.theta, 2 * np.pi)
 
     def is_pi(self) -> bool:
+        """True if theta is a pi - > pi .
+
+        :return: [description]
+        :rtype: bool
+        """
         return np.isclose(self.theta, np.pi) or np.isclose(self.theta, -np.pi)
+
+class MultiRotationGate:
+    """Class method for creating a new rotation gate .
+    """
+    def __init__(self, thetas: List[float]) -> None:
+        self.thetas = thetas
+

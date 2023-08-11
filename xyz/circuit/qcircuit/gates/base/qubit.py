@@ -10,6 +10,8 @@ Last Modified time: 2023-06-22 15:08:10
 
 
 class QBit:
+    """Class method for creating a bit class .
+    """
     def __init__(self, index: int) -> None:
         self.index = index
 

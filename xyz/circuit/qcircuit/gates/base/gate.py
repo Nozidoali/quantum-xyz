@@ -10,6 +10,7 @@ Last Modified time: 2023-06-22 23:55:41
 
 from enum import Enum, auto
 
+from .qubit import QBit
 
 class QGateType(Enum):
     """This method is used to set the auto - gate type for QGate type .
@@ -56,3 +57,27 @@ class QGate:
         :rtype: QGateType
         """
         return self.qgate_type
+
+class BasicGate(QGate):
+    """Class method for creating a gate .
+
+    :param QGate: [description]
+    :type QGate: [type]
+    """
+    def __init__(self, qgate_type: QGateType, target_qubit: QBit) -> None:
+        QGate.__init__(self, qgate_type)
+
+        if not isinstance(target_qubit, QBit):
+            print(f"WARNING: target_qubit {target_qubit} is not a QBit")
+
+        assert isinstance(target_qubit, QBit)
+        self.target_qubit: QBit = target_qubit
+
+class AdvancedGate(QGate):
+    """Class method that creates a AdvancedGate class .
+
+    :param QGate: [description]
+    :type QGate: [type]
+    """
+    def __init__(self, qgate_type: QGateType) -> None:
+        QGate.__init__(self, qgate_type)
