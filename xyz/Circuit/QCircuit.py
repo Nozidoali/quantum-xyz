@@ -32,6 +32,9 @@ class QCircuitParams:
 
 
 class QCircuit(QCircuitOptimized):
+    """the class of quantum circuit
+
+    """
     def __init__(self, num_qubits):
         super().__init__()
         self.init_qubits(num_qubits)

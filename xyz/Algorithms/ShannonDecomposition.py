@@ -19,14 +19,20 @@ import math
 
 
 def quantum_shannon_decomposition(matrix: np.ndarray) -> QCircuit:
+    """Decompose a unitary matrix into a quantum circuit.
+
+    Args:
+        matrix (np.ndarray): the unitary matrix to be decomposed
+
+    Returns:
+        QCircuit: the quantum circuit
+    """
     dim = matrix.shape[0]
     num_qubits = int(math.log(dim, 2))
 
     circuit = QCircuit(num_qubits)
 
     quantum_shannon_decomposition_helper(matrix, circuit, circuit.qr)
-    circuit.flush()
-    circuit.measure()
     return circuit
 
 
