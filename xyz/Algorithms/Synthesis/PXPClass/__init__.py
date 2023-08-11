@@ -1,1 +1,0 @@
-from .Detail import *

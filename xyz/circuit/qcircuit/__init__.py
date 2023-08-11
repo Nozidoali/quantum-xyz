@@ -9,4 +9,4 @@ Last Modified time: 2023-08-12 00:02:46
 """
 
 from .qcircuit import QCircuit
-from .Gates import *
+from .gates import *

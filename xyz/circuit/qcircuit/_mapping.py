@@ -11,8 +11,8 @@ Last Modified time: 2023-06-23 00:14:40
 from typing import List
 import numpy as np
 
-from .Gates import QGate, QGateType, RY, CX, MULTIPLEXY, QBit
-from xyz.Utils.Synthesis.MultiControl import synthesize_multi_controlled_rotations
+from .gates import QGate, QGateType, RY, CX, MULTIPLEXY, QBit
+from xyz.utils.Synthesis.MultiControl import synthesize_multi_controlled_rotations
 
 
 def control_sequence_to_gates(
@@ -69,7 +69,7 @@ def __map_mcry(gate: QGate) -> List[QGate]:
     :return: [description]
     :rtype: List[QGate]
     """
-    match gate.type:
+    match gate.get_qgate_type():
         case QGateType.MCRY:
             control_qubits = gate.control_qubits
             phases = gate.phases
@@ -108,7 +108,7 @@ def _add_gate_mapped(self, gate: QGate) -> None:
     :type gate: QGate
     """
 
-    match gate.type:
+    match gate.qgate_type:
         case QGateType.MULTIPLEX_Y:
             gates = __map_muxy(gate)
             self.append_gates(gates)

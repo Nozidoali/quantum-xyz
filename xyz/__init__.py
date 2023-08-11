@@ -8,6 +8,6 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 14:40:59
 """
 
-from .Algorithms import *
+from .algorithms import *
 from .circuit import *
-from .Utils import *
+from .utils import *

@@ -9,7 +9,7 @@ Last Modified time: 2023-06-19 21:27:44
 """
 
 from Algorithms import *
-from xyz.Utils import *
+from xyz.utils import *
 
 
 def test_multi_control():

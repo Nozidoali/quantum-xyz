@@ -9,7 +9,7 @@ Last Modified time: 2023-06-22 23:43:32
 """
 
 from typing import List
-from .Gates import QGate, QGateType, X, CX, RY, CRY
+from .gates import QGate, QGateType, X, CX, RY, CRY
 
 from ._mapping import _add_gate_mapped
 
@@ -21,7 +21,7 @@ def _add_gate_optimized(self, gate: QGate) -> None:
     :type gate: QGate
     """
 
-    match gate.type:
+    match gate.qgate_type:
         case QGateType.RY:
             if gate.is_trivial():
                 return

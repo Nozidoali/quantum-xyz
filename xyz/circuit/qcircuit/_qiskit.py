@@ -15,8 +15,8 @@ from typing import List
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 
 # my own library
-from .Gates import QBit, QGateType
-from .QiskitGates import SpecialGates
+from .gates import QBit, QGate, QGateType
+from .qiskit_gates import SpecialGates
 
 
 def _to_qiskit(
@@ -48,8 +48,9 @@ def _to_qiskit(
         elif isinstance(qubit, list):
             return [quantum_registers[q.index] for q in qubit]
 
+    gate: QGate
     for gate in self.get_gates():
-        match gate.type:
+        match gate.get_qgate_type():
             case QGateType.MCRY:
                 special_gate = SpecialGates.mcry(gate)
                 circuit.append(
