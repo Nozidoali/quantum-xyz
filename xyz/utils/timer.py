@@ -13,7 +13,7 @@ Last Modified time: 2023-03-11 20:53:23
 #
 import time
 
-from ..ColorPrint import *
+from .colors import *
 
 
 """
