@@ -9,7 +9,7 @@ Last Modified time: 2023-06-28 11:29:03
 """
 
 from typing import List
-from .QState import *
+from .qstate import *
 
 
 class MultiControlledOperator:

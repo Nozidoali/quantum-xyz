@@ -12,7 +12,7 @@ from typing import Any
 from .QOperatorBase import *
 from .QuantizedRotation import *
 from .MultiControlledOperator import *
-from .QState import *
+from .qstate import *
 
 
 class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):

@@ -11,7 +11,7 @@ Last Modified time: 2023-06-28 11:42:30
 from typing import Any
 from .QOperatorBase import *
 from .QuantizedRotation import *
-from .QState import *
+from .qstate import *
 
 
 class XOperator(QOperatorBase, QuantizedRotation):

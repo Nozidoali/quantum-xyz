@@ -8,6 +8,6 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-18 11:33:02
 """
 
-from .QCircuit import *
-from .Operators import *
-from .QTransition import *
+from .qcircuit import *
+from .qtransition import *
+from ._quantization import *
