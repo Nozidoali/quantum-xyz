@@ -9,15 +9,26 @@ Last Modified time: 2023-06-23 00:14:40
 """
 
 from typing import List
-from .Gates import *
+import numpy as np
 
-from .QCircuitQiskitCompatible import *
-from xyz.Utils import *
+from .Gates import QGate, QGateType, RY, CX, MULTIPLEXY, QBit
+from xyz.Utils.Synthesis.MultiControl import synthesize_multi_controlled_rotations
 
 
 def control_sequence_to_gates(
     control_sequence: list, control_qubits: List[QBit], target_qubit: QBit
 ) -> List[QGate]:
+    """Convert a control sequence into a list of gates .
+
+    :param control_sequence: [description]
+    :type control_sequence: list
+    :param control_qubits: [description]
+    :type control_qubits: List[QBit]
+    :param target_qubit: [description]
+    :type target_qubit: QBit
+    :return: [description]
+    :rtype: List[QGate]
+    """
     gates: List[QGate] = []
 
     for control in control_sequence:
@@ -29,7 +40,14 @@ def control_sequence_to_gates(
     return gates
 
 
-def map_muxy(gate: MULTIPLEXY) -> List[QGate]:
+def __map_muxy(gate: MULTIPLEXY) -> List[QGate]:
+    """Convert a multi - gate into a list of gates .
+
+    :param gate: [description]
+    :type gate: MULTIPLEXY
+    :return: [description]
+    :rtype: List[QGate]
+    """
     assert gate.type == QGateType.MULTIPLEX_Y
     rotation_table = [gate.theta0, gate.theta1]
 
@@ -42,7 +60,15 @@ def map_muxy(gate: MULTIPLEXY) -> List[QGate]:
     return gates
 
 
-def map_mcry(gate: QGate) -> List[QGate]:
+def __map_mcry(gate: QGate) -> List[QGate]:
+    """Convert a MCRY gate into a list of gates .
+
+    :param gate: [description]
+    :type gate: QGate
+    :raises Exception: [description]
+    :return: [description]
+    :rtype: List[QGate]
+    """
     match gate.type:
         case QGateType.MCRY:
             control_qubits = gate.control_qubits
@@ -62,7 +88,7 @@ def map_mcry(gate: QGate) -> List[QGate]:
 
     rotated_index = 0
     for i, controlled_by_one in enumerate(phases):
-        if controlled_by_one == True:
+        if controlled_by_one is True:
             rotated_index += 2**i
 
     # only rotate the target qubit if the control qubits are in the positive phase
@@ -75,38 +101,25 @@ def map_mcry(gate: QGate) -> List[QGate]:
     return gates
 
 
-class QCircuitMapping(QCircuitQiskitCompatible):
-    def __init__(self) -> None:
-        super().__init__()
-        self.do_mapping: bool = True
+def _add_gate_mapped(self, gate: QGate) -> None:
+    """Add a gate to the circuit .
 
-    def add_gate(self, gate: QGate) -> None:
-        if not self.do_mapping:
-            super().add_gate(gate)
-            return
+    :param gate: [description]
+    :type gate: QGate
+    """
 
-        match gate.type:
-            case QGateType.MULTIPLEX_Y:
-                gates = map_muxy(gate)
-                self.add_gates(gates)
+    match gate.type:
+        case QGateType.MULTIPLEX_Y:
+            gates = __map_muxy(gate)
+            self.append_gates(gates)
 
-            case QGateType.MCRY:
-                gates = map_mcry(gate)
-                self.add_gates(gates)
+        case QGateType.MCRY:
+            gates = __map_mcry(gate)
+            self.append_gates(gates)
 
-            case QGateType.CRY:
-                gates = map_mcry(gate)
-                self.add_gates(gates)
+        case QGateType.CRY:
+            gates = __map_mcry(gate)
+            self.append_gates(gates)
 
-            case _:
-                super().add_gate(gate)
-
-    def add_gates(self, gates: List[QGate]) -> None:
-        """
-        Add a list of gates to the circuit, with optimization
-        """
-        for gate in gates:
-            self.add_gate(gate)
-
-    def set_mapping(self, do_mapping: bool) -> None:
-        self.do_mapping = do_mapping
+        case _:
+            self.append_gate(gate)

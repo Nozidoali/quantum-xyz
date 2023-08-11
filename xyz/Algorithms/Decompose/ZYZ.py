@@ -10,7 +10,7 @@ Last Modified time: 2023-06-18 23:01:09
 
 import numpy as np
 from numpy.linalg import det
-from xyz.Circuit import QCircuit
+from xyz.circuit import QCircuit
 from xyz.Utils import *
 
 

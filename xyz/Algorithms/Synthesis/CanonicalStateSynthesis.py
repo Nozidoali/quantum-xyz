@@ -8,11 +8,12 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 19:46:24
 """
 
-from xyz.Circuit import *
+from xyz.circuit import *
 from .SearchBasedStateSynthesis import *
 
 from typing import List, Tuple
 from .PXPClass import *
+
 
 class CanonicalStateSynthesis(SearchBasedStateSynthesis):
     def __init__(self, target_state: QStateBase) -> None:

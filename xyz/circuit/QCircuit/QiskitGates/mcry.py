@@ -8,16 +8,26 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-22 15:01:37
 """
 
-from qiskit.circuit.library.standard_gates import *
-from qiskit import QuantumCircuit
-from ..Gates.Base.QGate import *
-from ..Gates import *
+from qiskit.circuit.library.standard_gates import RYGate
 
-import numpy as np
+from ..Gates import MCRY
 
 
 class SpecialGates:
+    """SpecialGates class ."""
+
+    def __init__(self):
+        pass
+
+    @staticmethod
     def mcry(gate: MCRY):
+        """Convert a MCRY gate into a RYZ gate .
+
+        :param gate: [description]
+        :type gate: MCRY
+        :return: [description]
+        :rtype: [type]
+        """
         num_control_qubits = len(gate.control_qubits)
 
         # we need to reverse the order of the control qubits

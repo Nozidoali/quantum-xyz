@@ -8,7 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 17:21:23
 """
 
-from xyz.Circuit.QTransitionBase import QTransitionBase
+from xyz.circuit.QTransitionBase import QTransitionBase
 from .Operators import *
 from .QTransitionWithSimulation import *
 

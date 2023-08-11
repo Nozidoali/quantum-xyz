@@ -8,8 +8,9 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-22 20:08:00
 """
 
-from xyz.Circuit import *
+from xyz.circuit import *
 from typing import List, Any
+
 
 def simulate(circuit: QCircuit):
     if not isinstance(circuit, QCircuit):

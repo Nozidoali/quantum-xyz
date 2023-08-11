@@ -8,13 +8,16 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-23 00:13:28
 """
 
-from .Base import *
-from typing import List
-
-import numpy as np
+from .Base import AdvancedGate, QBit, QGateType
 
 
 class MULTIPLEXY(AdvancedGate):
+    """Returns a DanceXRULTI class .
+
+    :param AdvancedGate: [description]
+    :type AdvancedGate: [type]
+    """
+
     def __init__(
         self, theta0: float, theta1: float, control_qubit: QBit, target_qubit: QBit
     ) -> None:
@@ -29,10 +32,4 @@ class MULTIPLEXY(AdvancedGate):
         self.theta1: float = theta1
 
     def __str__(self) -> str:
-        control_str = "+".join(
-            [
-                str(qubit) + f"[{phase}]"
-                for qubit, phase in zip(self.control_qubits, self.phases)
-            ]
-        )
-        return f"MUXY({self.theta:0.02f}, {control_str})"
+        return f"MULTIPLEXY({self.theta0}, {self.theta1}, {self.control_qubit}, {self.target_qubit})"

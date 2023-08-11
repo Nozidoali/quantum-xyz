@@ -8,13 +8,22 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-22 23:31:33
 """
 
-from .Base import *
 from typing import List
 
-import numpy as np
+from .Base import BasicGate, MultiControlledGate, QBit, QGateType, RotationGate
 
 
 class MCRY(RotationGate, BasicGate, MultiControlledGate):
+    """Classmethod to create a multi-controlled  gate .
+
+    :param RotationGate: [description]
+    :type RotationGate: [type]
+    :param BasicGate: [description]
+    :type BasicGate: [type]
+    :param MultiControlledGate: [description]
+    :type MultiControlledGate: [type]
+    """
+
     def __init__(
         self,
         theta: float,

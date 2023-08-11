@@ -62,7 +62,9 @@ class stopwatch:
         """
         return float(time.perf_counter() - self.tic)
 
+
 global_stopwatches = {}
+
 
 class GlobalStopwatch:
     # name the functions run inside this context
@@ -102,14 +104,15 @@ class GlobalStopwatch:
         @return The number of seconds since the start () call that took place in the test's run () method
         """
         return global_stopwatches[self.name]
-    
+
+
 def call_with_global_timer(func):
-    
-    def timed_func(*args, **kwargs):       
+    def timed_func(*args, **kwargs):
         with GlobalStopwatch(func.__name__):
             return func(*args, **kwargs)
-            
+
     return timed_func
+
 
 def get_time(name: str):
     if name not in global_stopwatches:

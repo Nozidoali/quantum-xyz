@@ -10,7 +10,7 @@ Last Modified time: 2023-06-18 21:47:46
 
 import numpy as np
 from xyz.Utils import *
-from xyz.Circuit import *
+from xyz.circuit import *
 
 
 def apply_control_sequence_to_z(

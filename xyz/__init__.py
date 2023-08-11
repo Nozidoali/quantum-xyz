@@ -9,5 +9,5 @@ Last Modified time: 2023-06-28 14:40:59
 """
 
 from .Algorithms import *
-from .Circuit import *
+from .circuit import *
 from .Utils import *

@@ -8,10 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-22 23:32:05
 """
 
-from .Base import *
-from typing import List
-
-import numpy as np
+from .Base import BasicGate, ControlledGate, QBit, QGateType, RotationGate
 
 
 class CRY(RotationGate, BasicGate, ControlledGate):

@@ -1,24 +1,20 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
 
-'''
+"""
 Author: Hanyu Wang
 Created time: 2023-08-11 22:26:09
 Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-11 22:28:35
-'''
+"""
 
 from xyz import *
 
 num_qubits: int = 4
 
 weighted_state = D_state(num_qubits, 2)
-    
-quantized_state = QState(
-    weighted_state,
-    num_qubits=num_qubits,
-    is_quantized=False
-)
+
+quantized_state = QState(weighted_state, num_qubits=num_qubits, is_quantized=False)
 
 canonical_state, _ = get_representative(quantized_state, num_qubits)
 

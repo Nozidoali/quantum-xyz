@@ -8,18 +8,41 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 20:05:52
 """
 
-from .Operators import *
-from .QTransitionBase import *
-from .QCircuit import *
-
 from typing import List
+import numpy as np
+
+from .Operators import (
+    MCRYOperator,
+    QOperatorType,
+    QuantizedRotationType,
+    find_first_diff_qubit_index,
+    PureState,
+)
+from .QTransitionBase import QTransitionBase
+from .QCircuit import QCircuit, X, MCRY, MULTIPLEXY
 
 
 class QTransitionQuantized(QTransitionBase):
+    """Class method to create a transition quantized .
+
+    :param QTransitionBase: [description]
+    :type QTransitionBase: [type]
+    """
+
     def __init__(self, num_qubits: int) -> None:
         QTransitionBase.__init__(self, num_qubits)
 
     def recover_circuit(self, _weights: List[float], verbose: bool = False) -> QCircuit:
+        """Recover the circuit with the same weight and weights .
+
+        :param _weights: [description]
+        :type _weights: List[float]
+        :param verbose: [description], defaults to False
+        :type verbose: bool, optional
+        :raises NotImplementedError: [description]
+        :return: [description]
+        :rtype: QCircuit
+        """
         circuit = QCircuit(self.num_qubits)
 
         # first we assign the weights to the last state
@@ -70,7 +93,9 @@ class QTransitionQuantized(QTransitionBase):
                     thetas = {}
 
                     if verbose:
-                        print(f"state_before: \n{state_before}\n, state_after: \n{state_after}\n")
+                        print(
+                            f"state_before: \n{state_before}\n, state_after: \n{state_after}\n"
+                        )
 
                     pure_state: PureState
                     for pure_state in state_before:
@@ -107,14 +132,14 @@ class QTransitionQuantized(QTransitionBase):
                         if len(thetas) == 2:
                             state1, state2 = list(thetas.values())
 
-                            decision_variable: int = find_first_diff_qubit_index(state1, state2)
+                            decision_variable: int = find_first_diff_qubit_index(
+                                state1, state2
+                            )
 
                             phase1 = (int(state1) >> decision_variable) & 1
                             phase2 = (int(state2) >> decision_variable) & 1
 
-                            control_qubits.append(
-                                circuit.qubit_at(decision_variable)
-                            )
+                            control_qubits.append(circuit.qubit_at(decision_variable))
 
                             phases1 = phases + [phase1]
                             phases2 = phases + [phase2]

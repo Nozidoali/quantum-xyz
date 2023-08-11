@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
 
-'''
+"""
 Author: Hanyu Wang
 Created time: 2023-07-03 10:06:02
 Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-11 22:28:03
-'''
+"""
 
-from xyz.Circuit import *
+from xyz.circuit import *
+
 
 class StateGraph:
-
     def __init__(self) -> None:
         self.nodes = set()
         self.edges = {}
-    
+
     def add_node(self, node: PureState) -> None:
         if node in self.nodes:
             return
@@ -42,13 +42,13 @@ class StateGraph:
             return_str += "\n"
         return return_str
 
+
 def state_to_graph(state: QState) -> StateGraph:
     graph = StateGraph()
 
     sorted_states = state.get_sorted_state_array()
 
     for i in range(len(sorted_states)):
-
         # we need to add the node whether it is adjacent to other nodes or not
         graph.add_node(sorted_states[i])
 

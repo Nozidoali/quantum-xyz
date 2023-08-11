@@ -8,9 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-22 23:14:28
 """
 
-from .Base import *
-
-from typing import List
+from .Base import BasicGate, ControlledGate, QBit, QGateType
 
 
 class CX(BasicGate, ControlledGate):

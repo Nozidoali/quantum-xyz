@@ -10,12 +10,14 @@ Last Modified time: 2023-06-28 11:17:55
 
 from typing import Any
 from .CanonicalStateSynthesis import *
-from ...Circuit import *
+from ...circuit import *
 from typing import List
 import subprocess
 
+
 class SparseStateSynthesisParams:
     enable_step_by_step: bool = False
+
 
 class SparseStateSynthesis(CanonicalStateSynthesis):
     def __init__(self, target_state: QState) -> None:
@@ -63,7 +65,10 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
                     # we have found a better state
                     break
 
-                if SparseStateSynthesisParams.enable_step_by_step and len(curr_state) < prev_ones:
+                if (
+                    SparseStateSynthesisParams.enable_step_by_step
+                    and len(curr_state) < prev_ones
+                ):
                     break
 
                 # Add next state to the list of states.
@@ -93,18 +98,21 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
 
             if verbose:
                 print(f"num_visited_states: {num_visited_states}")
-                
+
                 state_index: int = 0
                 for state in self.enquened_states:
                     state_index += 1
                     canonical_state, _ = get_representative(state, self.num_qubits)
-                    state_cost = self.enquened_states[state] - self.get_lower_bound(state)
-                    print(f"state{state_index}, cost = {state_cost}: \n{canonical_state}")
-            
+                    state_cost = self.enquened_states[state] - self.get_lower_bound(
+                        state
+                    )
+                    print(
+                        f"state{state_index}, cost = {state_cost}: \n{canonical_state}"
+                    )
+
             curr_transitions = QTransition(self.num_qubits)
             state_before = curr_state
             for state, op in self.backtrace_state(state_before):
-
                 if verbose:
                     print(
                         f"state: \n{state}\n\t, op = {op}, cost = {op.get_cost()}, state_before: {state_before}"
@@ -122,5 +130,5 @@ class SparseStateSynthesis(CanonicalStateSynthesis):
         # graph = self.export_record()
         # graph.write("search_graph.dot")
         # subprocess.call(["dot", "-Tpng", "search_graph.dot", "-o", "search_graph.png"])
-        
+
         return initial_transitions + transitions

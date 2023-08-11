@@ -12,6 +12,7 @@ from typing import Any
 import numpy as np
 from .QStateCanonical import *
 
+
 class QState(QStateCanonical):
     def __init__(
         self, state_array: np.ndarray, num_qubits: int, is_quantized: bool = True

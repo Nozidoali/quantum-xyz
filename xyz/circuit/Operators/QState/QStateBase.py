@@ -59,8 +59,10 @@ class QStateBase:
     def __iter__(self) -> Any:
         sorted_self = sorted(list(self.state_array))
         return sorted_self.__iter__()
-    
-    def get_sorted_state_array(self, key = None, reverse: bool = False) -> List[PureState]:
+
+    def get_sorted_state_array(
+        self, key=None, reverse: bool = False
+    ) -> List[PureState]:
         return sorted(list(self.state_array), key=key, reverse=reverse)
 
     def __eq__(self, __value: object) -> bool:

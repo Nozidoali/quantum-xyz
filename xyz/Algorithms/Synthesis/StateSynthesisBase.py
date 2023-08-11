@@ -8,7 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 11:02:26
 """
 
-from xyz.Circuit import *
+from xyz.circuit import *
 
 
 class StateSynthesisBase:

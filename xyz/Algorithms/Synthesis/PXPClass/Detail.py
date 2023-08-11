@@ -1,9 +1,22 @@
-from xyz.Circuit import *
+#!/usr/bin/env python
+# -*- encoding=utf8 -*-
+
+"""
+Author: Hanyu Wang
+Created time: 2023-08-11 22:26:09
+Last Modified by: Hanyu Wang
+Last Modified time: 2023-08-11 23:55:28
+"""
+
+from xyz.circuit import *
+from xyz.Utils import call_with_global_timer
 from typing import List, Tuple
+
 
 class CanonicalizationParams:
     run_once: bool = False
     use_swap: bool = True
+
 
 @call_with_global_timer
 def get_representative(
@@ -18,7 +31,7 @@ def get_representative(
     @param num_qubits - the number of qubits
     @return A tuple containing the representative state and a list of quantum operators, in the class of the QTransition class.
     """
-    
+
     # if the state is empty, return the empty state.
     if num_qubits == 0:
         return state, None
@@ -30,10 +43,11 @@ def get_representative(
     counter: int = 0
 
     while True:
-
         counter += 1
         if counter > 100:
-            print(f"counter > 100, prev_state = \n{prev_state}\n, curr_state = \n{curr_state}\n")
+            print(
+                f"counter > 100, prev_state = \n{prev_state}\n, curr_state = \n{curr_state}\n"
+            )
             exit(0)
 
         if verbose:
@@ -42,21 +56,25 @@ def get_representative(
         prev_state = curr_state.copy()
 
         if CanonicalizationParams.use_swap and enable_swap:
-            column_values_dict = {pivot_qubit:0 for pivot_qubit in range(num_qubits)}
+            column_values_dict = {pivot_qubit: 0 for pivot_qubit in range(num_qubits)}
 
             sorted_state_array = curr_state.get_sorted_state_array(
-                key=lambda x: (x.count_ones(), x),
-                reverse=True)
+                key=lambda x: (x.count_ones(), x), reverse=True
+            )
             for i, pure_state in enumerate(sorted_state_array):
                 if verbose:
                     print(f"i = {i}, pure_state = {pure_state}")
                 for pivot_qubit in range(num_qubits):
-                    column_values_dict[pivot_qubit] += ((int(pure_state) >> pivot_qubit) & 1) << i
+                    column_values_dict[pivot_qubit] += (
+                        (int(pure_state) >> pivot_qubit) & 1
+                    ) << i
 
             column_values = []
             for pivot_qubit in range(num_qubits):
                 if verbose:
-                    print(f"pivot_qubit = {pivot_qubit}, column_values_dict[pivot_qubit] = {column_values_dict[pivot_qubit]:b}")
+                    print(
+                        f"pivot_qubit = {pivot_qubit}, column_values_dict[pivot_qubit] = {column_values_dict[pivot_qubit]:b}"
+                    )
                 column_values.append((column_values_dict[pivot_qubit], pivot_qubit))
 
             column_values.sort(reverse=True)
@@ -82,14 +100,13 @@ def get_representative(
         # we need to exhaustively try all the possible flips
         original_state = curr_state.copy()
         best_state = curr_state.copy()
-        best_x_index = 0 # 0 means nothing is flipped.
-        
-        for x_index in range(1<<num_qubits):
-            
+        best_x_index = 0  # 0 means nothing is flipped.
+
+        for x_index in range(1 << num_qubits):
             curr_state = original_state.copy()
             for pivot_qubit in range(num_qubits):
                 qubit_is_flipped = ((x_index >> pivot_qubit) & 1) == 1
-                
+
                 if qubit_is_flipped:
                     op = XOperator(pivot_qubit)
                     curr_state = op(curr_state)
@@ -101,19 +118,23 @@ def get_representative(
                 # transitions.add_transition_to_front(x_state, op, curr_state)
                 best_state = curr_state.copy()
                 best_x_index = x_index
-        
+
         curr_state = original_state.copy()
         for pivot_qubit in range(num_qubits):
             qubit_is_flipped = ((best_x_index >> pivot_qubit) & 1) == 1
-            
+
             if qubit_is_flipped:
                 op = XOperator(pivot_qubit)
                 new_state = op(curr_state)
                 transitions.add_transition_to_front(new_state, op, curr_state)
                 curr_state = new_state
 
-        if CanonicalizationParams.run_once or not enable_swap or not CanonicalizationParams.use_swap or curr_state == prev_state:
+        if (
+            CanonicalizationParams.run_once
+            or not enable_swap
+            or not CanonicalizationParams.use_swap
+            or curr_state == prev_state
+        ):
             break
 
     return curr_state, transitions
-

@@ -9,7 +9,7 @@ Last Modified time: 2023-06-19 21:43:13
 """
 
 import numpy as np
-from xyz.Circuit import QCircuit
+from xyz.circuit import QCircuit
 from xyz.Utils import *
 from .Decompose import *
 
