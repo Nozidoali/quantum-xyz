@@ -121,7 +121,7 @@ def recover_circuit(
 
                 else:
                     if len(thetas) == 2:
-                        state1, state2 = list(thetas.values())[:2]
+                        state1, state2 = list(thetas.values())
 
                         decision_variable: int = find_first_diff_qubit_index(
                             state1, state2

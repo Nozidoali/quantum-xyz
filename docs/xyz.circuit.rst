@@ -1,5 +1,5 @@
-QuantumXYZ.Visualization package
-================================
+xyz.circuit package
+===================
 
 Subpackages
 -----------
@@ -7,12 +7,13 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   QuantumXYZ.Visualization.Cube
+   xyz.circuit.qcircuit
+   xyz.circuit.qtransition
 
 Module contents
 ---------------
 
-.. automodule:: QuantumXYZ.Visualization
+.. automodule:: xyz.circuit
    :members:
    :undoc-members:
    :show-inheritance:
