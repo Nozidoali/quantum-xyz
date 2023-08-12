@@ -10,7 +10,9 @@ Last Modified time: 2023-08-11 23:55:28
 
 from typing import List, Tuple
 
-from xyz.circuit import QOperator, QState, QTransition, XOperator, PureState
+import copy
+
+from xyz.circuit import QOperator, QState, QTransition, XOperator, PureState, QStateOpt
 from xyz.utils import call_with_global_timer
 
 
@@ -39,7 +41,10 @@ def get_representative(
     if num_qubits == 0:
         return state, None
 
-    curr_state = state.copy()
+    if isinstance(state, QStateOpt):
+        return state, None
+
+    curr_state = copy.copy(state)
     prev_state = None
     transitions = QTransition(num_qubits)
 
@@ -51,7 +56,7 @@ def get_representative(
         if verbose:
             print(f"prev_state = \n{prev_state}\n, curr_state = \n{curr_state}\n")
 
-        prev_state = curr_state.copy()
+        prev_state = copy.copy(curr_state)
 
         if CanonicalizationParams.use_swap and enable_swap:
             column_values_dict = {pivot_qubit: 0 for pivot_qubit in range(num_qubits)}

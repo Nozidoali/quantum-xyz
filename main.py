@@ -8,16 +8,16 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-11 23:56:48
 """
 
-from xyz import cnot_synthesis, recover_circuit, stopwatch, D_state, QState
+from xyz import cnot_synthesis, recover_circuit, stopwatch, D_state, QStateOpt
 
-num_qubits = 4
+num_qubits = 5
 
 state_array = D_state(num_qubits, 2)
 print("".join(["1" if x > 0 else "0" for x in state_array]))
 
 # state_array = GHZ_state(num_qubits)
 
-state = QState(state_array, num_qubits, False)
+state = QStateOpt(state_array, num_qubits)
 
 with stopwatch("SparseStateSynthesis"):
     transitions = cnot_synthesis(state)

@@ -91,7 +91,6 @@ def _get_operators(self, state: QState):
         for rotation_type in [
             QuantizedRotationType.SWAP,
             QuantizedRotationType.MERGE0,
-            QuantizedRotationType.MERGE1,
         ]:
             # first we try the case where no control qubit is used
             operator = MCRYOperator(
@@ -103,6 +102,9 @@ def _get_operators(self, state: QState):
 
             yield operator
 
+            if rotation_type == QuantizedRotationType.MERGE0:
+                continue
+
             # Yields the state of the current state of the MCRY operatorerator.
             for control_qubit_index in range(self.num_qubits):
                 # If control_qubit_index is pivot_qubit_index control_qubit_index pivot_qubit_index.
@@ -110,12 +112,11 @@ def _get_operators(self, state: QState):
                     continue
 
                 # Yields the state of the current state.
-                for control_qubit_phase in [False, True]:
-                    operator = MCRYOperator(
-                        target_qubit_index=pivot_qubit_index,
-                        rotation_type=rotation_type,
-                        control_qubit_indices=[control_qubit_index],
-                        control_qubit_phases=[control_qubit_phase],
-                    )
+                operator = MCRYOperator(
+                    target_qubit_index=pivot_qubit_index,
+                    rotation_type=rotation_type,
+                    control_qubit_indices=[control_qubit_index],
+                    control_qubit_phases=[True],
+                )
 
-                    yield operator
+                yield operator

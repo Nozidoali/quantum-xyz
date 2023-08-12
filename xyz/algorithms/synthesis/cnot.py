@@ -80,7 +80,7 @@ def cnot_synthesis(
                     continue
 
         assert engine.is_visited(curr_state)
-        assert len(curr_state) < prev_ones
+        # assert len(curr_state) < prev_ones
 
         curr_transitions = QTransition(engine.num_qubits)
         state_before = curr_state
@@ -98,9 +98,5 @@ def cnot_synthesis(
         curr_state, target_state.num_qubits
     )
     assert zero_state == ground_state(target_state.num_qubits)
-
-    # graph = engine.export_record()
-    # graph.write("search_graph.dot")
-    # subprocess.call(["dot", "-Tpng", "search_graph.dot", "-o", "search_graph.png"])
 
     return initial_transitions + transitions

@@ -9,6 +9,8 @@ Last Modified time: 2023-06-28 11:42:30
 """
 
 from typing import Any, List
+
+from xyz.circuit.qtransition.operators.qstate.qstate_opt import QStateOpt
 from .operator import QOperatorBase, QOperatorType
 from .rotation import QuantizedRotation, QuantizedRotationType
 from .control import MultiControlledOperator
@@ -45,6 +47,26 @@ class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):
         @param qstate - The input quantum state.
         @return The modified quantum state after applying the gate operation.
         """
+
+        if isinstance(qstate, QStateOpt):
+            if self.rotation_type == QuantizedRotationType.SWAP:
+                if len(self.control_qubit_indices) == 0:
+                    qstate.apply_x(self.target_qubit_index)
+                else:
+                    assert len(self.control_qubit_indices) == 1
+                    qstate.apply_cx(
+                        self.target_qubit_index, self.control_qubit_indices[0]
+                    )
+                return qstate
+
+            if self.rotation_type == QuantizedRotationType.MERGE0:
+                assert len(self.control_qubit_indices) == 0
+                if len(self.control_qubit_indices) == 0:
+                    qstate.apply_y(self.target_qubit_index)
+                return qstate
+
+            return qstate
+
         new_states = QState([], qstate.num_qubits)
 
         pure_state: PureState
