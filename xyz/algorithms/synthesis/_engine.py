@@ -11,7 +11,13 @@ Last Modified time: 2023-06-28 11:17:45
 from queue import PriorityQueue
 
 from xyz.circuit import QState, QOperator
-from ._canonical import _add_state, _get_lower_bound, _get_operators, _is_visited, _visit
+from ._canonical import (
+    _add_state,
+    _get_lower_bound,
+    _get_operators,
+    _is_visited,
+    _visit,
+)
 
 
 class SearchEngine:
@@ -79,7 +85,7 @@ class SearchEngine:
         """
         try:
             return self.record[state][0]
-        except:
+        except KeyError:
             return None
 
     def search_done(self) -> bool:

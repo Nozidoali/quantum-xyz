@@ -13,20 +13,16 @@ Last Modified time: 2023-03-11 20:53:23
 #
 import time
 
-from .colors import *
-
-
-"""
-Usage:
-with stopwatch("name"):
-    do_something()
-
-Output:
-name                     :     0.00 sec
-"""
+from .colors import print_green
 
 
 class stopwatch:
+    """Create a new Stopwatch class .
+
+    :return: [description]
+    :rtype: [type]
+    """
+
     # name the functions run inside this context
     def __init__(self, name: str):
         """
@@ -53,7 +49,8 @@ class stopwatch:
         @param exc_tb The traceback of the exception that was raised
         """
         self.toc = time.perf_counter()
-        print_green("{:<25}: {:>8.02f} sec".format(self.name, self.toc - self.tic))
+        duration = self.toc - self.tic
+        print_green(f"{self.name:<25}: {duration:>8.02f} sec")
 
     def time(self):
         """
@@ -67,6 +64,12 @@ global_stopwatches = {}
 
 
 class GlobalStopwatch:
+    """A class decorator that creates a global stopwatch .
+
+    :return: [description]
+    :rtype: [type]
+    """
+
     # name the functions run inside this context
     def __init__(self, name: str):
         """
@@ -107,6 +110,12 @@ class GlobalStopwatch:
 
 
 def call_with_global_timer(func):
+    """Call function with global timer .
+
+    :param func: [description]
+    :type func: [type]
+    """
+
     def timed_func(*args, **kwargs):
         with GlobalStopwatch(func.__name__):
             return func(*args, **kwargs)
@@ -115,6 +124,13 @@ def call_with_global_timer(func):
 
 
 def get_time(name: str):
+    """Get the current stop time for a given name .
+
+    :param name: [description]
+    :type name: str
+    :return: [description]
+    :rtype: [type]
+    """
     if name not in global_stopwatches:
         return 0
     return global_stopwatches[name]

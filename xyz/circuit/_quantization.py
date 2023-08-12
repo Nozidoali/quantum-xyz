@@ -11,7 +11,13 @@ Last Modified time: 2023-06-28 20:05:52
 from typing import List
 import numpy as np
 
-from .qtransition import MCRYOperator, QOperatorType, QuantizedRotationType, PureState, find_first_diff_qubit_index
+from .qtransition import (
+    MCRYOperator,
+    QOperatorType,
+    QuantizedRotationType,
+    PureState,
+    find_first_diff_qubit_index,
+)
 from .qcircuit import QCircuit, X, MCRY, MULTIPLEXY
 
 
@@ -115,7 +121,7 @@ def recover_circuit(
 
                 else:
                     if len(thetas) == 2:
-                        state1, state2 = list(thetas.values())
+                        state1, state2 = list(thetas.values())[:2]
 
                         decision_variable: int = find_first_diff_qubit_index(
                             state1, state2

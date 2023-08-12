@@ -9,4 +9,4 @@ Last Modified time: 2023-06-19 20:44:36
 """
 
 from .MultiControl import *
-from .GrayCode import *
+from .gray import *

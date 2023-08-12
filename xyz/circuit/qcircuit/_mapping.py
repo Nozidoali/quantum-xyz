@@ -81,7 +81,7 @@ def __map_mcry(gate: QGate) -> List[QGate]:
             target_qubit = gate.target_qubit
 
         case _:
-            raise Exception("Not a MCRY gate")
+            raise ValueError("Not a MCRY gate")
 
     # we prepare the rotation table
     rotation_table = np.zeros(2 ** (len(control_qubits)))

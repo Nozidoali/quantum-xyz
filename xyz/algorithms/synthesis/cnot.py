@@ -63,36 +63,24 @@ def cnot_synthesis(
                     next_state = operator(curr_state)
                     cost = operator.get_cost()
 
-                    curr_astar_cost = engine.get_lower_bound(curr_state)
                     astar_cost = engine.get_lower_bound(next_state)
 
                     # This is buggy here, the correct function is shown below.
                     # However, the correct function is not working as good as this one.
                     # This is probably because we need to use MCRY instead of CNRY, and the cost function is incorrect.
                     #
+                    # curr_astar_cost = engine.get_lower_bound(curr_state)
                     # next_cost = curr_cost + cost + astar_cost - curr_astar_cost
                     next_cost = curr_cost + cost + astar_cost
                     success = engine.add_state(next_state, cost=next_cost)
 
                     if success:
                         engine.record_operation(curr_state, operator, next_state)
-                except:
+                except ValueError:
                     continue
 
         assert engine.is_visited(curr_state)
         assert len(curr_state) < prev_ones
-
-        if verbose:
-            print(f"num_visited_states: {num_visited_states}")
-
-            state_index: int = 0
-            for state in engine.enquened_states:
-                state_index += 1
-                canonical_state, _ = get_representative(state, engine.num_qubits)
-                state_cost = engine.enquened_states[state] - engine.get_lower_bound(
-                    state
-                )
-                print(f"state{state_index}, cost = {state_cost}: \n{canonical_state}")
 
         curr_transitions = QTransition(engine.num_qubits)
         state_before = curr_state

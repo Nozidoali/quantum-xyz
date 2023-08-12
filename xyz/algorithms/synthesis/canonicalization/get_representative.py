@@ -85,7 +85,7 @@ def get_representative(
                 new_idx = 0
 
                 i = 0
-                for num_ones, pivot_qubit in column_values:
+                for _, pivot_qubit in column_values:
                     new_idx |= ((int(pure_state) >> pivot_qubit) & 1) << i
                     i += 1
 

@@ -8,12 +8,19 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-19 20:54:16
 """
 
-from .GrayCode import *
-
 import numpy as np
+
+from .gray import find_thetas
 
 
 def synthesize_multi_controlled_rotations(rotation_table: list):
+    """Synthesize multiple controlled rotations .
+
+    :param rotation_table: [description]
+    :type rotation_table: list
+    :return: [description]
+    :rtype: [type]
+    """
     num_controls = int(np.log2(len(rotation_table)))
 
     alphas = rotation_table[:]

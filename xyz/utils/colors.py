@@ -13,24 +13,51 @@ Last Modified time: 2023-03-11 20:52:12
 
 
 def print_green(text: str, **kwargs):
+    """Print a green green .
+
+    :param text: [description]
+    :type text: str
+    """
     print(f"\033[92m{text}\033[39m", **kwargs)
 
 
 def print_red(text: str, **kwargs):
+    """Print a red message with red .
+
+    :param text: [description]
+    :type text: str
+    """
     print(f"\033[91m{text}\033[39m", **kwargs)
 
 
-def text_red(text: str, **kwargs):
+def text_red(text: str):
+    """Return a text representation of text .
+
+    :param text: [description]
+    :type text: str
+    :return: [description]
+    :rtype: [type]
+    """
     return f"\033[91m{text}\033[39m"
 
 
 def print_blue(text: str, **kwargs):
+    """Print a blue color .
+
+    :param text: [description]
+    :type text: str
+    """
     print(f"\033[94m{text}\033[39m", **kwargs)
 
 
 def print_orange(text: str, **kwargs):
+    """Print an Orange color .
+
+    :param text: [description]
+    :type text: str
+    """
     print(f"\033[93m{text}\033[39m", **kwargs)
 
 
-def text_orange(text: str, **kwargs):
+def text_orange(text: str):
     return f"\033[93m{text}\033[39m"
