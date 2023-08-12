@@ -11,13 +11,7 @@ Last Modified time: 2023-06-28 20:05:52
 from typing import List
 import numpy as np
 
-from .qtransition.operators import (
-    MCRYOperator,
-    QOperatorType,
-    QuantizedRotationType,
-    find_first_diff_qubit_index,
-    PureState,
-)
+from .qtransition import MCRYOperator, QOperatorType, QuantizedRotationType, PureState, find_first_diff_qubit_index
 from .qcircuit import QCircuit, X, MCRY, MULTIPLEXY
 
 
@@ -47,7 +41,7 @@ def recover_circuit(
         operator: MCRYOperator
         state_before, operator, state_after = transitions.transition_at(i - 1)
 
-        if operator.type == QOperatorType.X:
+        if operator.operator_type == QOperatorType.X:
             gate = X(circuit.qubit_at(operator.target_qubit_index))
             gates.append(gate)
 

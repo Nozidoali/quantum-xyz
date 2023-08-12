@@ -9,24 +9,15 @@ Last Modified time: 2023-06-28 11:17:45
 """
 
 from queue import PriorityQueue
-import stat
-import pygraphviz as pgv
 
-from xyz.circuit import QState, QStateBase, QOperator
-from .canonicalization import get_representative
-from ._canonical import (
-    _add_state,
-    _get_lower_bound,
-    _visit,
-    _is_visited,
-    _get_operators,
-)
+from xyz.circuit import QState, QOperator
+from ._canonical import _add_state, _get_lower_bound, _get_operators, _is_visited, _visit
 
 
 class SearchEngine:
     """Generate the engine class ."""
 
-    def __init__(self, target_state: QStateBase) -> None:
+    def __init__(self, target_state: QState) -> None:
         self.target_state = target_state
         self.num_qubits = target_state.num_qubits
 
@@ -65,18 +56,18 @@ class SearchEngine:
         self.record.clear()
 
     def record_operation(
-        self, state_before: QState, op: QOperator, state_after: QState
+        self, state_before: QState, operator: QOperator, state_after: QState
     ) -> None:
         """Record a operation between state_after and state_after_after_after_after .
 
         :param state_before: [description]
         :type state_before: QState
-        :param op: [description]
-        :type op: QOperator
+        :param operator: [description]
+        :type operator: QOperator
         :param state_after: [description]
         :type state_after: QState
         """
-        self.record[state_after] = state_before, op
+        self.record[state_after] = state_before, operator
 
     def get_prev_state(self, state: QState) -> QState:
         """Get the previous state of a state .
@@ -109,8 +100,8 @@ class SearchEngine:
         """
         curr_state = state
         while curr_state in self.record:
-            prev_state, op = self.record[curr_state]
-            yield prev_state, op
+            prev_state, operator = self.record[curr_state]
+            yield prev_state, operator
             curr_state = prev_state
 
     def is_visited(self, state: QState):

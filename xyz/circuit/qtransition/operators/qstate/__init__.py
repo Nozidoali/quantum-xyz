@@ -8,5 +8,6 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 10:55:26
 """
 
-from .QState import *
-from .CommonStates import *
+from .qstate import *
+from .common import *
+from .pure_state import *
