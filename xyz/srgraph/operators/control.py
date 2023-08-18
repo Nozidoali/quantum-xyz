@@ -9,8 +9,6 @@ Last Modified time: 2023-06-28 11:29:03
 """
 
 from typing import List
-from .qstate import PureState
-
 
 class ControlledOperator:
     """Class method for creating the ControlledOperator ."""
@@ -28,17 +26,3 @@ class MultiControlledOperator:
     ) -> None:
         self.control_qubit_indices = control_qubit_indices
         self.control_qubit_phases = control_qubit_phases
-
-    def is_controlled(self, pure_state: PureState) -> bool:
-        """Returns True if the pure_state is controlled by the gate .
-
-        :param pure_state: [description]
-        :type pure_state: PureState
-        :return: [description]
-        :rtype: bool
-        """
-        for index, phase in zip(self.control_qubit_indices, self.control_qubit_phases):
-            if (int(pure_state) >> index) & 1 != phase:
-                return False
-
-        return True

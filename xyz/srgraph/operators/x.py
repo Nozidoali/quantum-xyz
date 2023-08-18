@@ -11,8 +11,7 @@ Last Modified time: 2023-06-28 11:42:30
 from typing import Any
 from .operator import QOperatorBase, QOperatorType
 from .rotation import QuantizedRotation, QuantizedRotationType
-from .qstate import QState, PureState
-
+from .qstate import QState
 
 class XOperator(QOperatorBase, QuantizedRotation):
     """Creates an XOperator class with XOperator .
@@ -36,11 +35,4 @@ class XOperator(QOperatorBase, QuantizedRotation):
         @param qstate - The input quantum state.
         @return The modified quantum state after applying the gate operation.
         """
-        new_states = QState([], qstate.num_qubits)
-
-        pure_state: PureState
-
-        for pure_state in qstate():
-            new_states.add_pure_state(pure_state.flip(self.target_qubit_index))
-
-        return new_states
+        qstate.apply_x(self.target_qubit_index)

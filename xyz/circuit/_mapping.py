@@ -11,7 +11,7 @@ Last Modified time: 2023-06-23 00:14:40
 from typing import List
 import numpy as np
 
-from .gates import QGate, QGateType, RY, CX, MULTIPLEXY, QBit
+from .basic_gates import QGate, QGateType, RY, CX, MULTIPLEXY, QBit
 from xyz.utils.Synthesis.MultiControl import synthesize_multi_controlled_rotations
 
 

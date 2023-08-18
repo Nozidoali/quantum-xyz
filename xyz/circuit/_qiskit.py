@@ -15,8 +15,8 @@ from typing import List
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 
 # my own library
-from .gates import QBit, QGate, QGateType
-from .qiskit_gates import SpecialGates
+from .basic_gates import QBit, QGate, QGateType
+from .super_gates import SpecialGates
 
 
 def _to_qiskit(

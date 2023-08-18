@@ -11,17 +11,15 @@ Last Modified time: 2023-06-28 20:05:52
 from typing import List
 import numpy as np
 
-from .qtransition import (
+from xyz.circuit import QCircuit, X, MCRY, MULTIPLEXY
+
+from .operators import (
     MCRYOperator,
     QOperatorType,
-    QuantizedRotationType,
-    PureState,
-    find_first_diff_qubit_index,
-)
-from .qcircuit import QCircuit, X, MCRY, MULTIPLEXY
+    QuantizedRotationType)
 
 
-def recover_circuit(
+def convert_srg_to_circuit(
     transitions, _weights: List[float], verbose: bool = False
 ) -> QCircuit:
     """Recover the circuit with the same weight and weights .

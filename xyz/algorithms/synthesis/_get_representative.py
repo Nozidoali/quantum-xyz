@@ -12,7 +12,7 @@ from typing import List, Tuple
 
 import copy
 
-from xyz.circuit import QOperator, QState, QTransition, XOperator, PureState, QStateOpt
+from xyz.srgraph import QOperator, QState, QTransition, XOperator, PureState, QStateOpt
 from xyz.utils import call_with_global_timer
 
 
@@ -42,7 +42,7 @@ def get_representative(
         return state, None
 
     if isinstance(state, QStateOpt):
-        return state, None
+        return state, QTransition(num_qubits)
 
     curr_state = copy.copy(state)
     prev_state = None

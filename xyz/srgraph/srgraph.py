@@ -8,8 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 17:21:23
 """
 
-from .operators import QOperator, QState, ground_state
-
+from .operators import QOperator, QState
 
 class QTransition:
     """Class method to call the transition class ."""
@@ -24,7 +23,7 @@ class QTransition:
 
         self.__operators = [None]
 
-        self.__states = [ground_state(num_qubits)]
+        self.__states = [None]
 
     def add_operator(self, operator: QOperator) -> None:
         """Adds an operator to the list of operators .

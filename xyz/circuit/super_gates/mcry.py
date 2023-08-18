@@ -10,7 +10,7 @@ Last Modified time: 2023-06-22 15:01:37
 
 from qiskit.circuit.library.standard_gates import RYGate
 
-from ..gates import MCRY
+from ..basic_gates import MCRY
 
 
 class SpecialGates:

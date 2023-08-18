@@ -8,11 +8,11 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-11 23:56:48
 """
 
-from xyz import cnot_synthesis, recover_circuit, stopwatch, D_state, QStateOpt
+from xyz import cnot_synthesis, convert_srg_to_circuit, stopwatch, D_state, QStateOpt
 
-num_qubits = 5
+num_qubits = 2
 
-state_array = D_state(num_qubits, 2)
+state_array = D_state(num_qubits, 1)
 print("".join(["1" if x > 0 else "0" for x in state_array]))
 
 # state_array = GHZ_state(num_qubits)
@@ -20,10 +20,12 @@ print("".join(["1" if x > 0 else "0" for x in state_array]))
 state = QStateOpt(state_array, num_qubits)
 
 with stopwatch("SparseStateSynthesis"):
-    transitions = cnot_synthesis(state)
+    srg = cnot_synthesis(state, verbose=True)
+
+stg = srg_to_srg(srg)
 
 with stopwatch("transitions"):
-    circuit = recover_circuit(transitions, state_array)
+    circuit = convert_srg_to_circuit(transitions, state_array)
 
 circ = circuit.to_qiskit(with_measurement=False, with_tomography=True)
 

@@ -8,10 +8,9 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 11:02:26
 """
 
-from xyz.circuit import QState, QTransition, ground_state
-from .canonicalization import get_representative
-from ._engine import SearchEngine
-
+from xyz.srgraph import QState, QTransition
+from ._get_representative import get_representative
+from ._search import SearchEngine
 
 def cnot_synthesis(
     target_state: QState, enable_step_by_step: bool = False, verbose: bool = False
@@ -50,7 +49,7 @@ def cnot_synthesis(
             num_visited_states += 1
 
             # This function will break until we have a better state.
-            if len(curr_state) == 1:
+            if len(curr_state) == 0:
                 # we have found a better state
                 break
 
@@ -80,8 +79,8 @@ def cnot_synthesis(
                     continue
 
         assert engine.is_visited(curr_state)
-        # assert len(curr_state) < prev_ones
 
+        # start backtracing
         curr_transitions = QTransition(engine.num_qubits)
         state_before = curr_state
         for state, operator in engine.backtrace_state(state_before):
@@ -94,9 +93,4 @@ def cnot_synthesis(
 
         transitions = curr_transitions + transitions
 
-    zero_state, initial_transitions = get_representative(
-        curr_state, target_state.num_qubits
-    )
-    assert zero_state == ground_state(target_state.num_qubits)
-
-    return initial_transitions + transitions
+    return transitions

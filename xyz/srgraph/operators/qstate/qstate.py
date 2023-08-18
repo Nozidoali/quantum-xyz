@@ -5,12 +5,12 @@
 Author: Hanyu Wang
 Created time: 2023-08-12 03:02:33
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-08-12 10:32:00
+Last Modified time: 2023-08-18 14:20:30
 '''
 
 import numpy as np
 
-class QStateOpt:
+class QState:
     """Class method for QStateOpt
     """
     def __init__(self, state_array: np.ndarray, num_qubits: int) -> None:
@@ -22,9 +22,13 @@ class QStateOpt:
                 for j in range(num_qubits):
                     self.patterns[j] = self.patterns[j] << 1 | (i >> j & 1)
                 self.length += 1
+        self.const_one: int = 1 << num_qubits - 1
 
     def __len__(self) -> int:
-        return self.length
+        num_ones: int = 0
+        for j in range(self.num_qubits):
+            num_ones += self.patterns[j]
+        return num_ones
     
     def num_supports(self) -> int:
         """Returns the number of supported supports supports .
@@ -36,6 +40,7 @@ class QStateOpt:
 
     def count_ones(self) -> int:
         """Returns the number of ones in the state array.
+        
 
         :return: [description]
         :rtype: int
@@ -56,7 +61,7 @@ class QStateOpt:
         :param qubit_index: [description]
         :type qubit_index: int
         """
-        self.patterns[qubit_index] = ~self.patterns[qubit_index]
+        self.patterns[qubit_index] = self.const_one ^ self.patterns[qubit_index]
 
     def apply_cx(self, control_qubit_index: int, target_qubit_index: int) -> None:
         """Apply CX gate to the qubit.
@@ -68,7 +73,7 @@ class QStateOpt:
         """
         self.patterns[target_qubit_index] ^= self.patterns[control_qubit_index]
     
-    def apply_y(self, qubit_index: int) -> None:
+    def apply_merge0(self, qubit_index: int) -> None:
         """Apply the Y operator to the given qubit .
 
         :param qubit_index: [description]
@@ -76,3 +81,26 @@ class QStateOpt:
         """
         self.patterns[qubit_index] = 0
         
+
+    def canonicalize(self) -> None:
+
+        return
+    
+    def is_ground_state(self) -> None:
+        
+        return len(self) == 0
+    
+    def get_neighbors(self) -> None:
+
+        return
+    
+    def __str__(self) -> str:
+        return "-".join([f"{x:b}" for x in self.patterns])
+    
+
+    def __hash__(self) -> int:
+        ret_val: int = 1
+        for pattern in self.patterns:
+            ret_val <<= self.length
+            ret_val |= pattern
+        return ret_val

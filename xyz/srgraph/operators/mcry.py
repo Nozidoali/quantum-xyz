@@ -10,12 +10,10 @@ Last Modified time: 2023-06-28 11:42:30
 
 from typing import Any, List
 
-from xyz.circuit.qtransition.operators.qstate.qstate_opt import QStateOpt
+from .qstate import QState
 from .operator import QOperatorBase, QOperatorType
 from .rotation import QuantizedRotation, QuantizedRotationType
 from .control import MultiControlledOperator
-from .qstate import QState, PureState
-
 
 class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):
     """Construct a multi - controlledOperator .
@@ -48,52 +46,23 @@ class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):
         @return The modified quantum state after applying the gate operation.
         """
 
-        if isinstance(qstate, QStateOpt):
-            if self.rotation_type == QuantizedRotationType.SWAP:
-                if len(self.control_qubit_indices) == 0:
-                    qstate.apply_x(self.target_qubit_index)
-                else:
-                    assert len(self.control_qubit_indices) == 1
-                    qstate.apply_cx(
-                        self.target_qubit_index, self.control_qubit_indices[0]
-                    )
-                return qstate
-
-            if self.rotation_type == QuantizedRotationType.MERGE0:
-                assert len(self.control_qubit_indices) == 0
-                if len(self.control_qubit_indices) == 0:
-                    qstate.apply_y(self.target_qubit_index)
-                return qstate
-
+        if self.rotation_type == QuantizedRotationType.SWAP:
+            if len(self.control_qubit_indices) == 0:
+                qstate.apply_x(self.target_qubit_index)
+            else:
+                assert len(self.control_qubit_indices) == 1
+                qstate.apply_cx(
+                    self.target_qubit_index, self.control_qubit_indices[0]
+                )
             return qstate
 
-        new_states = QState([], qstate.num_qubits)
+        if self.rotation_type == QuantizedRotationType.MERGE0:
+            assert len(self.control_qubit_indices) == 0
+            if len(self.control_qubit_indices) == 0:
+                qstate.apply_merge0(self.target_qubit_index)
+            return qstate
 
-        pure_state: PureState
-
-        for pure_state in qstate():
-            # check the unateness
-            if not self.is_controlled(pure_state):
-                new_states.add_pure_state(pure_state)
-                continue
-
-            match self.rotation_type:
-                case QuantizedRotationType.SWAP:
-                    new_states.add_pure_state(pure_state.flip(self.target_qubit_index))
-
-                case QuantizedRotationType.MERGE0:
-                    if pure_state.flip(self.target_qubit_index) not in qstate:
-                        raise ValueError("The target state is not in the qstate")
-
-                    new_states.add_pure_state(pure_state.set0(self.target_qubit_index))
-
-                case QuantizedRotationType.MERGE1:
-                    if pure_state.flip(self.target_qubit_index) not in qstate:
-                        raise ValueError("The target state is not in the qstate")
-
-                    new_states.add_pure_state(pure_state.set1(self.target_qubit_index))
-
-        return new_states
+        return qstate
 
     def get_cost(self) -> int:
         """Returns the cost of the gate .

@@ -9,7 +9,7 @@ Last Modified time: 2023-06-22 23:43:32
 """
 
 from typing import List
-from .gates import QGate, QGateType, X, CX, RY, CRY
+from .basic_gates import QGate, QGateType, X, CX, RY, CRY
 
 from ._mapping import _add_gate_mapped
 
