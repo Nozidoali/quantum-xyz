@@ -12,8 +12,7 @@ from typing import List
 import numpy as np
 
 from xyz.circuit import QCircuit, X, MCRY, MULTIPLEXY
-
-from .operators import (
+from xyz.srgraph import (
     MCRYOperator,
     QOperatorType,
     QuantizedRotationType)

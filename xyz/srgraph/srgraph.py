@@ -10,7 +10,7 @@ Last Modified time: 2023-06-28 17:21:23
 
 from .operators import QOperator, QState
 
-class QTransition:
+class SRGraph:
     """Class method to call the transition class ."""
 
     def __init__(self, num_qubits: int) -> None:
@@ -119,17 +119,17 @@ class QTransition:
         for i in range(self.num_transitions()):
             yield self.transition_at(i)
 
-    def __add__(self, other: "QTransition") -> None:
-        """Adds the two QTransition to this QTransition .
+    def __add__(self, other: "SRGraph") -> None:
+        """Adds the two SRGraph to this SRGraph .
 
         :param other: [description]
-        :type other: QTransition
+        :type other: SRGraph
         :return: [description]
         :rtype: [type]
         """
         assert self.num_qubits == other.num_qubits
 
-        new_transition = QTransition(self.num_qubits)
+        new_transition = SRGraph(self.num_qubits)
 
         for transition in self.all_transitions():
             new_transition.add_transition(*transition)

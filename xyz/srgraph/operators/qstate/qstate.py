@@ -5,13 +5,13 @@
 Author: Hanyu Wang
 Created time: 2023-08-12 03:02:33
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-08-18 14:20:30
+Last Modified time: 2023-08-18 16:24:47
 '''
 
 import numpy as np
 
 class QState:
-    """Class method for QStateOpt
+    """Class method for QState
     """
     def __init__(self, state_array: np.ndarray, num_qubits: int) -> None:
         self.patterns = [0 for i in range(num_qubits)]

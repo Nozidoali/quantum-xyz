@@ -8,7 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-11 23:56:48
 """
 
-from xyz import cnot_synthesis, convert_srg_to_circuit, stopwatch, D_state, QStateOpt
+from xyz import synthesize_srg, convert_srg_to_circuit, stopwatch, D_state, QState
 
 num_qubits = 2
 
@@ -17,10 +17,10 @@ print("".join(["1" if x > 0 else "0" for x in state_array]))
 
 # state_array = GHZ_state(num_qubits)
 
-state = QStateOpt(state_array, num_qubits)
+state = QState(state_array, num_qubits)
 
 with stopwatch("SparseStateSynthesis"):
-    srg = cnot_synthesis(state, verbose=True)
+    srg = synthesize_srg(state, verbose=True)
 
 stg = srg_to_srg(srg)
 

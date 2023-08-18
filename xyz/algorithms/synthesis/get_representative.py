@@ -12,7 +12,7 @@ from typing import List, Tuple
 
 import copy
 
-from xyz.srgraph import QOperator, QState, QTransition, XOperator, PureState, QStateOpt
+from xyz.srgraph import QOperator, QState, SRGraph, XOperator, PureState, QState
 from xyz.utils import call_with_global_timer
 
 
@@ -34,19 +34,19 @@ def get_representative(
 
     @param state - the initial quantum state
     @param num_qubits - the number of qubits
-    @return A tuple containing the representative state and a list of quantum operators, in the class of the QTransition class.
+    @return A tuple containing the representative state and a list of quantum operators, in the class of the SRGraph class.
     """
 
     # if the state is empty, return the empty state.
     if num_qubits == 0:
         return state, None
 
-    if isinstance(state, QStateOpt):
-        return state, QTransition(num_qubits)
+    if isinstance(state, QState):
+        return state, SRGraph(num_qubits)
 
     curr_state = copy.copy(state)
     prev_state = None
-    transitions = QTransition(num_qubits)
+    transitions = SRGraph(num_qubits)
 
     counter: int = 0
 

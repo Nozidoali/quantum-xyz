@@ -8,13 +8,12 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 11:02:26
 """
 
-from xyz.srgraph import QState, QTransition
-from ._get_representative import get_representative
+from xyz.srgraph import QState, SRGraph
 from ._search import SearchEngine
 
-def cnot_synthesis(
+def synthesize_srg(
     target_state: QState, enable_step_by_step: bool = False, verbose: bool = False
-) -> QTransition:
+) -> SRGraph:
     """
     @brief Runs the search based state synthesis
     @param verbose Whether to print out the state of the search
@@ -22,7 +21,7 @@ def cnot_synthesis(
 
     engine = SearchEngine(target_state)
 
-    transitions = QTransition(target_state.num_qubits)
+    transitions = SRGraph(target_state.num_qubits)
 
     num_visited_states: int = 0
 
@@ -81,7 +80,7 @@ def cnot_synthesis(
         assert engine.is_visited(curr_state)
 
         # start backtracing
-        curr_transitions = QTransition(engine.num_qubits)
+        curr_transitions = SRGraph(engine.num_qubits)
         state_before = curr_state
         for state, operator in engine.backtrace_state(state_before):
             if verbose:

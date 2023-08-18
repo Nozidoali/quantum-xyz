@@ -10,8 +10,7 @@ Last Modified time: 2023-06-28 11:17:45
 
 from queue import PriorityQueue
 
-from xyz.srgraph import QState, QOperator, MCRYOperator, QuantizedRotationType
-from ._get_representative import get_representative
+from xyz.srgraph import QOperator, QState
 
 class SearchEngine:
     """Generate the engine class ."""
@@ -33,8 +32,7 @@ class SearchEngine:
         :return: [description]
         :rtype: [type]
         """
-        state_repr, _ = get_representative(state, self.num_qubits)
-        self.visited_states.add(state_repr)
+        self.visited_states.add(state)
 
     def add_state(self, state: QState, cost: int) -> bool:
         """Add a state to the machine .
@@ -46,16 +44,15 @@ class SearchEngine:
         :return: [description]
         :rtype: bool
         """
-        state_repr, _ = get_representative(state, self.num_qubits)
 
-        if state_repr in self.visited_states:
+        if state in self.visited_states:
             return False
 
-        if state_repr in self.enquened_states and self.enquened_states[state_repr] <= cost:
+        if state in self.enquened_states and self.enquened_states[state] <= cost:
             return False
 
         self.state_queue.put((cost, state))
-        self.enquened_states[state_repr] = cost
+        self.enquened_states[state] = cost
         return True
 
     def init_search(self) -> None:
@@ -122,8 +119,7 @@ class SearchEngine:
         :return: [description]
         :rtype: [type]
         """
-        state_repr, _ = get_representative(state, self.num_qubits)
-        return state_repr in self.visited_states
+        return state in self.visited_states
     
     @staticmethod
     def get_lower_bound(state: QState) -> int:
@@ -135,55 +131,3 @@ class SearchEngine:
         :rtype: int
         """
         return state.num_supports()
-
-    def get_operators(self, state: QState):
-        """Get the list of operators for the given state .
-
-        :param state: [description]
-        :type state: QState
-        :return: [description]
-        :rtype: [type]
-        """
-        one_counts = state.count_ones()
-
-        # yields the state of the pivot qubit.
-        for pivot_qubit_index in range(self.num_qubits):
-            # this qubit is a dont care qubit.
-            if one_counts[pivot_qubit_index] == 0 or one_counts[pivot_qubit_index] == len(
-                state
-            ):
-                continue
-
-            # yields the rotation state of the current state.
-            for rotation_type in [
-                QuantizedRotationType.SWAP,
-                QuantizedRotationType.MERGE0,
-            ]:
-                # first we try the case where no control qubit is used
-                operator = MCRYOperator(
-                    target_qubit_index=pivot_qubit_index,
-                    rotation_type=rotation_type,
-                    control_qubit_indices=[],
-                    control_qubit_phases=[],
-                )
-
-                yield operator
-
-                if rotation_type == QuantizedRotationType.MERGE0:
-                    continue
-
-                # Yields the state of the current state of the MCRY operatorerator.
-                for control_qubit_index in range(self.num_qubits):
-                    # If control_qubit_index is pivot_qubit_index control_qubit_index pivot_qubit_index.
-                    if control_qubit_index == pivot_qubit_index:
-                        continue
-
-                    # Yields the state of the current state.
-                    operator = MCRYOperator(
-                        target_qubit_index=pivot_qubit_index,
-                        rotation_type=rotation_type,
-                        control_qubit_indices=[control_qubit_index],
-                        control_qubit_phases=[True],
-                    )
-
-                    yield operator
