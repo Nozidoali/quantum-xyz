@@ -135,8 +135,8 @@ dmypy.json
 tmp.*
 
 # Visualizations
-# *.dot
-# *.png
+*.dot
+*.png
 *.pdf
 *.svg
 *.log

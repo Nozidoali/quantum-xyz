@@ -8,133 +8,176 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 17:21:23
 """
 
-from .operators import QOperator, QState
+from cProfile import label
+from queue import PriorityQueue
+from time import process_time_ns
+import pygraphviz as pgv
+import copy
+
+from .operators import QOperator, QState, QuantizedRotationType, MCRYOperator
 
 class SRGraph:
     """Class method to call the transition class ."""
 
-    def __init__(self, num_qubits: int) -> None:
-        """Initialize the circuit .
 
-        :param num_qubits: [description]
-        :type num_qubits: int
-        """
+    def __init__(self, num_qubits: int) -> None:
         self.num_qubits = num_qubits
 
-        self.__operators = [None]
+        self.visited_states = set()
+        self.state_queue = PriorityQueue()
+        self.enquened_states = {}
+        self.record = {}
 
-        self.__states = [None]
+    def visit(self, state: QState) -> None:
+        """Visit the current state and return the result .
 
-    def add_operator(self, operator: QOperator) -> None:
-        """Adds an operator to the list of operators .
-
-        :param operator: [description]
-        :type operator: QOperator
-        """
-        self.__operators.append(operator)
-
-    def add_transition(
-        self, state_before: QState, operator: QOperator, state_after: QState
-    ) -> None:
-        """Adds a transition to the state .
-
-        :param state_before: [description]
-        :type state_before: QState
-        :param operator: [description]
-        :type operator: QOperator
-        :param state_after: [description]
-        :type state_after: QState
-        """
-        if self.num_transitions() == 0:
-            self.__states[0] = state_before
-
-        self.__operators.append(operator)
-        self.__states.append(state_after)
-
-    def add_transition_to_front(
-        self, state_before: QState, operator: QOperator, state_after: QState
-    ) -> None:
-        """Adds a transition to the front of the list .
-
-        :param state_before: [description]
-        :type state_before: QState
-        :param operator: [description]
-        :type operator: QOperator
-        :param state_after: [description]
-        :type state_after: QState
-        """
-        self.__operators.insert(1, operator)
-        self.__states.insert(1, state_after)
-
-        self.__states[0] = state_before
-
-    def add_transition_to_back(
-        self, state_before: QState, operator: QOperator, state_after: QState
-    ) -> None:
-        """Adds a transition to the given state before the given state .
-
-        :param state_before: [description]
-        :type state_before: QState
-        :param operator: [description]
-        :type operator: QOperator
-        :param state_after: [description]
-        :type state_after: QState
+        :param state: [description]
+        :type state: QState
         :return: [description]
         :rtype: [type]
         """
-        return self.add_transition(state_before, operator, state_after)
+        self.visited_states.add(state.representative())
 
-    def num_transitions(self) -> int:
-        """The number of transitions in the chain .
+    def add_state(self, state: QState, cost: int) -> bool:
+        """Add a state to the machine .
 
+        :param state: [description]
+        :type state: QState
+        :param cost: [description]
+        :type cost: int
+        :return: [description]
+        :rtype: bool
+        """
+
+        representive: QState = state.representative()
+
+        if representive in self.visited_states:
+            return False
+
+        if representive in self.enquened_states and self.enquened_states[representive] <= cost:
+            return False
+
+        self.state_queue.put((cost, state))
+        self.enquened_states[representive] = cost
+        return True
+
+    def init_search(self) -> None:
+        """Initialize search state ."""
+        self.visited_states.clear()
+        self.state_queue = PriorityQueue()
+        self.enquened_states.clear()
+        self.record.clear()
+
+    def add_edge(
+        self, state_before: QState, operator: QOperator, state_after: QState
+    ) -> None:
+        """Record a operation between state_after and state_after_after_after_after .
+
+        :param state_before: [description]
+        :type state_before: QState
+        :param operator: [description]
+        :type operator: QOperator
+        :param state_after: [description]
+        :type state_after: QState
+        """
+        self.record[state_after] = state_before, operator
+
+    def get_prev_state(self, state: QState) -> QState:
+        """Get the previous state of a state .
+
+        :param state: [description]
+        :type state: QState
+        :return: [description]
+        :rtype: QState
+        """
+        try:
+            return self.record[state][0]
+        except KeyError:
+            return None
+
+    def search_done(self) -> bool:
+        """Return True if all search is done .
+
+        :return: [description]
+        :rtype: bool
+        """
+        return self.state_queue.empty()
+
+    def backtrace_state(self, state: QState, max_depth: int = 100):
+        """Return a generator that yields the operations from the given state .
+
+        :param state: [description]
+        :type state: QState
+        :yield: [description]
+        :rtype: [type]
+        """
+        curr_state = state
+        curr_depth: int = 0
+        while curr_state in self.record:
+            # to avoid infinite loop
+            if curr_depth > max_depth:
+                raise RuntimeError(f"Backtrace depth exceeded state = {curr_state}")
+            curr_depth += 1
+
+            prev_state, operator = self.record[curr_state]
+            yield prev_state, operator
+            curr_state = prev_state
+
+    def is_visited(self, state: QState):
+        """Returns whether the given state is visited .
+
+        :param state: [description]
+        :type state: QState
+        :return: [description]
+        :rtype: [type]
+        """
+        return state.representative() in self.visited_states
+    
+    @staticmethod
+    def get_lower_bound(state: QState) -> int:
+        """Returns the lower bound of the state .
+
+        :param state: [description]
+        :type state: QState
         :return: [description]
         :rtype: int
         """
-        return len(self.__operators) - 1
+        return state.num_supports()
 
-    def transition_at(self, index: int) -> QOperator:
-        """Returns the state before the given index .
+    def explore(self, cost: int, state: QState):
+        """Return the neighbors of the state .
 
-        :param index: [description]
-        :type index: int
-        :return: [description]
-        :rtype: QOperator
+        :param state: [description]
+        :type state: QState
         """
-        assert index >= 0 and index < self.num_transitions()
 
-        state_before = self.__states[index]
-        state_after = self.__states[index + 1]
-        operator = self.__operators[index + 1]
+        for target_qubit in range(self.num_qubits):
+            if state.patterns[target_qubit] == 0:
+                continue
 
-        return state_before, operator, state_after
+            for control_qubit in range(self.num_qubits):
+                if control_qubit == target_qubit:
+                    continue
 
-    def all_transitions(self) -> list:
-        """Return a list of all transitions in the state .
+                if state.patterns[control_qubit] == 0:
+                    continue
 
-        :return: [description]
-        :rtype: list
-        :yield: [description]
-        :rtype: Iterator[list]
-        """
-        for i in range(self.num_transitions()):
-            yield self.transition_at(i)
+                operator = MCRYOperator(target_qubit, QuantizedRotationType.SWAP, [control_qubit], [True])
+                next_state = state.apply_cx(control_qubit, target_qubit)
+                
+                if not next_state < state:
+                    continue
 
-    def __add__(self, other: "SRGraph") -> None:
-        """Adds the two SRGraph to this SRGraph .
+                next_cost = cost + operator.get_cost() + self.get_lower_bound(next_state)
+                if self.add_state(next_state, next_cost):
+                   self.add_edge(state, operator, next_state)
 
-        :param other: [description]
-        :type other: SRGraph
-        :return: [description]
-        :rtype: [type]
-        """
-        assert self.num_qubits == other.num_qubits
-
-        new_transition = SRGraph(self.num_qubits)
-
-        for transition in self.all_transitions():
-            new_transition.add_transition(*transition)
-
-        for transition in other.all_transitions():
-            new_transition.add_transition(*transition)
-
-        return new_transition
+    def __str__(self) -> str:
+        graph: pgv.AGraph = pgv.AGraph(directed=True)
+        for state in self.record:
+            representative = state.representative()
+            state_cost = self.enquened_states[representative]
+            graph.add_node(str(state), label= f"{representative}({state_cost})")
+            for prev_state, operator in self.backtrace_state(state):
+                graph.add_edge(str(prev_state), str(state), label=str(operator) + f"({operator.get_cost()})")
+        return graph.string()

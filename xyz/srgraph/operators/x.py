@@ -36,3 +36,12 @@ class XOperator(QOperatorBase, QuantizedRotation):
         @return The modified quantum state after applying the gate operation.
         """
         qstate.apply_x(self.target_qubit_index)
+
+    def __str__(self) -> str:
+        """The repr of the class .
+
+        :return: [description]
+        :rtype: str
+        """
+
+        return f"X({self.target_qubit_index})"
