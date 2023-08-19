@@ -11,7 +11,7 @@ Last Modified time: 2023-08-18 21:09:09
 import subprocess
 import numpy as np
 
-from xyz import QState, synthesize_srg, D_state
+from xyz import QState, synthesize_srg, D_state, stopwatch, get_time, representative_cache_size, representative_cache_hit
 
 
 def rand_state(num_qubit: int, sparsity: int) -> QState:
@@ -32,13 +32,18 @@ def rand_state(num_qubit: int, sparsity: int) -> QState:
 
 def test_synthesis():
     """Test that the synthesis is used ."""
-    state = QState(D_state(3, 2), 3)
-    srg = synthesize_srg(state)
+    state = QState(D_state(4, 2), 4)
+    
+    with stopwatch("synthesis"):
+        srg = synthesize_srg(state)
     with open("srg.dot", "w") as f:
         f.write(str(srg))
-
+    print(f"time = {get_time('representative')}")
     subprocess.run(["dot", "-Tpng", "srg.dot", "-o", "srg.png"])
 
+    # report 
+    print(f"representative cache size = {representative_cache_size()}")
+    print(f"representative cache hit = {representative_cache_hit()}")
 
 if __name__ == "__main__":
     test_synthesis()

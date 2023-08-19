@@ -85,6 +85,11 @@ class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):
             if self.rotation_type is QuantizedRotationType.MERGE0
             else "Y"
         )
+        if len(self.control_qubit_indices) == 0:
+            return f"{rotation_str}({self.target_qubit_index})"
+        if len(self.control_qubit_indices) == 1:
+            return f"C{rotation_str}({self.control_qubit_indices[0]}, {self.target_qubit_index})"
+        
         return f"MCRY({self.target_qubit_index}, {rotation_str}, {self.control_qubit_indices}, {self.control_qubit_phases})"
 
     def __invert__(self):

@@ -32,7 +32,7 @@ def rand_state(num_qubit: int, sparsity: int) -> QState:
 def test_canonicalization():
     """Test that the canonicalization is used ."""
     # state = rand_state(3, 3)
-    state = QState(np.array([1, 0, 0, 1, 0, 0, 0, 1]), 3)
+    state = QState(np.array([0, 1, 0, 0, 1, 0, 0, 1]), 3)
     print(f"before: {state}")
 
     state = state.representative()
