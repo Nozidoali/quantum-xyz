@@ -15,6 +15,7 @@ from .operator import QOperatorBase, QOperatorType
 from .rotation import QuantizedRotation, QuantizedRotationType
 from .control import MultiControlledOperator
 
+
 class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):
     """Construct a multi - controlledOperator .
 
@@ -51,9 +52,7 @@ class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):
                 qstate.apply_x(self.target_qubit_index)
             else:
                 assert len(self.control_qubit_indices) == 1
-                qstate.apply_cx(
-                    self.target_qubit_index, self.control_qubit_indices[0]
-                )
+                qstate.apply_cx(self.target_qubit_index, self.control_qubit_indices[0])
             return qstate
 
         if self.rotation_type == QuantizedRotationType.MERGE0:

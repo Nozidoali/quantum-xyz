@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
 
-'''
+"""
 Author: Hanyu Wang
 Created time: 2023-08-12 03:02:33
 Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-19 13:40:18
-'''
+"""
 
 from typing import List
 from itertools import permutations
@@ -14,9 +14,10 @@ from itertools import permutations
 import copy
 import numpy as np
 
+
 class QState:
-    """Class method for QState
-    """
+    """Class method for QState"""
+
     def __init__(self, state_array: np.ndarray, num_qubits: int) -> None:
         self.patterns = [0 for i in range(num_qubits)]
         self.num_qubits = num_qubits
@@ -33,7 +34,7 @@ class QState:
         for j in range(self.num_qubits):
             num_ones += self.patterns[j]
         return num_ones
-    
+
     def num_supports(self) -> int:
         """Returns the number of supported supports supports .
 
@@ -44,7 +45,7 @@ class QState:
 
     def count_ones(self) -> int:
         """Returns the number of ones in the state array.
-        
+
 
         :return: [description]
         :rtype: int
@@ -58,7 +59,7 @@ class QState:
                 pattern >>= 1
 
         return one_counts
-    
+
     def apply_x(self, qubit_index: int) -> None:
         """Apply X gate to the qubit.
 
@@ -80,7 +81,7 @@ class QState:
         next_state = copy.deepcopy(self)
         next_state.patterns[target_qubit_index] ^= self.patterns[control_qubit_index]
         return next_state
-    
+
     def apply_merge0(self, qubit_index: int) -> None:
         """Apply the Y operator to the given qubit .
 
@@ -90,8 +91,7 @@ class QState:
         self.patterns[qubit_index] = 0
 
     def __transpose(self) -> List[int]:
-        """Transpose the state array .
-        """
+        """Transpose the state array ."""
         values = [0 for i in range(self.length)]
         for qubit_index in range(self.num_qubits):
             pattern = self.patterns[qubit_index]
@@ -101,8 +101,7 @@ class QState:
         return values
 
     def cleanup_columns(self) -> None:
-        """Remove the redundant supports supports .
-        """
+        """Remove the redundant supports supports ."""
         values = self.__transpose()
         values = set(values)
         self.length = len(values)
@@ -127,10 +126,8 @@ class QState:
 
             yield patterns
 
-            
-    def representative(self) -> 'QState':
-        """Return a repr string for this object .
-        """
+    def representative(self) -> "QState":
+        """Return a repr string for this object ."""
         repr_state = copy.deepcopy(self)
 
         # remove redundant columns, update length
@@ -152,13 +149,13 @@ class QState:
                 if patterns[i] > repr_state.patterns[i]:
                     is_smallest = False
                     break
-            
+
             # update if this is the smallest
             if is_smallest:
                 repr_state.patterns = copy.deepcopy(patterns)
 
         return repr_state
-    
+
     def is_ground_state(self) -> None:
         """True if the current state is a ground state .
 
@@ -166,16 +163,15 @@ class QState:
         :rtype: [type]
         """
         return len(self) == 0
-    
+
     def __str__(self) -> str:
         return "-".join([f"{x:b}".zfill(self.length) for x in self.patterns])
-    
 
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, QState):
             return False
         return self.patterns == o.patterns
-    
+
     def __lt__(self, o: object) -> bool:
         if not isinstance(o, QState):
             return False

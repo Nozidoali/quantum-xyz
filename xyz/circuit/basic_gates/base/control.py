@@ -12,18 +12,20 @@ from typing import List
 
 from .qubit import QBit
 
+
 class ControlledGate:
-    """Classmethod for creating a controlled gate .
-    """
+    """Classmethod for creating a controlled gate ."""
+
     def __init__(self, control_qubit: QBit, phase: int = 1) -> None:
         self.phase = phase
 
         assert isinstance(control_qubit, QBit)
         self.control_qubit = control_qubit
 
+
 class MultiControlledGate:
-    """Class method for creating a multiControlledGate .
-    """
+    """Class method for creating a multiControlledGate ."""
+
     def __init__(self, control_qubits: List[QBit], phases: List[int]) -> None:
         self.control_qubits = control_qubits
         self.phases = phases

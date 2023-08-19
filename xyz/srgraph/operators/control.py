@@ -10,6 +10,7 @@ Last Modified time: 2023-06-28 11:29:03
 
 from typing import List
 
+
 class ControlledOperator:
     """Class method for creating the ControlledOperator ."""
 

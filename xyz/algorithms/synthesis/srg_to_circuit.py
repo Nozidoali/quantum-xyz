@@ -12,10 +12,7 @@ from typing import List
 import numpy as np
 
 from xyz.circuit import QCircuit, X, MCRY, MULTIPLEXY
-from xyz.srgraph import (
-    MCRYOperator,
-    QOperatorType,
-    QuantizedRotationType)
+from xyz.srgraph import MCRYOperator, QOperatorType, QuantizedRotationType
 
 
 def convert_srg_to_circuit(

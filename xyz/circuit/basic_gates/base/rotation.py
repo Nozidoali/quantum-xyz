@@ -11,9 +11,10 @@ Last Modified time: 2023-06-22 23:25:35
 import numpy as np
 from typing import List
 
+
 class RotationGate:
-    """Classmethod to handle RotationGate .
-    """
+    """Classmethod to handle RotationGate ."""
+
     def __init__(self, theta: float) -> None:
         self.theta = theta
 
@@ -33,9 +34,9 @@ class RotationGate:
         """
         return np.isclose(self.theta, np.pi) or np.isclose(self.theta, -np.pi)
 
+
 class MultiRotationGate:
-    """Class method for creating a new rotation gate .
-    """
+    """Class method for creating a new rotation gate ."""
+
     def __init__(self, thetas: List[float]) -> None:
         self.thetas = thetas
-

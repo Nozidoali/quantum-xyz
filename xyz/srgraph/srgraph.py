@@ -17,9 +17,9 @@ import copy
 
 from .operators import QOperator, QState, QuantizedRotationType, MCRYOperator
 
+
 class SRGraph:
     """Class method to call the transition class ."""
-
 
     def __init__(self, num_qubits: int) -> None:
         self.num_qubits = num_qubits
@@ -55,7 +55,10 @@ class SRGraph:
         if representive in self.visited_states:
             return False
 
-        if representive in self.enquened_states and self.enquened_states[representive] <= cost:
+        if (
+            representive in self.enquened_states
+            and self.enquened_states[representive] <= cost
+        ):
             return False
 
         self.state_queue.put((cost, state))
@@ -133,7 +136,7 @@ class SRGraph:
         :rtype: [type]
         """
         return state.representative() in self.visited_states
-    
+
     @staticmethod
     def get_lower_bound(state: QState) -> int:
         """Returns the lower bound of the state .
@@ -153,7 +156,6 @@ class SRGraph:
         """
 
         for target_qubit in range(self.num_qubits):
-
             # skip if the target qubit is already 0
             if state.patterns[target_qubit] == 0:
                 continue
@@ -166,25 +168,34 @@ class SRGraph:
                     continue
 
                 # CNOT
-                operator = MCRYOperator(target_qubit, QuantizedRotationType.SWAP, [control_qubit], [True])
+                operator = MCRYOperator(
+                    target_qubit, QuantizedRotationType.SWAP, [control_qubit], [True]
+                )
                 next_state = state.apply_cx(control_qubit, target_qubit)
-                
+
                 if not next_state < state:
                     continue
 
-                next_cost = cost + operator.get_cost() + self.get_lower_bound(next_state)
+                next_cost = (
+                    cost + operator.get_cost() + self.get_lower_bound(next_state)
+                )
                 if self.add_state(next_state, next_cost):
-                   
-                   print(f"add edge: {state} -> {next_state} by {operator}")
-                   self.add_edge(state, operator, next_state)
+                    print(f"add edge: {state} -> {next_state} by {operator}")
+                    self.add_edge(state, operator, next_state)
 
     def __str__(self) -> str:
         graph: pgv.AGraph = pgv.AGraph(directed=True)
-        
+
         for state, edge in self.record.items():
             representative = state.representative()
             state_cost = self.enquened_states[representative]
-            graph.add_node(str(state), label= f"[{state}]\n{representative}({state_cost})")
+            graph.add_node(
+                str(state), label=f"[{state}]\n{representative}({state_cost})"
+            )
             prev_state, edge_operator, *_ = edge
-            graph.add_edge(str(prev_state), str(state), label=str(edge_operator) + f"({edge_operator.get_cost()})")
+            graph.add_edge(
+                str(prev_state),
+                str(state),
+                label=str(edge_operator) + f"({edge_operator.get_cost()})",
+            )
         return graph.string()

@@ -12,6 +12,7 @@ import copy
 
 from xyz.srgraph import QState, SRGraph, XOperator
 
+
 def synthesize_srg(
     target_state: QState, enable_step_by_step: bool = False, verbose: bool = False
 ) -> SRGraph:
@@ -24,7 +25,7 @@ def synthesize_srg(
     srg.init_search()
 
     curr_state = target_state
-    
+
     srg.add_state(curr_state, cost=srg.get_lower_bound(curr_state))
 
     # This function is called by the search loop.
@@ -35,10 +36,12 @@ def synthesize_srg(
         if curr_state.is_ground_state():
             break
 
-        print(f"queue size: {srg.state_queue.qsize()}, enqueued states: {len(srg.enquened_states)}, visited states: {len(srg.visited_states)}")
+        print(
+            f"queue size: {srg.state_queue.qsize()}, enqueued states: {len(srg.enquened_states)}, visited states: {len(srg.visited_states)}"
+        )
         print(f"current cost: {curr_cost}, current state: {curr_state}")
 
         srg.explore(curr_cost, curr_state)
-    
+
     print(f"done")
     return srg
