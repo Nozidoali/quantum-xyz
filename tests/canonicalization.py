@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-08-18 19:41:07
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-08-18 20:22:18
+Last Modified time: 2023-08-19 13:34:14
 '''
 
 import numpy as np
@@ -28,10 +28,11 @@ def rand_state(num_qubit: int, sparsity: int) -> QState:
 def test_canonicalization():
     """Test that the canonicalization is used .
     """
-    state = rand_state(3, 3)
+    # state = rand_state(3, 3)
+    state = QState(np.array([1, 0, 0, 1, 0, 0, 0, 1]), 3)
     print(f"before: {state}")
     
-    state.canonicalize()
+    state = state.representative()
     print(f"after: {state}")
 
 if __name__ == "__main__":

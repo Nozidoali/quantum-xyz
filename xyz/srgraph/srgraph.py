@@ -9,6 +9,7 @@ Last Modified time: 2023-06-28 17:21:23
 """
 
 from cProfile import label
+import operator
 from queue import PriorityQueue
 from time import process_time_ns
 import pygraphviz as pgv
@@ -152,6 +153,8 @@ class SRGraph:
         """
 
         for target_qubit in range(self.num_qubits):
+
+            # skip if the target qubit is already 0
             if state.patterns[target_qubit] == 0:
                 continue
 
@@ -162,6 +165,7 @@ class SRGraph:
                 if state.patterns[control_qubit] == 0:
                     continue
 
+                # CNOT
                 operator = MCRYOperator(target_qubit, QuantizedRotationType.SWAP, [control_qubit], [True])
                 next_state = state.apply_cx(control_qubit, target_qubit)
                 
@@ -170,14 +174,17 @@ class SRGraph:
 
                 next_cost = cost + operator.get_cost() + self.get_lower_bound(next_state)
                 if self.add_state(next_state, next_cost):
+                   
+                   print(f"add edge: {state} -> {next_state} by {operator}")
                    self.add_edge(state, operator, next_state)
 
     def __str__(self) -> str:
         graph: pgv.AGraph = pgv.AGraph(directed=True)
-        for state in self.record:
+        
+        for state, edge in self.record.items():
             representative = state.representative()
             state_cost = self.enquened_states[representative]
-            graph.add_node(str(state), label= f"{representative}({state_cost})")
-            for prev_state, operator in self.backtrace_state(state):
-                graph.add_edge(str(prev_state), str(state), label=str(operator) + f"({operator.get_cost()})")
+            graph.add_node(str(state), label= f"[{state}]\n{representative}({state_cost})")
+            prev_state, edge_operator, *_ = edge
+            graph.add_edge(str(prev_state), str(state), label=str(edge_operator) + f"({edge_operator.get_cost()})")
         return graph.string()

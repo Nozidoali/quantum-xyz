@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-08-12 03:02:33
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-08-19 13:21:59
+Last Modified time: 2023-08-19 13:40:18
 '''
 
 from typing import List
@@ -147,12 +147,15 @@ class QState:
             patterns = sorted(patterns)
 
             # check if this is the smallest
+            is_smallest = True
             for i in range(repr_state.num_qubits):
                 if patterns[i] > repr_state.patterns[i]:
+                    is_smallest = False
                     break
             
             # update if this is the smallest
-            repr_state.patterns = patterns
+            if is_smallest:
+                repr_state.patterns = copy.deepcopy(patterns)
 
         return repr_state
     
