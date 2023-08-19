@@ -5,13 +5,14 @@
 Author: Hanyu Wang
 Created time: 2023-08-12 03:02:33
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-08-18 21:00:55
+Last Modified time: 2023-08-19 13:21:59
 '''
 
-from calendar import c
+from typing import List
+from itertools import permutations
+
 import copy
 import numpy as np
-from sympy import Q
 
 class QState:
     """Class method for QState
@@ -87,19 +88,73 @@ class QState:
         :type qubit_index: int
         """
         self.patterns[qubit_index] = 0
-    
+
+    def __transpose(self) -> List[int]:
+        """Transpose the state array .
+        """
+        values = [0 for i in range(self.length)]
+        for qubit_index in range(self.num_qubits):
+            pattern = self.patterns[qubit_index]
+            for i in range(self.length):
+                values[i] = values[i] << 1 | (pattern & 1)
+                pattern >>= 1
+        return values
+
+    def cleanup_columns(self) -> None:
+        """Remove the redundant supports supports .
+        """
+        values = self.__transpose()
+        values = set(values)
+        self.length = len(values)
+        self.patterns = [0 for i in range(self.num_qubits)]
+        for _, value in enumerate(values):
+            for j in range(self.num_qubits):
+                self.patterns[j] = self.patterns[j] << 1 | (value >> j & 1)
+
+    def all_column_permutations(self):
+        """Generator over all permutations of all columns in the DataFrame .
+
+        :yield: [description]
+        :rtype: [type]
+        """
+        values = self.__transpose()
+        for perm in permutations(values):
+            # transpose back
+            patterns = [0 for i in range(self.num_qubits)]
+            for _, value in enumerate(perm):
+                for j in range(self.num_qubits):
+                    patterns[j] = patterns[j] << 1 | (value >> j & 1)
+
+            yield patterns
+
+            
     def representative(self) -> 'QState':
         """Return a repr string for this object .
         """
         repr_state = copy.deepcopy(self)
-        repr_state.patterns = sorted(repr_state.patterns)
-        return repr_state
 
-    def canonicalize(self) -> None:
-        """Returns a canonicalized version of self . pattern .
-        """
-        self.patterns = np.sort(self.patterns)
-        return
+        # remove redundant columns, update length
+        repr_state.cleanup_columns()
+
+        for patterns in repr_state.all_column_permutations():
+            # run x and qubit permutations
+            for qubit_index in range(repr_state.num_qubits):
+                # apply X gate to reduce pattern
+                if patterns[qubit_index] >> (self.length - 1) == 1:
+                    patterns[qubit_index] = repr_state.const_one ^ patterns[qubit_index]
+
+            # sort patterns
+            patterns = sorted(patterns)
+
+            # check if this is the smallest
+            for i in range(repr_state.num_qubits):
+                if patterns[i] > repr_state.patterns[i]:
+                    break
+            
+            # update if this is the smallest
+            repr_state.patterns = patterns
+
+        return repr_state
     
     def is_ground_state(self) -> None:
         """True if the current state is a ground state .
@@ -107,7 +162,6 @@ class QState:
         :return: [description]
         :rtype: [type]
         """
-        
         return len(self) == 0
     
     def __str__(self) -> str:
