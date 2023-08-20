@@ -9,63 +9,9 @@ Last Modified time: 2023-08-19 13:40:18
 """
 
 from typing import List
-from itertools import permutations
-from functools import cache
 
 import copy
 import numpy as np
-
-from xyz.utils.timer import call_with_global_timer
-
-__representative_cache = {}
-__representative_cache_hit = 0
-
-@cache
-def representative_cache_hit():
-    """Return the number of cache hits."""
-    global __representative_cache_hit
-    return __representative_cache_hit
-
-@cache
-def representative_cache_clear():
-    """Clear the cache."""
-    global __representative_cache
-    __representative_cache = {}
-    
-@cache
-def representative_cache_size():
-    """Return the size of the cache."""
-    global __representative_cache
-    return len(__representative_cache)
-
-@cache
-def representative_cache_read(state: "QState") -> "QState":
-    """Return the representative of the given state .
-
-    :param state: [description]
-    :type state: [type]
-    :return: [description]
-    :rtype: [type]
-    """
-    global __representative_cache
-    global __representative_cache_hit
-    if state in __representative_cache:
-        __representative_cache_hit += 1
-        return __representative_cache[state]
-    else:
-        return None
-
-@cache
-def representative_cache_write(state: "QState", value: "QState") -> None:
-    """Write the representative of the given state .
-
-    :param state: [description]
-    :type state: [type]
-    :param value: [description]
-    :type value: [type]
-    """
-    global __representative_cache
-    __representative_cache[state] = value
 
 class QState:
     """Class method for QState"""
@@ -81,6 +27,9 @@ class QState:
                     self.patterns[j] = self.patterns[j] << 1 | (i >> j & 1)
                 self.length += 1
         self.signature_length: int = self.length
+    
+    # canonicalization
+    from ._representative import representative
 
     def __len__(self) -> int:
         num_ones: int = 0
@@ -171,7 +120,7 @@ class QState:
         next_state.cleanup_columns()
         return next_state
 
-    def __transpose(self) -> List[int]:
+    def transpose(self) -> List[int]:
         """Transpose the state array ."""
         values = [0 for i in range(self.length)]
         for qubit_index in range(self.num_qubits):
@@ -232,7 +181,7 @@ class QState:
 
     def cleanup_columns(self) -> None:
         """Remove the redundant supports supports ."""
-        values = self.__transpose()
+        values = self.transpose()
         values = set(values)
         self.length = len(values)
         self.const_one = (1 << self.length) - 1
@@ -240,80 +189,14 @@ class QState:
         for _, value in enumerate(values):
             for j in range(self.num_qubits):
                 self.patterns[j] = self.patterns[j] << 1 | (value >> j & 1)
-
-    def all_column_permutations(self):
-        """Generator over all permutations of all columns in the DataFrame .
-
-        :yield: [description]
-        :rtype: [type]
-        """
-        values = self.__transpose()
-        for perm in permutations(values):
-            # transpose back
-            patterns = [0 for i in range(self.num_qubits)]
-            for _, value in enumerate(perm):
-                for j in range(self.num_qubits):
-                    patterns[j] = patterns[j] << 1 | (value >> j & 1)
-
-            yield patterns
             
-    def __transpose_back(self, values: List[int]) -> List[int]:
+    def transpose_back(self, values: List[int]) -> List[int]:
         """Transpose the state array ."""
         patterns = [0 for i in range(self.num_qubits)]
         for _, value in enumerate(values):
             for j in range(self.num_qubits):
                 patterns[j] = patterns[j] << 1 | (value >> j & 1)
         return patterns
-        
-    def lowest_column_permutations(self):
-        """Get the smallest column permutations that are not equal to the given state .
-
-        :return: [description]
-        :rtype: [type]
-        """
-        values = self.__transpose()
-        sorted_values = sorted(values)
-        return self.__transpose_back(sorted_values)
-        
-    @call_with_global_timer
-    def representative(self) -> "QState":
-        """Return a repr string for this object ."""
-        
-        cached_repr = representative_cache_read(self)
-        if cached_repr is not None:
-            return copy.deepcopy(cached_repr)
-        
-        repr_state = copy.deepcopy(self)
-
-        # remove redundant columns, update length
-        repr_state.cleanup_columns()
-
-        for patterns in repr_state.all_column_permutations():
-            # run x and qubit permutations
-            for qubit_index in range(repr_state.num_qubits):
-                # apply X gate to reduce pattern
-                if patterns[qubit_index] >> (self.length - 1) == 1:
-                    patterns[qubit_index] = ~patterns[qubit_index] & self.const_one
-
-            # sort patterns
-            patterns = sorted(patterns)
-
-            # check if this is the smallest
-            is_smallest = True
-            for i in range(repr_state.num_qubits):
-                if patterns[i] > repr_state.patterns[i]:
-                    is_smallest = False
-                    break
-                if patterns[i] < repr_state.patterns[i]:
-                    break
-
-            # update if this is the smallest
-            if is_smallest:
-                repr_state.patterns = copy.deepcopy(patterns)
-                
-        representative_cache_write(self, repr_state)
-
-        return repr_state
 
     def is_ground_state(self) -> None:
         """True if the current state is a ground state .
@@ -322,6 +205,7 @@ class QState:
         :rtype: [type]
         """
         return self.length == 1
+
     
     @staticmethod
     def ground_state(num_qubits: int) -> "QState":
