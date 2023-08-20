@@ -11,9 +11,8 @@ Last Modified time: 2023-06-28 11:02:26
 import copy
 import sys
 
-from xyz.srgraph import QState, SRGraph, XOperator, MCRYOperator, QuantizedRotationType
+from xyz.srgraph import QState, SRGraph, XOperator, MCRYOperator, QuantizedRotationType, representative
 from xyz.srgraph.operators.operator import QOperator
-
 
 def explore_state(srg: SRGraph, curr_state: QState, operator: QOperator, curr_cost: int) -> None:
     """Explore a state in a SRGraph .
@@ -31,19 +30,7 @@ def explore_state(srg: SRGraph, curr_state: QState, operator: QOperator, curr_co
     next_state = operator(curr_state)
     next_cost = curr_cost + operator.get_cost() + srg.get_lower_bound(next_state) - srg.get_lower_bound(curr_state)
     
-    # pre-processing
-    next_state.cleanup_columns()
-    
-    # pre-processing Xs
-    state = copy.deepcopy(next_state)
-    x_signatures = next_state.get_x_signatures()
-    for i in x_signatures:
-        state = state.apply_x(i)
-        
-    # pre-processing Ys
-    y_signatures = state.get_y_signatures()
-    for i in y_signatures:
-        state = state.apply_merge0(i)
+    state, x_signatures, y_signatures = representative(next_state)
 
     # we skip the state if it is already visited
     if state in srg.visited_states:

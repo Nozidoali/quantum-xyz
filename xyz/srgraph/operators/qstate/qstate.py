@@ -8,28 +8,34 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-19 13:40:18
 """
 
+from math import log2
 from typing import List
 
 import copy
 import numpy as np
+from panel import state
 
 class QState:
     """Class method for QState"""
 
-    def __init__(self, state_array: np.ndarray, num_qubits: int) -> None:
-        self.patterns = [0 for i in range(num_qubits)]
-        self.num_qubits = num_qubits
-        self.length: int = 0
-        self.const_one: int = (1 << num_qubits) - 1
-        for i in range(2**num_qubits):
-            if state_array[i] != 0:
-                for j in range(num_qubits):
-                    self.patterns[j] = self.patterns[j] << 1 | (i >> j & 1)
-                self.length += 1
+    def __init__(self, patterns: List[int], length: int) -> None:
+        self.patterns = patterns[:]
+        self.num_qubits = len(patterns)
+        self.length: int = length
+        self.const_one: int = (1 << self.length) - 1
         self.signature_length: int = self.length
-    
-    # canonicalization
-    from .representative import representative
+
+    def to_value(self) -> int:
+        """Return the value of the state .
+
+        :return: [description]
+        :rtype: int
+        """
+        states = self.transpose()
+        value = 0
+        for val in states:
+            value |= (1 << val)
+        return value
 
     def __len__(self) -> int:
         num_ones: int = 0
@@ -96,6 +102,25 @@ class QState:
         next_state.cleanup_columns()
         return next_state
     
+    def apply_split(self, qubit_index: int) -> None:
+        """Apply the Y operator to the given qubit .
+
+        :param qubit_index: [description]
+        :type qubit_index: int
+        """
+        states = self.transpose()
+        new_states = []
+        for state in states:
+            state0 = state & ~(1 << qubit_index)
+            state1 = state | (1 << qubit_index)
+            
+            new_states.append(state0)
+            new_states.append(state1)
+        
+        patterns = self.transpose_back(new_states)
+        next_state = QState(patterns, len(new_states))
+        return next_state
+    
     def apply_controlled_merge0(self, control_qubit_index: int, phase: bool, target_qubit_index: int) -> None:
         """Apply the Y operator to the given qubit .
 
@@ -122,13 +147,12 @@ class QState:
 
     def transpose(self) -> List[int]:
         """Transpose the state array ."""
-        values = [0 for i in range(self.length)]
-        for qubit_index in range(self.num_qubits):
-            pattern = self.patterns[qubit_index]
-            for i in range(self.length):
-                values[i] = values[i] << 1 | (pattern & 1)
-                pattern >>= 1
-        return values
+        basis = [0 for i in range(self.length)]
+        for i in range(self.length):
+            for qubit_index in range(self.num_qubits):
+                pattern = self.patterns[qubit_index]
+                basis[i] |= ((pattern >> i) & 1) << qubit_index
+        return basis
     
     def cofactors(self, qubit_index: int) -> List[int]:
         """Return the cofactor of the given qubit .
@@ -250,7 +274,7 @@ class QState:
         :return: [description]
         :rtype: QState
         """
-        state = QState(np.array([1, 0] + [0 for i in range(2**num_qubits - 2)]), num_qubits)
+        state = QState([0 for i in range(num_qubits)], 1)
         return state
 
     def __str__(self) -> str:
@@ -271,3 +295,25 @@ class QState:
         for pattern in self.patterns:
             ret_val = (ret_val << self.signature_length) | (pattern & self.const_one)
         return hash(ret_val)
+
+def from_val(val: int, num_qubits: int) -> QState:
+    """Return the state from the vector representation .
+
+    :param state_vector: [description]
+    :type state_vector: np.ndarray
+    :return: [description]
+    :rtype: QState
+    """
+    
+    assert val > 0 and val < 2**(2**num_qubits)
+    states = []
+    for i in range(2**num_qubits):
+        if val & 1 == 1:
+            states.append(i)
+        val >>= 1
+            
+    patterns = [0 for i in range(num_qubits)]
+    for _, value in enumerate(states):
+        for j in range(num_qubits):
+            patterns[j] = patterns[j] << 1 | ((value >> j) & 1)
+    return QState(patterns, len(states))
