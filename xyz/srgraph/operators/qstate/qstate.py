@@ -122,7 +122,7 @@ class QState:
         next_state.patterns[qubit_index] = self.const_one ^ self.patterns[qubit_index]
         return next_state
 
-    def apply_cx(self, control_qubit_index: int, target_qubit_index: int) -> None:
+    def apply_cx(self, control_qubit_index: int, phase: bool, target_qubit_index: int) -> None:
         """Apply CX gate to the qubit.
 
         :param control_qubit_index: [description]
@@ -132,6 +132,8 @@ class QState:
         """
         next_state = copy.deepcopy(self)
         next_state.patterns[target_qubit_index] ^= self.patterns[control_qubit_index]
+        if phase:
+            next_state.patterns[target_qubit_index] = ~next_state.patterns[target_qubit_index] & self.const_one
         return next_state
 
     def apply_merge0(self, qubit_index: int) -> None:
@@ -154,6 +156,18 @@ class QState:
         next_state = copy.deepcopy(self)
         control = ~self.patterns[control_qubit_index] if phase else self.patterns[control_qubit_index]
         next_state.patterns[target_qubit_index] &= control
+        next_state.cleanup_columns()
+        return next_state
+
+    def apply_controlled_merge1(self, control_qubit_index: int, phase: bool, target_qubit_index: int) -> None:
+        """Apply the Y operator to the given qubit .
+
+        :param qubit_index: [description]
+        :type qubit_index: int
+        """
+        next_state = copy.deepcopy(self)
+        control = ~self.patterns[control_qubit_index] if phase else self.patterns[control_qubit_index]
+        next_state.patterns[target_qubit_index] |= control
         next_state.cleanup_columns()
         return next_state
 
@@ -227,7 +241,7 @@ class QState:
             for j in range(self.num_qubits):
                 self.patterns[j] = self.patterns[j] << 1 | (value >> j & 1)
 
-    def all_column_permutations(self, disable: bool = False):
+    def all_column_permutations(self):
         """Generator over all permutations of all columns in the DataFrame .
 
         :yield: [description]
@@ -242,9 +256,25 @@ class QState:
                     patterns[j] = patterns[j] << 1 | (value >> j & 1)
 
             yield patterns
-            if disable:
-                break
+            
+    def __transpose_back(self, values: List[int]) -> List[int]:
+        """Transpose the state array ."""
+        patterns = [0 for i in range(self.num_qubits)]
+        for _, value in enumerate(values):
+            for j in range(self.num_qubits):
+                patterns[j] = patterns[j] << 1 | (value >> j & 1)
+        return patterns
+        
+    def lowest_column_permutations(self):
+        """Get the smallest column permutations that are not equal to the given state .
 
+        :return: [description]
+        :rtype: [type]
+        """
+        values = self.__transpose()
+        sorted_values = sorted(values)
+        return self.__transpose_back(sorted_values)
+        
     @call_with_global_timer
     def representative(self) -> "QState":
         """Return a repr string for this object ."""
@@ -258,7 +288,8 @@ class QState:
         # remove redundant columns, update length
         repr_state.cleanup_columns()
 
-        for patterns in repr_state.all_column_permutations():
+        # for patterns in repr_state.all_column_permutations():
+        for patterns in [repr_state.lowest_column_permutations()]:
             # run x and qubit permutations
             for qubit_index in range(repr_state.num_qubits):
                 # apply X gate to reduce pattern
@@ -291,7 +322,19 @@ class QState:
         :return: [description]
         :rtype: [type]
         """
-        return len(self) == 0
+        return self.length == 1
+    
+    @staticmethod
+    def ground_state(num_qubits: int) -> "QState":
+        """Return the ground state .
+
+        :param num_qubits: [description]
+        :type num_qubits: int
+        :return: [description]
+        :rtype: QState
+        """
+        state = QState(np.array([1, 0] + [0 for i in range(2**num_qubits - 2)]), num_qubits)
+        return state
 
     def __str__(self) -> str:
         return "-".join([f"{x:b}".zfill(self.length) for x in self.patterns])
@@ -299,7 +342,10 @@ class QState:
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, QState):
             return False
-        return self.patterns == o.patterns
+        for i in range(self.num_qubits):
+            if self.patterns[i] & self.const_one != o.patterns[i] & o.const_one:
+                return False
+        return True
 
     def __lt__(self, o: object) -> bool:
         if not isinstance(o, QState):
@@ -307,7 +353,7 @@ class QState:
         return len(self) < len(o)
 
     def __hash__(self) -> int:
-        ret_val: int = 1
+        ret_val: int = 0
         for pattern in sorted(self.patterns):
             ret_val <<= self.signature_length
             pattern = pattern & self.const_one

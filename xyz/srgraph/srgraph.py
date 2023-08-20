@@ -37,7 +37,8 @@ class SRGraph:
         :return: [description]
         :rtype: [type]
         """
-        self.visited_states.add(state.representative())
+        representive: QState = state.representative()
+        self.visited_states.add(representive)
 
     def add_state(self, state: QState, cost: int) -> bool:
         """Add a state to the machine .
@@ -69,8 +70,8 @@ class SRGraph:
         """Initialize search state ."""
         self.visited_states.clear()
         self.state_queue = PriorityQueue()
-        self.enquened_states.clear()
-        self.record.clear()
+        # self.enquened_states.clear()
+        # self.record.clear()
 
     def add_edge(
         self, state_before: QState, quantum_operator: QOperator, state_after: QState
@@ -84,6 +85,12 @@ class SRGraph:
         :param state_after: [description]
         :type state_after: QState
         """
+        repr_before = state_before.representative()
+        repr_after = state_after.representative()
+        assert repr_before in self.visited_states
+        if repr_after in self.visited_states:
+            # if the state is already visited, we should not add it to the queue
+            return
         self.record[state_after] = state_before, quantum_operator
 
     def get_prev_state(self, state: QState) -> QState:
@@ -124,7 +131,7 @@ class SRGraph:
             curr_depth += 1
 
             prev_state, quantum_operator = self.record[curr_state]
-            yield prev_state, quantum_operator
+            yield prev_state, quantum_operator, curr_state
             curr_state = prev_state
 
     def is_visited(self, state: QState):
@@ -187,12 +194,14 @@ class SRGraph:
         with self.threading_lock:
                     
             if representive in self.visited_states:
+                # we should not explore visited states
                 return
 
             if (
                 representive in self.enquened_states
                 and self.enquened_states[representive] <= next_cost
             ):
+                # if the state is already enquened with a lower cost, we should not explore it
                 return
 
             self.state_queue.put((next_cost, next_state))
@@ -246,27 +255,38 @@ class SRGraph:
                         )
                         next_state = state.apply_controlled_merge0(control_qubit, phase, target_qubit)
                         self.thread_explore(state, quantum_operator, next_state, cost)
+                        
+                        # apply merge1
+                        quantum_operator = MCRYOperator(
+                            target_qubit,
+                            QuantizedRotationType.MERGE1,
+                            [control_qubit],
+                            [phase],
+                        )
+                        next_state = state.apply_controlled_merge1(control_qubit, phase, target_qubit)
+                        self.thread_explore(state, quantum_operator, next_state, cost)
 
                 # CNOT
-                quantum_operator = MCRYOperator(
-                    target_qubit, QuantizedRotationType.SWAP, [control_qubit], [True]
-                )
-                next_state = state.apply_cx(control_qubit, target_qubit)
-                self.thread_explore(state, quantum_operator, next_state, cost)
+                for phase in [True]:
+                    quantum_operator = MCRYOperator(
+                        target_qubit, QuantizedRotationType.SWAP, [control_qubit], [phase]
+                    )
+                    next_state = state.apply_cx(control_qubit, phase, target_qubit)
+                    self.thread_explore(state, quantum_operator, next_state, cost)
                 
         self.wait_exploration_done()
 
     def __str__(self) -> str:
         graph: pgv.AGraph = pgv.AGraph(directed=True)
 
-        for state, edge in self.record.items():
+        for prev_state, edge_operator, state in self.backtrace_state(QState.ground_state(self.num_qubits)):
             representative = state.representative()
             try:
                 state_cost = self.enquened_states[representative]
+                print(state, f"({state_cost})")
                 graph.add_node(
                     str(state), label=f"[{state}]\n{representative}({state_cost})"
                 )
-                prev_state, edge_operator, *_ = edge
                 graph.add_edge(
                     str(prev_state),
                     str(state),

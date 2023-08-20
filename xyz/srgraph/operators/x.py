@@ -46,3 +46,11 @@ class XOperator(QOperatorBase, QuantizedRotation):
         """
 
         return f"X({self.target_qubit_index})"
+
+    def get_cost(self) -> int:
+        """Returns the cost of the job .
+
+        :return: [description]
+        :rtype: int
+        """
+        return 0
