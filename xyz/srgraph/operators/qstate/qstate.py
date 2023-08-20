@@ -15,6 +15,7 @@ import copy
 import numpy as np
 from panel import state
 
+
 class QState:
     """Class method for QState"""
 
@@ -34,7 +35,7 @@ class QState:
         states = self.transpose()
         value = 0
         for val in states:
-            value |= (1 << val)
+            value |= 1 << val
         return value
 
     def __len__(self) -> int:
@@ -77,7 +78,9 @@ class QState:
         next_state.patterns[qubit_index] = self.const_one ^ self.patterns[qubit_index]
         return next_state
 
-    def apply_cx(self, control_qubit_index: int, phase: bool, target_qubit_index: int) -> None:
+    def apply_cx(
+        self, control_qubit_index: int, phase: bool, target_qubit_index: int
+    ) -> None:
         """Apply CX gate to the qubit.
 
         :param control_qubit_index: [description]
@@ -88,7 +91,9 @@ class QState:
         next_state = copy.deepcopy(self)
         next_state.patterns[target_qubit_index] ^= self.patterns[control_qubit_index]
         if phase:
-            next_state.patterns[target_qubit_index] = ~next_state.patterns[target_qubit_index] & self.const_one
+            next_state.patterns[target_qubit_index] = (
+                ~next_state.patterns[target_qubit_index] & self.const_one
+            )
         return next_state
 
     def apply_merge0(self, qubit_index: int) -> None:
@@ -101,7 +106,7 @@ class QState:
         next_state.patterns[qubit_index] = 0
         next_state.cleanup_columns()
         return next_state
-    
+
     def apply_split(self, qubit_index: int) -> None:
         """Apply the Y operator to the given qubit .
 
@@ -113,34 +118,46 @@ class QState:
         for state in states:
             state0 = state & ~(1 << qubit_index)
             state1 = state | (1 << qubit_index)
-            
+
             new_states.append(state0)
             new_states.append(state1)
-        
+
         patterns = self.transpose_back(new_states)
         next_state = QState(patterns, len(new_states))
         return next_state
-    
-    def apply_controlled_merge0(self, control_qubit_index: int, phase: bool, target_qubit_index: int) -> None:
+
+    def apply_controlled_merge0(
+        self, control_qubit_index: int, phase: bool, target_qubit_index: int
+    ) -> None:
         """Apply the Y operator to the given qubit .
 
         :param qubit_index: [description]
         :type qubit_index: int
         """
         next_state = copy.deepcopy(self)
-        control = ~self.patterns[control_qubit_index] if phase else self.patterns[control_qubit_index]
+        control = (
+            ~self.patterns[control_qubit_index]
+            if phase
+            else self.patterns[control_qubit_index]
+        )
         next_state.patterns[target_qubit_index] &= control
         next_state.cleanup_columns()
         return next_state
 
-    def apply_controlled_merge1(self, control_qubit_index: int, phase: bool, target_qubit_index: int) -> None:
+    def apply_controlled_merge1(
+        self, control_qubit_index: int, phase: bool, target_qubit_index: int
+    ) -> None:
         """Apply the Y operator to the given qubit .
 
         :param qubit_index: [description]
         :type qubit_index: int
         """
         next_state = copy.deepcopy(self)
-        control = ~self.patterns[control_qubit_index] if phase else self.patterns[control_qubit_index]
+        control = (
+            ~self.patterns[control_qubit_index]
+            if phase
+            else self.patterns[control_qubit_index]
+        )
         next_state.patterns[target_qubit_index] |= control
         next_state.cleanup_columns()
         return next_state
@@ -153,7 +170,7 @@ class QState:
                 pattern = self.patterns[qubit_index]
                 basis[i] |= ((pattern >> i) & 1) << qubit_index
         return basis
-    
+
     def cofactors(self, qubit_index: int) -> List[int]:
         """Return the cofactor of the given qubit .
 
@@ -177,7 +194,9 @@ class QState:
 
         return pos_cofactor, neg_cofactor
 
-    def controlled_cofactors(self, qubit_index: int, control_qubit: int, phase: bool) -> List[int]:
+    def controlled_cofactors(
+        self, qubit_index: int, control_qubit: int, phase: bool
+    ) -> List[int]:
         """Return the cofactor of the given qubit .
 
         :param qubit_index: [description]
@@ -206,48 +225,48 @@ class QState:
     def cleanup_columns(self) -> None:
         """Remove the redundant supports supports ."""
         values = self.transpose()
-        
+
         # remove redundant columns
         values = set(values)
         self.length = len(values)
         self.const_one = (1 << self.length) - 1
         self.patterns = [0 for i in range(self.num_qubits)]
-        
+
         # now we sort the values
         values = sorted(values)
-        
+
         self.patterns = self.transpose_back(values)
-        
+
     def get_x_signatures(self) -> List[int]:
         """Returns the indices of the X - signature of the QR code .
 
         :return: [description]
         :rtype: List[int]
         """
-        
+
         signatures = []
         for qubit_index in range(self.num_qubits):
             if self.patterns[qubit_index] & 1 == 1:
                 signatures.append(qubit_index)
-        
+
         return signatures
-    
+
     def get_y_signatures(self) -> List[int]:
         """Returns the indices of the Y - signature of the QR code .
 
         :return: [description]
         :rtype: List[int]
         """
-        
+
         signatures = []
         for qubit_index in range(self.num_qubits):
             pos_cofactor, neg_cofactor = self.cofactors(qubit_index)
-            
+
             if len(pos_cofactor) != 0 and pos_cofactor == neg_cofactor:
                 signatures.append(qubit_index)
-        
+
         return signatures
-    
+
     def transpose_back(self, values: List[int]) -> List[int]:
         """Transpose the state array ."""
         patterns = [0 for i in range(self.num_qubits)]
@@ -264,7 +283,6 @@ class QState:
         """
         return self.length == 1
 
-    
     @staticmethod
     def ground_state(num_qubits: int) -> "QState":
         """Return the ground state .
@@ -296,6 +314,7 @@ class QState:
             ret_val = (ret_val << self.signature_length) | (pattern & self.const_one)
         return hash(ret_val)
 
+
 def from_val(val: int, num_qubits: int) -> QState:
     """Return the state from the vector representation .
 
@@ -304,14 +323,14 @@ def from_val(val: int, num_qubits: int) -> QState:
     :return: [description]
     :rtype: QState
     """
-    
-    assert val > 0 and val < 2**(2**num_qubits)
+
+    assert val > 0 and val < 2 ** (2**num_qubits)
     states = []
     for i in range(2**num_qubits):
         if val & 1 == 1:
             states.append(i)
         val >>= 1
-            
+
     patterns = [0 for i in range(num_qubits)]
     for _, value in enumerate(states):
         for j in range(num_qubits):

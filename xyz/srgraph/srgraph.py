@@ -25,7 +25,7 @@ class SRGraph:
         self.state_queue = PriorityQueue()
         self.enquened_states = {}
         self.record = {}
-        
+
         self.threading_lock = threading.Lock()
         self.exploration_threads = []
 
@@ -124,12 +124,13 @@ class SRGraph:
         curr_depth: int = 0
         collected_states = []
         while curr_state in self.record:
-
             if curr_state in collected_states:
-                loop_str = "\n -> ".join([str(x) for x in collected_states] + [str(curr_state)])
+                loop_str = "\n -> ".join(
+                    [str(x) for x in collected_states] + [str(curr_state)]
+                )
                 raise RuntimeError(f"Backtrace loop detected state = {loop_str}")
             collected_states.append(curr_state)
-            
+
             # to avoid infinite loop
             if curr_depth > max_depth:
                 raise RuntimeError(f"Backtrace depth exceeded state = {curr_state}")
@@ -158,14 +159,20 @@ class SRGraph:
         :return: [description]
         :rtype: int
         """
-        
+
         lower_bound: int = 0
         for pattern in state.patterns:
             if pattern != 0:
                 lower_bound += 1
         return lower_bound
 
-    def thread_explore(self, curr_state: QState, quantum_operator: QOperator, next_state: QState, cost: int):
+    def thread_explore(
+        self,
+        curr_state: QState,
+        quantum_operator: QOperator,
+        next_state: QState,
+        cost: int,
+    ):
         """Explore the next state in a thread .
 
         :param curr_state: [description]
@@ -175,23 +182,28 @@ class SRGraph:
         :param cost: [description]
         :type cost: int
         """
-        
+
         # don't use multi-threading if the state is already visited
         self.thread_explore_target(curr_state, quantum_operator, next_state, cost)
         return
-        
-        task = threading.Thread(target=self.thread_explore_target, args=(curr_state, quantum_operator, next_state, cost))
+
+        task = threading.Thread(
+            target=self.thread_explore_target,
+            args=(curr_state, quantum_operator, next_state, cost),
+        )
         self.exploration_threads.append(task)
         task.start()
-        
+
     def wait_exploration_done(self):
         """Wait for all exploration threads to finish ."""
         for task in self.exploration_threads:
             task.join()
-        
+
         self.exploration_threads.clear()
-        
-    def thread_explore_target(self, state: QState, quantum_operator: QOperator, next_state: QState, cost: int):
+
+    def thread_explore_target(
+        self, state: QState, quantum_operator: QOperator, next_state: QState, cost: int
+    ):
         """Explore the next state in a thread .
 
         :param curr_state: [description]
@@ -205,10 +217,9 @@ class SRGraph:
             cost + quantum_operator.get_cost() + self.get_lower_bound(next_state)
         )
         representive: QState = next_state.representative()
-        
+
         # avoid thrusting
         with self.threading_lock:
-                    
             if representive in self.visited_states:
                 # we should not explore visited states
                 return
@@ -222,9 +233,8 @@ class SRGraph:
 
             self.state_queue.put((next_cost, next_state))
             self.enquened_states[representive] = next_cost
-            
+
             self.record[next_state] = state, quantum_operator
-                
 
     def explore(self, cost: int, state: QState):
         """Return the neighbors of the state .
@@ -232,9 +242,8 @@ class SRGraph:
         :param state: [description]
         :type state: QState
         """
-        
+
         # we first check the signatures of the state
-        
 
         for target_qubit in range(self.num_qubits):
             pos_cofactor, neg_cofactor = state.cofactors(target_qubit)
@@ -259,13 +268,11 @@ class SRGraph:
                     continue
 
                 for phase in [True, False]:
-
                     pos_cofactor, neg_cofactor = state.controlled_cofactors(
                         target_qubit, control_qubit, phase
                     )
 
                     if len(pos_cofactor) > 0 and pos_cofactor == neg_cofactor:
-                        
                         # apply merge0
                         quantum_operator = MCRYOperator(
                             target_qubit,
@@ -273,9 +280,11 @@ class SRGraph:
                             [control_qubit],
                             [phase],
                         )
-                        next_state = state.apply_controlled_merge0(control_qubit, phase, target_qubit)
+                        next_state = state.apply_controlled_merge0(
+                            control_qubit, phase, target_qubit
+                        )
                         self.thread_explore(state, quantum_operator, next_state, cost)
-                        
+
                         # apply merge1
                         quantum_operator = MCRYOperator(
                             target_qubit,
@@ -283,28 +292,33 @@ class SRGraph:
                             [control_qubit],
                             [phase],
                         )
-                        next_state = state.apply_controlled_merge1(control_qubit, phase, target_qubit)
+                        next_state = state.apply_controlled_merge1(
+                            control_qubit, phase, target_qubit
+                        )
                         self.thread_explore(state, quantum_operator, next_state, cost)
 
                 # CNOT
                 for phase in [True]:
                     quantum_operator = MCRYOperator(
-                        target_qubit, QuantizedRotationType.SWAP, [control_qubit], [phase]
+                        target_qubit,
+                        QuantizedRotationType.SWAP,
+                        [control_qubit],
+                        [phase],
                     )
                     next_state = state.apply_cx(control_qubit, phase, target_qubit)
                     self.thread_explore(state, quantum_operator, next_state, cost)
-                
+
         self.wait_exploration_done()
-        
+
     def __str__(self) -> str:
         graph: pgv.AGraph = pgv.AGraph(directed=True)
 
-        for prev_state, edge_operator, state in self.backtrace_state(QState.ground_state(self.num_qubits)):
+        for prev_state, edge_operator, state in self.backtrace_state(
+            QState.ground_state(self.num_qubits)
+        ):
             try:
                 state_str = str(state).replace("-", "\n")
-                graph.add_node(
-                    str(state), label=f"{state_str}"
-                )
+                graph.add_node(str(state), label=f"{state_str}")
                 graph.add_edge(
                     str(prev_state),
                     str(state),

@@ -52,18 +52,30 @@ class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):
                 return qstate.apply_x(self.target_qubit_index)
             else:
                 assert len(self.control_qubit_indices) == 1
-                return qstate.apply_cx(self.control_qubit_indices[0], self.control_qubit_phases[0], self.target_qubit_index)
+                return qstate.apply_cx(
+                    self.control_qubit_indices[0],
+                    self.control_qubit_phases[0],
+                    self.target_qubit_index,
+                )
 
         if self.rotation_type == QuantizedRotationType.MERGE0:
             if len(self.control_qubit_indices) == 0:
                 return qstate.apply_merge0(self.target_qubit_index)
             else:
                 assert len(self.control_qubit_indices) == 1
-                return qstate.apply_controlled_merge0(self.control_qubit_indices[0], self.control_qubit_phases[0], self.target_qubit_index)
-            
+                return qstate.apply_controlled_merge0(
+                    self.control_qubit_indices[0],
+                    self.control_qubit_phases[0],
+                    self.target_qubit_index,
+                )
+
         if self.rotation_type == QuantizedRotationType.MERGE1:
             assert len(self.control_qubit_indices) == 1
-            return qstate.apply_controlled_merge1(self.control_qubit_indices[0], self.control_qubit_phases[0], self.target_qubit_index)
+            return qstate.apply_controlled_merge1(
+                self.control_qubit_indices[0],
+                self.control_qubit_phases[0],
+                self.target_qubit_index,
+            )
 
         return qstate
 
@@ -93,7 +105,7 @@ class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):
             return f"{rotation_str}({self.target_qubit_index})"
         if len(self.control_qubit_indices) == 1:
             return f"C{rotation_str}({self.control_qubit_indices[0]}, {self.target_qubit_index})"
-        
+
         return f"MCRY({self.target_qubit_index}, {rotation_str}, {self.control_qubit_indices}, {self.control_qubit_phases})"
 
     def __invert__(self):
