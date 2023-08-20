@@ -88,9 +88,7 @@ class SRGraph:
         repr_before = state_before.representative()
         repr_after = state_after.representative()
         assert repr_before in self.visited_states
-        if repr_after in self.visited_states:
-            # if the state is already visited, we should not add it to the queue
-            return
+        assert repr_after not in self.visited_states
         self.record[state_after] = state_before, quantum_operator
 
     def get_prev_state(self, state: QState) -> QState:
@@ -216,6 +214,9 @@ class SRGraph:
         :param state: [description]
         :type state: QState
         """
+        
+        # we first check the signatures of the state
+        
 
         for target_qubit in range(self.num_qubits):
             pos_cofactor, neg_cofactor = state.cofactors(target_qubit)
@@ -231,6 +232,9 @@ class SRGraph:
                 )
                 next_state = state.apply_merge0(target_qubit)
                 self.thread_explore(state, quantum_operator, next_state, cost)
+                
+                # if a zero-cost Y rotation can be found, we can skip the rest
+                return
 
             for control_qubit in range(self.num_qubits):
                 if control_qubit == target_qubit:
@@ -246,6 +250,7 @@ class SRGraph:
                     )
 
                     if len(pos_cofactor) > 0 and pos_cofactor == neg_cofactor:
+                        
                         # apply merge0
                         quantum_operator = MCRYOperator(
                             target_qubit,

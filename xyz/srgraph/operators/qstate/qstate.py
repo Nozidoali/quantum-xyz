@@ -288,8 +288,7 @@ class QState:
         # remove redundant columns, update length
         repr_state.cleanup_columns()
 
-        # for patterns in repr_state.all_column_permutations():
-        for patterns in [repr_state.lowest_column_permutations()]:
+        for patterns in repr_state.all_column_permutations():
             # run x and qubit permutations
             for qubit_index in range(repr_state.num_qubits):
                 # apply X gate to reduce pattern

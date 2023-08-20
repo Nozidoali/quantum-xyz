@@ -32,10 +32,10 @@ def rand_state(num_qubit: int, sparsity: int) -> QState:
 
 def test_synthesis():
     """Test that the synthesis is used ."""
-    state = QState(D_state(3, 1), 3)
+    state = QState(D_state(5, 2), 5)
     
     with stopwatch("synthesis"):
-        srg = synthesize_srg(state)
+        srg = synthesize_srg(state, verbose=True)
     with open("srg.dot", "w") as f:
         f.write(str(srg))
     print(f"time = {get_time('representative')}")

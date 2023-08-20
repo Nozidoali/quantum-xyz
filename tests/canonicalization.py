@@ -10,7 +10,8 @@ Last Modified time: 2023-08-19 13:34:14
 
 import numpy as np
 
-from xyz import QState
+from xyz import QState, D_state
+from xyz.utils.timer import get_time
 
 
 def rand_state(num_qubit: int, sparsity: int) -> QState:
@@ -32,12 +33,12 @@ def rand_state(num_qubit: int, sparsity: int) -> QState:
 def test_canonicalization():
     """Test that the canonicalization is used ."""
     # state = rand_state(3, 3)
-    state = QState(np.array([0, 1, 0, 0, 1, 0, 0, 1]), 3)
+    state = QState(D_state(5, 2), 5)
     print(f"before: {state}")
 
     state = state.representative()
     print(f"after: {state}")
-
+    print(f"time = {get_time('representative')}")
 
 if __name__ == "__main__":
     test_canonicalization()
