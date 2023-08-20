@@ -29,7 +29,7 @@ class QState:
         self.signature_length: int = self.length
     
     # canonicalization
-    from ._representative import representative
+    from .representative import representative
 
     def __len__(self) -> int:
         num_ones: int = 0
@@ -182,14 +182,48 @@ class QState:
     def cleanup_columns(self) -> None:
         """Remove the redundant supports supports ."""
         values = self.transpose()
+        
+        # remove redundant columns
         values = set(values)
         self.length = len(values)
         self.const_one = (1 << self.length) - 1
         self.patterns = [0 for i in range(self.num_qubits)]
-        for _, value in enumerate(values):
-            for j in range(self.num_qubits):
-                self.patterns[j] = self.patterns[j] << 1 | (value >> j & 1)
+        
+        # now we sort the values
+        values = sorted(values)
+        
+        self.patterns = self.transpose_back(values)
+        
+    def get_x_signatures(self) -> List[int]:
+        """Returns the indices of the X - signature of the QR code .
+
+        :return: [description]
+        :rtype: List[int]
+        """
+        
+        signatures = []
+        for qubit_index in range(self.num_qubits):
+            if self.patterns[qubit_index] & 1 == 1:
+                signatures.append(qubit_index)
+        
+        return signatures
+    
+    def get_y_signatures(self) -> List[int]:
+        """Returns the indices of the Y - signature of the QR code .
+
+        :return: [description]
+        :rtype: List[int]
+        """
+        
+        signatures = []
+        for qubit_index in range(self.num_qubits):
+            pos_cofactor, neg_cofactor = self.cofactors(qubit_index)
             
+            if len(pos_cofactor) != 0 and pos_cofactor == neg_cofactor:
+                signatures.append(qubit_index)
+        
+        return signatures
+    
     def transpose_back(self, values: List[int]) -> List[int]:
         """Transpose the state array ."""
         patterns = [0 for i in range(self.num_qubits)]
@@ -225,10 +259,7 @@ class QState:
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, QState):
             return False
-        for i in range(self.num_qubits):
-            if self.patterns[i] & self.const_one != o.patterns[i] & o.const_one:
-                return False
-        return True
+        return self.__hash__() == o.__hash__()
 
     def __lt__(self, o: object) -> bool:
         if not isinstance(o, QState):
@@ -238,11 +269,5 @@ class QState:
     def __hash__(self) -> int:
         ret_val: int = 0
         for pattern in sorted(self.patterns):
-            ret_val <<= self.signature_length
-            pattern = pattern & self.const_one
-            
-            if pattern > (~pattern & self.const_one):
-                pattern = ~pattern & self.const_one
-
-            ret_val |= pattern
+            ret_val = (ret_val << self.signature_length) | (pattern & self.const_one)
         return hash(ret_val)

@@ -122,7 +122,14 @@ class SRGraph:
         """
         curr_state = state
         curr_depth: int = 0
+        collected_states = []
         while curr_state in self.record:
+
+            if curr_state in collected_states:
+                loop_str = "\n -> ".join([str(x) for x in collected_states] + [str(curr_state)])
+                raise RuntimeError(f"Backtrace loop detected state = {loop_str}")
+            collected_states.append(curr_state)
+            
             # to avoid infinite loop
             if curr_depth > max_depth:
                 raise RuntimeError(f"Backtrace depth exceeded state = {curr_state}")
@@ -151,7 +158,12 @@ class SRGraph:
         :return: [description]
         :rtype: int
         """
-        return state.num_supports()
+        
+        lower_bound: int = 0
+        for pattern in state.patterns:
+            if pattern != 0:
+                lower_bound += 1
+        return lower_bound
 
     def thread_explore(self, curr_state: QState, quantum_operator: QOperator, next_state: QState, cost: int):
         """Explore the next state in a thread .
@@ -163,6 +175,11 @@ class SRGraph:
         :param cost: [description]
         :type cost: int
         """
+        
+        # don't use multi-threading if the state is already visited
+        self.thread_explore_target(curr_state, quantum_operator, next_state, cost)
+        return
+        
         task = threading.Thread(target=self.thread_explore_target, args=(curr_state, quantum_operator, next_state, cost))
         self.exploration_threads.append(task)
         task.start()
@@ -189,6 +206,7 @@ class SRGraph:
         )
         representive: QState = next_state.representative()
         
+        # avoid thrusting
         with self.threading_lock:
                     
             if representive in self.visited_states:
@@ -232,9 +250,6 @@ class SRGraph:
                 )
                 next_state = state.apply_merge0(target_qubit)
                 self.thread_explore(state, quantum_operator, next_state, cost)
-                
-                # if a zero-cost Y rotation can be found, we can skip the rest
-                return
 
             for control_qubit in range(self.num_qubits):
                 if control_qubit == target_qubit:
@@ -280,17 +295,15 @@ class SRGraph:
                     self.thread_explore(state, quantum_operator, next_state, cost)
                 
         self.wait_exploration_done()
-
+        
     def __str__(self) -> str:
         graph: pgv.AGraph = pgv.AGraph(directed=True)
 
         for prev_state, edge_operator, state in self.backtrace_state(QState.ground_state(self.num_qubits)):
-            representative = state.representative()
             try:
-                state_cost = self.enquened_states[representative]
-                print(state, f"({state_cost})")
+                state_str = str(state).replace("-", "\n")
                 graph.add_node(
-                    str(state), label=f"[{state}]\n{representative}({state_cost})"
+                    str(state), label=f"{state_str}"
                 )
                 graph.add_edge(
                     str(prev_state),

@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-08-20 12:48:10
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-08-20 13:11:10
+Last Modified time: 2023-08-20 13:54:22
 '''
 
 import copy
@@ -109,7 +109,7 @@ def representative(self) -> "QState":
     # run x and qubit permutations
     for qubit_index in range(repr_state.num_qubits):
         # apply X gate to reduce pattern
-        if patterns[qubit_index] >> (self.length - 1) == 1:
+        if patterns[qubit_index] & 1 == 1:
             patterns[qubit_index] = ~patterns[qubit_index] & self.const_one
 
     repr_state.patterns = copy.deepcopy(patterns)

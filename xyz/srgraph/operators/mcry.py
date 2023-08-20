@@ -49,17 +49,21 @@ class MCRYOperator(QOperatorBase, QuantizedRotation, MultiControlledOperator):
 
         if self.rotation_type == QuantizedRotationType.SWAP:
             if len(self.control_qubit_indices) == 0:
-                qstate.apply_x(self.target_qubit_index)
+                return qstate.apply_x(self.target_qubit_index)
             else:
                 assert len(self.control_qubit_indices) == 1
-                qstate.apply_cx(self.target_qubit_index, self.control_qubit_indices[0])
-            return qstate
+                return qstate.apply_cx(self.control_qubit_indices[0], self.control_qubit_phases[0], self.target_qubit_index)
 
         if self.rotation_type == QuantizedRotationType.MERGE0:
-            assert len(self.control_qubit_indices) == 0
             if len(self.control_qubit_indices) == 0:
-                qstate.apply_merge0(self.target_qubit_index)
-            return qstate
+                return qstate.apply_merge0(self.target_qubit_index)
+            else:
+                assert len(self.control_qubit_indices) == 1
+                return qstate.apply_controlled_merge0(self.control_qubit_indices[0], self.control_qubit_phases[0], self.target_qubit_index)
+            
+        if self.rotation_type == QuantizedRotationType.MERGE1:
+            assert len(self.control_qubit_indices) == 1
+            return qstate.apply_controlled_merge1(self.control_qubit_indices[0], self.control_qubit_phases[0], self.target_qubit_index)
 
         return qstate
 
