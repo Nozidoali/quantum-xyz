@@ -268,6 +268,6 @@ class QState:
 
     def __hash__(self) -> int:
         ret_val: int = 0
-        for pattern in sorted(self.patterns):
+        for pattern in self.patterns:
             ret_val = (ret_val << self.signature_length) | (pattern & self.const_one)
         return hash(ret_val)
