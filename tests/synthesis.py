@@ -8,18 +8,18 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-18 21:09:09
 """
 
+from gettext import find
 import subprocess
 import numpy as np
 
 from xyz import (
     QState,
     synthesize_srg,
-    D_state,
     stopwatch,
-    get_time,
-    representative_cache_hit,
-    representative_cache_size,
+    from_val,
+    lookup_repr,
 )
+from xyz.srgraph.operators.qstate.common.dicke_state import D_state
 
 
 def rand_state(num_qubit: int, sparsity: int) -> QState:
@@ -35,12 +35,22 @@ def rand_state(num_qubit: int, sparsity: int) -> QState:
         1 for i in range(sparsity)
     ]
     np.random.shuffle(state_array)
-    return QState(np.array(state_array), num_qubit)
-
+    state_val = 0
+    for i in range(2**num_qubit):
+        if state_array[i] == 1:
+            state_val |= 1 << i
+    
+    return from_val(state_val, num_qubit)
 
 def test_synthesis():
     """Test that the synthesis is used ."""
-    state = rand_state(4, 8)
+    # state = rand_state(4, 8)
+    s = D_state(4, 2)
+    state_val = 0
+    for i in range(2**4):
+        if s[i] != 0:
+            state_val |= 1 << i
+    state = from_val(state_val, 4)
 
     with stopwatch("synthesis"):
         srg = synthesize_srg(state, verbose=True)

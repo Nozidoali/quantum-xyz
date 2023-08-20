@@ -8,12 +8,9 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-19 13:40:18
 """
 
-from math import log2
 from typing import List
 
 import copy
-import numpy as np
-from panel import state
 
 
 class QState:
@@ -32,10 +29,10 @@ class QState:
         :return: [description]
         :rtype: int
         """
-        states = self.transpose()
+        states = self.transpose()[:]
         value = 0
-        for val in states:
-            value |= 1 << val
+        for basis in states:
+            value |= (1 << basis)
         return value
 
     def __len__(self) -> int:
@@ -167,8 +164,9 @@ class QState:
         basis = [0 for i in range(self.length)]
         for i in range(self.length):
             for qubit_index in range(self.num_qubits):
-                pattern = self.patterns[qubit_index]
-                basis[i] |= ((pattern >> i) & 1) << qubit_index
+                pattern = self.patterns[qubit_index] & self.const_one
+                digit = ((pattern >> i) & 1) << qubit_index
+                basis[i] |= digit
         return basis
 
     def cofactors(self, qubit_index: int) -> List[int]:

@@ -17,9 +17,8 @@ from xyz.srgraph import (
     XOperator,
     MCRYOperator,
     QuantizedRotationType,
-    representative,
 )
-from xyz.srgraph.operators.operator import QOperator
+from xyz.srgraph import QOperator, lookup_repr
 
 
 def explore_state(
@@ -45,7 +44,9 @@ def explore_state(
         - srg.get_lower_bound(curr_state)
     )
 
-    state, x_signatures, y_signatures = representative(next_state)
+    state, x_signatures, y_signatures = lookup_repr(next_state), [], []
+    
+    # state, x_signatures, y_signatures = representative(next_state)
 
     # we skip the state if it is already visited
     if state in srg.visited_states:
@@ -89,13 +90,7 @@ def synthesize_srg(target_state: QState, verbose: bool = False) -> SRGraph:
 
     curr_state = copy.deepcopy(target_state)
 
-    curr_state.cleanup_columns()
-    # pre-processing Xs
-    x_signatures = curr_state.get_x_signatures()
-    for i in x_signatures:
-        next_state = curr_state.apply_x(i)
-        srg.record[next_state] = curr_state, XOperator(i)
-        curr_state = next_state
+    curr_state = lookup_repr(curr_state)
 
     curr_cost = srg.get_lower_bound(curr_state)
     srg.state_queue.put((curr_cost, curr_state))

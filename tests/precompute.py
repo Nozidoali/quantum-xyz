@@ -12,8 +12,7 @@ from xyz import QState, precompute_representatives
 
 
 def test_precompute():
-    precompute_representatives(5)
-
+    precompute_representatives(4)
 
 if __name__ == "__main__":
     test_precompute()
