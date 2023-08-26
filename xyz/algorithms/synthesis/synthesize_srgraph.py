@@ -45,8 +45,7 @@ def explore_state(
     )
 
     state, x_signatures, y_signatures = lookup_repr(next_state), [], []
-    
-    # state, x_signatures, y_signatures = representative(next_state)
+
 
     # we skip the state if it is already visited
     if state in srg.visited_states:

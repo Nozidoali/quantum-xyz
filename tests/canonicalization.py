@@ -11,7 +11,7 @@ Last Modified time: 2023-08-19 13:34:14
 import numpy as np
 from itertools import permutations, combinations
 
-from xyz import QState, D_state, get_time, representative, representative_old
+from xyz import QState, D_state, get_time, lookup_repr
 
 
 def place_ones(size, count):
@@ -60,7 +60,7 @@ def test_canonicalization():
     for sparsity in range(1, 2**num_qubit):
         canon_states = set()
         for idx, state in enumerate(all_states(num_qubit, sparsity)):
-            state = representative_old(state)
+            state = lookup_repr(state)
             canon_states.add(state)
 
         print(f"sparsity = {sparsity}, num_ppp_classes = {len(canon_states)}")

@@ -8,12 +8,11 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 17:21:23
 """
 
+import threading
 from queue import PriorityQueue
 import pygraphviz as pgv
-import threading
 
-from .operators import QOperator, QState, QuantizedRotationType, MCRYOperator
-
+from .operators import QOperator, QState, QuantizedRotationType, MCRYOperator, lookup_repr
 
 class SRGraph:
     """Class method to call the transition class ."""
@@ -38,7 +37,7 @@ class SRGraph:
         :return: [description]
         :rtype: [type]
         """
-        representive: QState = state.representative()
+        representive: QState = lookup_repr(state)
         self.visited_states.add(representive)
 
     def add_state(self, state: QState, cost: int) -> bool:
@@ -52,7 +51,7 @@ class SRGraph:
         :rtype: bool
         """
 
-        representive: QState = state.representative()
+        representive: QState = lookup_repr(state)
 
         if representive in self.visited_states:
             return False
@@ -86,8 +85,8 @@ class SRGraph:
         :param state_after: [description]
         :type state_after: QState
         """
-        repr_before = state_before.representative()
-        repr_after = state_after.representative()
+        repr_before = lookup_repr(state_before)
+        repr_after = lookup_repr(state_after)
         assert repr_before in self.visited_states
         assert repr_after not in self.visited_states
         self.record[state_after] = state_before, quantum_operator
@@ -149,7 +148,7 @@ class SRGraph:
         :return: [description]
         :rtype: [type]
         """
-        return state.representative() in self.visited_states
+        return lookup_repr(state) in self.visited_states
 
     @staticmethod
     def get_lower_bound(state: QState) -> int:
@@ -218,7 +217,7 @@ class SRGraph:
         next_cost = (
             cost + quantum_operator.get_cost() + self.get_lower_bound(next_state)
         )
-        representive: QState = next_state.representative()
+        representive: QState = lookup_repr(next_state)
 
         # avoid thrusting
         with self.threading_lock:
