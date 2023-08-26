@@ -16,7 +16,7 @@ from xyz.srgraph import MCRYOperator, QOperatorType, QuantizedRotationType
 
 
 def convert_srg_to_circuit(
-    transitions, _weights: List[float], verbose: bool = False
+    srg, _weights: List[float], verbose: bool = False
 ) -> QCircuit:
     """Recover the circuit with the same weight and weights .
 
@@ -28,25 +28,29 @@ def convert_srg_to_circuit(
     :return: [description]
     :rtype: QCircuit
     """
-    circuit = QCircuit(transitions.num_qubits)
+    
+    # initialize the circuit
+    circuit = QCircuit(srg.num_qubits)
 
     # first we assign the weights to the last state
     weights = _weights[:]  # copy
 
-    num_transitions = transitions.num_transitions()
+    assert len(weights) == 1 << srg.num_qubits
+
+    num_transitions = srg.num_transitions()
 
     gates = []
 
     for i in range(num_transitions, 0, -1):
         operator: MCRYOperator
-        state_before, operator, state_after = transitions.transition_at(i - 1)
+        state_before, operator, state_after = srg.transition_at(i - 1)
 
         if operator.operator_type == QOperatorType.X:
             gate = X(circuit.qubit_at(operator.target_qubit_index))
             gates.append(gate)
 
         else:
-            new_weights = np.zeros(1 << transitions.num_qubits)
+            new_weights = np.zeros(1 << srg.num_qubits)
 
             control_qubits = [
                 circuit.qubit_at(i) for i in operator.control_qubit_indices
@@ -54,10 +58,10 @@ def convert_srg_to_circuit(
             phases = operator.control_qubit_phases
             target_qubit = circuit.qubit_at(operator.target_qubit_index)
 
+            # CX or X
             if operator.rotation_type == QuantizedRotationType.SWAP:
-                for pure_state in state_before:
-                    idx = int(pure_state)
-                    ridx = int(pure_state.flip(operator.target_qubit_index))
+                for idx in state_before:
+                    ridx = idx ^ (1 << operator.target_qubit_index)
                     if not operator.is_controlled(idx):
                         # if the state is controlled, we need to check if the control qubits are all 1
                         new_weights[idx] += weights[idx]
@@ -74,6 +78,7 @@ def convert_srg_to_circuit(
 
                 gates.append(gate)
 
+            # U(2)
             else:
                 thetas = {}
 
@@ -82,11 +87,9 @@ def convert_srg_to_circuit(
                         f"state_before: \n{state_before}\n, state_after: \n{state_after}\n"
                     )
 
-                pure_state: PureState
-                for pure_state in state_before:
-                    idx = int(pure_state)
-                    ridx = int(pure_state.flip(operator.target_qubit_index))
-                    if not operator.is_controlled(pure_state):
+                for idx in state_before:
+                    ridx = idx ^ (1 << operator.target_qubit_index)
+                    if not operator.is_controlled(idx):
                         new_weights[idx] += weights[idx]
                         weights[idx] = 0
                     else:
@@ -96,7 +99,7 @@ def convert_srg_to_circuit(
                         theta = 2 * np.arccos(
                             np.sqrt(weights[idx] / (weights[idx] + weights[ridx]))
                         )
-                        thetas[theta] = pure_state
+                        thetas[theta] = idx
 
                         new_weights[idx] += weights[idx] + weights[ridx]
 
@@ -117,9 +120,8 @@ def convert_srg_to_circuit(
                     if len(thetas) == 2:
                         state1, state2, *_ = list(thetas.values())
 
-                        decision_variable: int = find_first_diff_qubit_index(
-                            state1, state2
-                        )
+                        # find the first different bit, use it as the decision variable
+                        decision_variable: int = (state1 ^ state2).bit_length() - 1
 
                         phase1 = (int(state1) >> decision_variable) & 1
                         phase2 = (int(state2) >> decision_variable) & 1

@@ -44,13 +44,16 @@ def rand_state(num_qubit: int, sparsity: int) -> QState:
 
 def test_synthesis():
     """Test that the synthesis is used ."""
-    # state = rand_state(4, 8)
-    s = D_state(4, 2)
-    state_val = 0
-    for i in range(2**4):
-        if s[i] != 0:
-            state_val |= 1 << i
-    state = from_val(state_val, 4)
+    # s = D_state(4, 2)
+    # state_val = 0
+    # for i in range(2**4):
+    #     if s[i] != 0:
+    #         state_val |= 1 << i
+    # state = from_val(state_val, 4)
+    
+    state = rand_state(4, 8)
+    
+    # state = from_val((1<<0b1110) + (1<<0b1001) + (1<<0b0010) + (1<<0b0000), 4)
 
     with stopwatch("synthesis"):
         srg = synthesize_srg(state, verbose=True)
