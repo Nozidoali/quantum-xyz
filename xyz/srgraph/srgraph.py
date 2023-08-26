@@ -26,6 +26,7 @@ class SRGraph:
         self.enquened_states = {}
         self.record = {}
 
+        self.multi_threading = False
         self.threading_lock = threading.Lock()
         self.exploration_threads = []
 
@@ -184,8 +185,9 @@ class SRGraph:
         """
 
         # don't use multi-threading if the state is already visited
-        self.thread_explore_target(curr_state, quantum_operator, next_state, cost)
-        return
+        if not self.multi_threading:
+            self.thread_explore_target(curr_state, quantum_operator, next_state, cost)
+            return
 
         task = threading.Thread(
             target=self.thread_explore_target,

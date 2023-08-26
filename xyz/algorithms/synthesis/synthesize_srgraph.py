@@ -63,7 +63,6 @@ def explore_state(
     # and record the operator
     srg.record[state] = curr_state, operator
 
-    return
     for i in x_signatures:
         state = next_state.apply_x(i)
         srg.record[state] = next_state, XOperator(i)
