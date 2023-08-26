@@ -9,19 +9,27 @@ Last Modified time: 2023-08-19 13:40:18
 """
 
 from typing import List
-
+import numpy as np
 import copy
 
 
 class QState:
     """Class method for QState"""
 
-    def __init__(self, patterns: List[int], length: int) -> None:
-        self.patterns = patterns[:]
+    def __init__(self, patterns: List[int], sparsity: int) -> None:
+        self.const_one: int = (1 << sparsity) - 1
+        self.signature_length: int = sparsity
+        
+        # patterns
         self.num_qubits = len(patterns)
-        self.length: int = length
-        self.const_one: int = (1 << self.length) - 1
-        self.signature_length: int = self.length
+        self.patterns = patterns[:]
+        
+        # sparsity
+        self.sparsity: int = sparsity
+        self.index_set = self.to_index_set()
+        
+        # weights (lets imagine that the weights are all 1)
+        self.index_to_weight = {index: 1 for index in self.index_set}
 
     def to_value(self) -> int:
         """Return the value of the state .
@@ -29,10 +37,10 @@ class QState:
         :return: [description]
         :rtype: int
         """
-        states = self.transpose()[:]
+        states = self.to_index_set()[:]
         value = 0
         for basis in states:
-            value |= (1 << basis)
+            value |= 1 << basis
         return value
 
     def __len__(self) -> int:
@@ -40,30 +48,6 @@ class QState:
         for j in range(self.num_qubits):
             num_ones += self.patterns[j]
         return num_ones
-
-    def num_supports(self) -> int:
-        """Returns the number of supported supports supports .
-
-        :return: [description]
-        :rtype: int
-        """
-        return 0
-
-    def count_ones(self) -> int:
-        """Returns the number of ones in the state array.
-
-        :return: [description]
-        :rtype: int
-        """
-        one_counts = {qubit_index: 0 for qubit_index in range(self.num_qubits)}
-        for qubit_index in range(self.num_qubits):
-            pattern = self.patterns[qubit_index]
-            for _ in range(self.length):
-                if pattern & 1 == 1:
-                    one_counts[qubit_index] += 1
-                pattern >>= 1
-
-        return one_counts
 
     def apply_x(self, qubit_index: int) -> None:
         """Apply X gate to the qubit.
@@ -87,7 +71,7 @@ class QState:
         """
         next_state = copy.deepcopy(self)
         next_state.patterns[target_qubit_index] ^= self.patterns[control_qubit_index]
-        if phase:
+        if not phase:
             next_state.patterns[target_qubit_index] = (
                 ~next_state.patterns[target_qubit_index] & self.const_one
             )
@@ -110,7 +94,7 @@ class QState:
         :param qubit_index: [description]
         :type qubit_index: int
         """
-        states = self.transpose()
+        states = self.to_index_set()
         new_states = []
         for state in states:
             state0 = state & ~(1 << qubit_index)
@@ -159,10 +143,10 @@ class QState:
         next_state.cleanup_columns()
         return next_state
 
-    def transpose(self) -> List[int]:
+    def to_index_set(self) -> List[int]:
         """Transpose the state array ."""
-        basis = [0 for i in range(self.length)]
-        for i in range(self.length):
+        basis = [0 for i in range(self.sparsity)]
+        for i in range(self.sparsity):
             for qubit_index in range(self.num_qubits):
                 pattern = self.patterns[qubit_index] & self.const_one
                 digit = ((pattern >> i) & 1) << qubit_index
@@ -177,7 +161,7 @@ class QState:
         """
         pos_cofactor = set()
         neg_cofactor = set()
-        for i in range(self.length):
+        for i in range(self.sparsity):
             value = 0
             for j in range(self.num_qubits):
                 value <<= 1
@@ -202,7 +186,7 @@ class QState:
         """
         pos_cofactor = set()
         neg_cofactor = set()
-        for i in range(self.length):
+        for i in range(self.sparsity):
             if (self.patterns[control_qubit] >> i) & 1 != phase:
                 continue
 
@@ -222,12 +206,12 @@ class QState:
 
     def cleanup_columns(self) -> None:
         """Remove the redundant supports supports ."""
-        values = self.transpose()
+        values = self.to_index_set()
 
         # remove redundant columns
         values = set(values)
-        self.length = len(values)
-        self.const_one = (1 << self.length) - 1
+        self.sparsity = len(values)
+        self.const_one = (1 << self.sparsity) - 1
         self.patterns = [0 for i in range(self.num_qubits)]
 
         # now we sort the values
@@ -279,7 +263,7 @@ class QState:
         :return: [description]
         :rtype: [type]
         """
-        return self.length == 1
+        return self.sparsity == 1
 
     @staticmethod
     def ground_state(num_qubits: int) -> "QState":
@@ -293,8 +277,23 @@ class QState:
         state = QState([0 for i in range(num_qubits)], 1)
         return state
 
+    def get_lower_bound(self) -> int:
+        """Returns the lower bound of the state .
+
+        :param state: [description]
+        :type state: QState
+        :return: [description]
+        :rtype: int
+        """
+
+        lower_bound: int = 0
+        for pattern in self.patterns:
+            if pattern != 0:
+                lower_bound += 1
+        return lower_bound
+
     def __str__(self) -> str:
-        return "-".join([f"{x:b}".zfill(self.length) for x in self.patterns])
+        return "+".join([f"{x:b}".zfill(self.sparsity) for x in self.patterns])
 
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, QState):
@@ -311,6 +310,26 @@ class QState:
         for pattern in self.patterns:
             ret_val = (ret_val << self.signature_length) | (pattern & self.const_one)
         return hash(ret_val)
+
+
+def quantize_state(state_vector: np.ndarray):
+    """Quantize a state to the number of qubits .
+
+    :param state_vector: [description]
+    :type state_vector: np.ndarray
+    """
+
+    states = []
+    num_qubits = int(np.log2(len(state_vector)))
+    for state, coefficient in enumerate(state_vector):
+        if coefficient != 0:
+            states.append(state)
+
+    patterns = [0 for i in range(num_qubits)]
+    for _, value in enumerate(states):
+        for j in range(num_qubits):
+            patterns[j] = patterns[j] << 1 | ((value >> j) & 1)
+    return QState(patterns, len(states))
 
 
 def from_val(val: int, num_qubits: int) -> QState:

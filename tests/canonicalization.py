@@ -9,12 +9,21 @@ Last Modified time: 2023-08-19 13:34:14
 """
 
 import numpy as np
-from itertools import permutations, combinations
+from itertools import combinations
 
-from xyz import QState, D_state, get_time, lookup_repr
+from xyz import QState, lookup_repr
 
 
 def place_ones(size, count):
+    """Place one or more lists into one .
+
+    :param size: [description]
+    :type size: [type]
+    :param count: [description]
+    :type count: [type]
+    :yield: [description]
+    :rtype: [type]
+    """
     for positions in combinations(range(size), count):
         p = [0] * size
         for i in positions:

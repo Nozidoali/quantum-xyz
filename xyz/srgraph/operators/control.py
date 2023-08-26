@@ -28,6 +28,7 @@ class ControlledOperator:
         """
         return (basis_state >> self.control_qubit_index) & 1 == self.control_qubit_phase
 
+
 class MultiControlledOperator:
     """Class method to create a class that is used by the FirmrolledOperator ."""
 

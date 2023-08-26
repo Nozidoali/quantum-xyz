@@ -32,7 +32,6 @@ circ = circuit.to_qiskit(with_measurement=False, with_tomography=True)
 print(circ)
 exit(0)
 
-# print(simulate(circ))
 # print(f"cnot = {circuit.num_gates(QGateType.CX)}")
 
 from qiskit_ibm_provider import IBMProvider
