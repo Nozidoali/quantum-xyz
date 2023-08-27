@@ -16,20 +16,36 @@ import copy
 class QState:
     """Class method for QState"""
 
-    def __init__(self, patterns: List[int], sparsity: int) -> None:
-        self.const_one: int = (1 << sparsity) - 1
-        self.signature_length: int = sparsity
-        
-        # patterns
-        self.num_qubits = len(patterns)
-        self.patterns = patterns[:]
-        
-        # sparsity
-        self.sparsity: int = sparsity
-        self.index_set = self.to_index_set()
-        
-        # weights (lets imagine that the weights are all 1)
-        self.index_to_weight = {index: 1 for index in self.index_set}
+    def __init__(self, index_to_weight: dict, num_qubit: int) -> None:
+        self.num_qubits = num_qubit
+        self.sparsity: int = len(index_to_weight)
+        self.index_set = index_to_weight.keys()
+        self.index_to_weight = copy.deepcopy(index_to_weight)
+
+    def get_supports(self) -> List[int]:
+        """Return the support of the state .
+
+        :param state: [description]
+        :type state: QState
+        :return: [description]
+        :rtype: List[int]
+        """
+        signatures = self.to_signatures()
+        qubit_indices = []
+        for qubit, pattern in enumerate(signatures):
+            if pattern != 0:
+                qubit_indices.append(qubit)
+        return qubit_indices
+
+    def get_sparsity(self) -> int:
+        """Return the sparsity of the state .
+
+        :param state: [description]
+        :type state: QState
+        :return: [description]
+        :rtype: int
+        """
+        return len(self.index_set)
 
     def to_value(self) -> int:
         """Return the value of the state .
@@ -37,17 +53,10 @@ class QState:
         :return: [description]
         :rtype: int
         """
-        states = self.to_index_set()[:]
         value = 0
-        for basis in states:
+        for basis in self.index_set:
             value |= 1 << basis
         return value
-
-    def __len__(self) -> int:
-        num_ones: int = 0
-        for j in range(self.num_qubits):
-            num_ones += self.patterns[j]
-        return num_ones
 
     def apply_x(self, qubit_index: int) -> None:
         """Apply X gate to the qubit.
@@ -55,9 +64,11 @@ class QState:
         :param qubit_index: [description]
         :type qubit_index: int
         """
-        next_state = copy.deepcopy(self)
-        next_state.patterns[qubit_index] = self.const_one ^ self.patterns[qubit_index]
-        return next_state
+        index_to_weight = {}
+        for idx in self.index_set:
+            reversed_idx = idx ^ (1 << qubit_index)
+            index_to_weight[reversed_idx] = self.index_to_weight[idx]
+        return QState(index_to_weight, self.num_qubits)
 
     def apply_cx(
         self, control_qubit_index: int, phase: bool, target_qubit_index: int
@@ -69,13 +80,14 @@ class QState:
         :param target_qubit_index: [description]
         :type target_qubit_index: int
         """
-        next_state = copy.deepcopy(self)
-        next_state.patterns[target_qubit_index] ^= self.patterns[control_qubit_index]
-        if not phase:
-            next_state.patterns[target_qubit_index] = (
-                ~next_state.patterns[target_qubit_index] & self.const_one
-            )
-        return next_state
+        index_to_weight = {}
+        for idx in self.index_set:
+            reversed_idx = idx ^ (1 << target_qubit_index)
+            if (idx >> control_qubit_index) & 1 == phase:
+                index_to_weight[reversed_idx] = self.index_to_weight[idx]
+            else:
+                index_to_weight[idx] = self.index_to_weight[idx]
+        return QState(index_to_weight, self.num_qubits)
 
     def apply_merge0(self, qubit_index: int) -> None:
         """Apply the Y operator to the given qubit .
@@ -83,10 +95,69 @@ class QState:
         :param qubit_index: [description]
         :type qubit_index: int
         """
-        next_state = copy.deepcopy(self)
-        next_state.patterns[qubit_index] = 0
-        next_state.cleanup_columns()
-        return next_state
+        index_to_weight = {}
+        theta = None
+        for idx in self.index_set:
+            reversed_idx = idx ^ (1 << qubit_index)
+            if reversed_idx not in self.index_set:
+                raise ValueError("The state is not a valid state.")
+            idx0 = idx & ~(1 << qubit_index)
+            idx1 = idx0 ^ (1 << qubit_index)
+
+            # now we check the rotation angle
+            _theta = 2 * np.arccos(
+                np.sqrt(
+                    self.index_to_weight[idx0]
+                    / (self.index_to_weight[idx0] + self.index_to_weight[idx1])
+                )
+            )
+            if theta is None:
+                theta = _theta
+            elif not np.isclose(theta, _theta):
+                raise ValueError("The state is not a valid state.")
+
+            # finally we update the weight
+            index_to_weight[idx0] = (
+                self.index_to_weight[idx0] + self.index_to_weight[idx1]
+            )
+        if theta is None:
+            raise ValueError("The state is not a valid state.")
+        return QState(index_to_weight, self.num_qubits), theta
+
+    def apply_merge1(self, qubit_index: int) -> None:
+        """Apply the Y operator to the given qubit .
+
+        :param qubit_index: [description]
+        :type qubit_index: int
+        """
+        index_to_weight = {}
+        theta = None
+        for idx in self.index_set:
+            reversed_idx = idx ^ (1 << qubit_index)
+            if reversed_idx not in self.index_set:
+                raise ValueError("The state is not a valid state.")
+            idx0 = idx & ~(1 << qubit_index)
+            idx1 = idx0 ^ (1 << qubit_index)
+
+            # now we check the rotation angle
+            _theta = 2 * np.arccos(
+                np.sqrt(
+                    self.index_to_weight[idx1]
+                    / (self.index_to_weight[idx0] + self.index_to_weight[idx1])
+                )
+            )
+            if theta is None:
+                theta = _theta
+            elif not np.isclose(theta, _theta):
+                raise ValueError("The state is not a valid state.")
+
+            # finally we update the weight
+            index_to_weight[idx1] = (
+                self.index_to_weight[idx0] + self.index_to_weight[idx1]
+            )
+        if theta is None:
+            raise ValueError("The state is not a valid state.")
+        return QState(index_to_weight, self.num_qubits), theta
 
     def apply_split(self, qubit_index: int) -> None:
         """Apply the Y operator to the given qubit .
@@ -94,17 +165,15 @@ class QState:
         :param qubit_index: [description]
         :type qubit_index: int
         """
-        states = self.to_index_set()
         new_states = []
-        for state in states:
+        for state in self.index_set:
             state0 = state & ~(1 << qubit_index)
             state1 = state | (1 << qubit_index)
 
             new_states.append(state0)
             new_states.append(state1)
 
-        patterns = self.transpose_back(new_states)
-        next_state = QState(patterns, len(new_states))
+        next_state = QState(new_states, self.num_qubits)
         return next_state
 
     def apply_controlled_merge0(
@@ -115,15 +184,39 @@ class QState:
         :param qubit_index: [description]
         :type qubit_index: int
         """
-        next_state = copy.deepcopy(self)
-        control = (
-            ~self.patterns[control_qubit_index]
-            if phase
-            else self.patterns[control_qubit_index]
-        )
-        next_state.patterns[target_qubit_index] &= control
-        next_state.cleanup_columns()
-        return next_state
+        index_to_weight = {}
+        theta = None
+        for idx in self.index_set:
+            # no rotation
+            if (idx >> control_qubit_index) & 1 != phase:
+                index_to_weight[idx] = self.index_to_weight[idx]
+                continue
+
+            reversed_idx = idx ^ (1 << target_qubit_index)
+            if reversed_idx not in self.index_set:
+                raise ValueError("The state is not a valid state.")
+            idx0 = idx & ~(1 << target_qubit_index)
+            idx1 = idx0 ^ (1 << target_qubit_index)
+
+            # now we check the rotation angle
+            _theta = 2 * np.arccos(
+                np.sqrt(
+                    self.index_to_weight[idx0]
+                    / (self.index_to_weight[idx0] + self.index_to_weight[idx1])
+                )
+            )
+            if theta is None:
+                theta = _theta
+            elif not np.isclose(theta, _theta):
+                raise ValueError("The state is not a valid state.")
+
+            # finally we update the weight
+            index_to_weight[idx0] = (
+                self.index_to_weight[idx0] + self.index_to_weight[idx1]
+            )
+        if theta is None:
+            raise ValueError("The state is not a valid state.")
+        return QState(index_to_weight, self.num_qubits), theta
 
     def apply_controlled_merge1(
         self, control_qubit_index: int, phase: bool, target_qubit_index: int
@@ -133,137 +226,47 @@ class QState:
         :param qubit_index: [description]
         :type qubit_index: int
         """
-        next_state = copy.deepcopy(self)
-        control = (
-            ~self.patterns[control_qubit_index]
-            if phase
-            else self.patterns[control_qubit_index]
-        )
-        next_state.patterns[target_qubit_index] |= control
-        next_state.cleanup_columns()
-        return next_state
-
-    def to_index_set(self) -> List[int]:
-        """Transpose the state array ."""
-        basis = [0 for i in range(self.sparsity)]
-        for i in range(self.sparsity):
-            for qubit_index in range(self.num_qubits):
-                pattern = self.patterns[qubit_index] & self.const_one
-                digit = ((pattern >> i) & 1) << qubit_index
-                basis[i] |= digit
-        return basis
-
-    def cofactors(self, qubit_index: int) -> List[int]:
-        """Return the cofactor of the given qubit .
-
-        :param qubit_index: [description]
-        :type qubit_index: int
-        """
-        pos_cofactor = set()
-        neg_cofactor = set()
-        for i in range(self.sparsity):
-            value = 0
-            for j in range(self.num_qubits):
-                value <<= 1
-                if j == qubit_index:
-                    continue
-                value |= (self.patterns[j] >> i) & 1
-
-            if (self.patterns[qubit_index] >> i) & 1 == 1:
-                pos_cofactor.add(value)
-            else:
-                neg_cofactor.add(value)
-
-        return pos_cofactor, neg_cofactor
-
-    def controlled_cofactors(
-        self, qubit_index: int, control_qubit: int, phase: bool
-    ) -> List[int]:
-        """Return the cofactor of the given qubit .
-
-        :param qubit_index: [description]
-        :type qubit_index: int
-        """
-        pos_cofactor = set()
-        neg_cofactor = set()
-        for i in range(self.sparsity):
-            if (self.patterns[control_qubit] >> i) & 1 != phase:
+        index_to_weight = {}
+        theta = None
+        for idx in self.index_set:
+            # no rotation
+            if (idx >> control_qubit_index) & 1 != phase:
+                index_to_weight[idx] = self.index_to_weight[idx]
                 continue
 
-            value = 0
-            for j in range(self.num_qubits):
-                value <<= 1
-                if j == qubit_index:
-                    continue
-                value |= (self.patterns[j] >> i) & 1
+            reversed_idx = idx ^ (1 << target_qubit_index)
+            if reversed_idx not in self.index_set:
+                raise ValueError("The state is not a valid state.")
+            idx0 = idx & ~(1 << target_qubit_index)
+            idx1 = idx0 ^ (1 << target_qubit_index)
 
-            if (self.patterns[qubit_index] >> i) & 1 == 1:
-                pos_cofactor.add(value)
-            else:
-                neg_cofactor.add(value)
+            # now we check the rotation angle
+            _theta = 2 * np.arccos(
+                np.sqrt(
+                    self.index_to_weight[idx1]
+                    / (self.index_to_weight[idx0] + self.index_to_weight[idx1])
+                )
+            )
+            if theta is None:
+                theta = _theta
+            elif not np.isclose(theta, _theta):
+                raise ValueError("The state is not a valid state.")
 
-        return pos_cofactor, neg_cofactor
+            # finally we update the weight
+            index_to_weight[idx1] = (
+                self.index_to_weight[idx0] + self.index_to_weight[idx1]
+            )
+        if theta is None:
+            raise ValueError("The state is not a valid state.")
+        return QState(index_to_weight, self.num_qubits), theta
 
-    def cleanup_columns(self) -> None:
-        """Remove the redundant supports supports ."""
-        values = self.to_index_set()
-
-        # remove redundant columns
-        values = set(values)
-        self.sparsity = len(values)
-        self.const_one = (1 << self.sparsity) - 1
-        self.patterns = [0 for i in range(self.num_qubits)]
-
-        # now we sort the values
-        values = sorted(values)
-
-        self.patterns = self.transpose_back(values)
-
-    def get_x_signatures(self) -> List[int]:
-        """Returns the indices of the X - signature of the QR code .
-
-        :return: [description]
-        :rtype: List[int]
-        """
-
-        signatures = []
-        for qubit_index in range(self.num_qubits):
-            if self.patterns[qubit_index] & 1 == 1:
-                signatures.append(qubit_index)
-
-        return signatures
-
-    def get_y_signatures(self) -> List[int]:
-        """Returns the indices of the Y - signature of the QR code .
-
-        :return: [description]
-        :rtype: List[int]
-        """
-
-        signatures = []
-        for qubit_index in range(self.num_qubits):
-            pos_cofactor, neg_cofactor = self.cofactors(qubit_index)
-
-            if len(pos_cofactor) != 0 and pos_cofactor == neg_cofactor:
-                signatures.append(qubit_index)
-
-        return signatures
-
-    def transpose_back(self, values: List[int]) -> List[int]:
+    def to_signatures(self) -> List[int]:
         """Transpose the state array ."""
-        patterns = [0 for i in range(self.num_qubits)]
-        for _, value in enumerate(values):
+        signatures = [0 for i in range(self.num_qubits)]
+        for _, value in enumerate(self.index_set):
             for j in range(self.num_qubits):
-                patterns[j] = patterns[j] << 1 | (value >> j & 1)
-        return patterns
-
-    def is_ground_state(self) -> None:
-        """True if the current state is a ground state .
-
-        :return: [description]
-        :rtype: [type]
-        """
-        return self.sparsity == 1
+                signatures[j] = signatures[j] << 1 | (value >> j & 1)
+        return signatures
 
     @staticmethod
     def ground_state(num_qubits: int) -> "QState":
@@ -274,7 +277,7 @@ class QState:
         :return: [description]
         :rtype: QState
         """
-        state = QState([0 for i in range(num_qubits)], 1)
+        state = QState({0: 1.0}, num_qubits)
         return state
 
     def get_lower_bound(self) -> int:
@@ -285,15 +288,22 @@ class QState:
         :return: [description]
         :rtype: int
         """
-
         lower_bound: int = 0
-        for pattern in self.patterns:
+        signatures = self.to_signatures()
+        for pattern in signatures:
             if pattern != 0:
                 lower_bound += 1
         return lower_bound
 
     def __str__(self) -> str:
-        return "+".join([f"{x:b}".zfill(self.sparsity) for x in self.patterns])
+        return " + ".join(
+            [
+                f"{np.sqrt(weight):0.02f}*|{idx:0{self.num_qubits}b}>".zfill(
+                    self.num_qubits
+                )
+                for idx, weight in self.index_to_weight.items()
+            ]
+        )
 
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, QState):
@@ -303,13 +313,13 @@ class QState:
     def __lt__(self, o: object) -> bool:
         if not isinstance(o, QState):
             return False
-        return len(self) < len(o)
+        return False
 
     def __hash__(self) -> int:
-        ret_val: int = 0
-        for pattern in self.patterns:
-            ret_val = (ret_val << self.signature_length) | (pattern & self.const_one)
-        return hash(ret_val)
+        value = 0
+        for index in sorted(self.index_set):
+            value = value << self.num_qubits | index
+        return value
 
 
 def quantize_state(state_vector: np.ndarray):
@@ -319,17 +329,12 @@ def quantize_state(state_vector: np.ndarray):
     :type state_vector: np.ndarray
     """
 
-    states = []
+    index_to_weight = {}
     num_qubits = int(np.log2(len(state_vector)))
-    for state, coefficient in enumerate(state_vector):
+    for idx, coefficient in enumerate(state_vector):
         if coefficient != 0:
-            states.append(state)
-
-    patterns = [0 for i in range(num_qubits)]
-    for _, value in enumerate(states):
-        for j in range(num_qubits):
-            patterns[j] = patterns[j] << 1 | ((value >> j) & 1)
-    return QState(patterns, len(states))
+            index_to_weight[idx] = coefficient**2
+    return QState(index_to_weight, num_qubits)
 
 
 def from_val(val: int, num_qubits: int) -> QState:

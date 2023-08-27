@@ -8,16 +8,12 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-18 21:09:09
 """
 
+import random
 import numpy as np
 from qiskit import Aer, transpile
 
-from xyz import (
-    QState,
-    synthesize,
-    stopwatch,
-    from_val,
-    D_state
-)
+from xyz import QState, synthesize, stopwatch, from_val, D_state
+
 
 def rand_state(num_qubit: int, sparsity: int) -> QState:
     """Generate a random state .
@@ -29,33 +25,31 @@ def rand_state(num_qubit: int, sparsity: int) -> QState:
     """
 
     state_array = [0 for i in range((2**num_qubit) - sparsity)] + [
-        1 for i in range(sparsity)
+        random.random() for i in range(sparsity)
     ]
     np.random.shuffle(state_array)
-    state_val = 0
-    for i in range(2**num_qubit):
-        if state_array[i] == 1:
-            state_val |= 1 << i
-
-    return from_val(state_val, num_qubit)
+    return state_array
 
 
 def test_synthesis():
     """Test that the synthesis is used ."""
 
-    state = D_state(4, 2)
-
+    # state = rand_state(4, 5)
+    state = D_state(7, 2)
     with stopwatch("synthesis"):
         circuit = synthesize(state, verbose_level=2)
         circ = circuit.to_qiskit()
         print(circ)
-        simulator = Aer.get_backend('aer_simulator')
+        simulator = Aer.get_backend("aer_simulator")
         circ = transpile(circ, simulator)
 
         # Run and get counts
         result = simulator.run(circ).result()
         counts = result.get_counts(circ)
-        
+
         print(counts)
+        print(f"cnot = {circ.count_ops()['cx']}")
+
+
 if __name__ == "__main__":
     test_synthesis()

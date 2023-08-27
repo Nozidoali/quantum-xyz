@@ -20,6 +20,11 @@ class QOperatorType(Enum):
 
     MCRY = auto()
     X = auto()
+    CX = auto()
+    T0 = auto()
+    T1 = auto()
+    CT0 = auto()
+    CT1 = auto()
 
 
 class QOperator:

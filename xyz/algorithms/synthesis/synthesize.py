@@ -12,32 +12,61 @@ Last Modified time: 2023-06-28 11:02:26
 import copy
 from queue import PriorityQueue
 import numpy as np
+from sympy import true
+from xyz.circuit.basic_gates.base.gate import QGate
+from xyz.circuit.basic_gates.cx import CX
 
 from xyz.srgraph import (
     QState,
     SRGraph,
-    MCRYOperator,
     QOperatorType,
-    QuantizedRotationType,
     QOperator,
+    TROperator,
+    XOperator,
+    CXOperator,
+    CTROperator,
     quantize_state,
-    lookup_repr,
 )
 
-from xyz.circuit import QCircuit, X, MCRY, MULTIPLEXY
+from xyz.circuit import QCircuit, X, MCRY
 
 
-def synthesize(state_vector: np.ndarray, verbose_level: int = 0) -> SRGraph:
+def synthesize(
+    state_vector: np.ndarray, exact_optimal: bool = False, verbose_level: int = 0
+) -> SRGraph:
     """
     @brief Runs the search based state synthesis
     @param verbose_level Whether to print out the state of the search
     """
 
+    class AStarCost:
+        """AStarCost class ."""
+
+        def __init__(
+            self, cnot_cost: float, unitary_cost: float, lower_bound: float
+        ) -> None:
+            self.cnot_cost = cnot_cost
+            self.unitary_cost = unitary_cost
+            self.lower_bound = lower_bound
+
+        def __lt__(self, other):
+            return (
+                self.cnot_cost + 0.1 * self.unitary_cost + self.lower_bound
+                < other.cnot_cost + 0.1 * other.unitary_cost + other.lower_bound
+            )
+
+        def __ge__(self, other):
+            return (
+                self.cnot_cost + 0.1 * self.unitary_cost + self.lower_bound
+                >= other.cnot_cost + 0.1 * other.unitary_cost + other.lower_bound
+            )
+
     target_state = quantize_state(state_vector)
+    num_qubits = target_state.num_qubits
+    initial_state = QState.ground_state(num_qubits)
 
-    srg = SRGraph(target_state.num_qubits)
-
-    weights = state_vector[:]
+    # initialize the circuit
+    circuit = QCircuit(num_qubits)
 
     visited_states = set()
     state_queue = PriorityQueue()
@@ -45,227 +74,182 @@ def synthesize(state_vector: np.ndarray, verbose_level: int = 0) -> SRGraph:
     record = {}
 
     def explore_state(
-        srg: SRGraph, curr_state: QState, quantum_operator: QOperator, curr_cost: int
-    ) -> None:
-        """Explore a state in a SRGraph .
-        """
+        curr_state: QState, quantum_operator: QOperator, curr_cost: AStarCost
+    ) -> QState:
+        """Explore a state in a SRGraph ."""
         nonlocal visited_states, state_queue, enquened_states, record
-        next_state = quantum_operator(curr_state)
-        next_cost = (
-            curr_cost
-            + quantum_operator.get_cost()
-            + next_state.get_lower_bound()
-            - curr_state.get_lower_bound()
+        try:
+            next_state = quantum_operator(curr_state)
+        except ValueError:
+            return None
+
+        next_cost = AStarCost(
+            curr_cost.cnot_cost + quantum_operator.get_cost(),
+            curr_cost.unitary_cost + 1,
+            next_state.get_lower_bound(),
         )
 
-        state = lookup_repr(next_state)
-
         # we skip the state if it is already visited
-        if state in visited_states:
-            return
+        if next_state in visited_states:
+            return None
 
         # we skip the state if it is already enquened and the cost is higher
-        if state in enquened_states and next_cost >= enquened_states[state]:
-            return
+        if next_state in enquened_states and next_cost >= enquened_states[next_state]:
+            return None
 
         # now we add the state to the queue
         state_queue.put((next_cost, next_state))
-        enquened_states[state] = next_cost
+        enquened_states[next_state] = next_cost
+
+        # we record the gate
+        gate: QGate = None
+        match quantum_operator.operator_type:
+            case QOperatorType.X:
+                gate = X(circuit.qubit_at(quantum_operator.target_qubit_index))
+            case QOperatorType.CX:
+                gate = CX(
+                    circuit.qubit_at(quantum_operator.control_qubit_index),
+                    quantum_operator.control_qubit_phase,
+                    circuit.qubit_at(quantum_operator.target_qubit_index),
+                )
+            case QOperatorType.T0 | QOperatorType.T1:
+                gate = MCRY(
+                    quantum_operator.theta,
+                    [],
+                    [],
+                    circuit.qubit_at(quantum_operator.target_qubit_index),
+                )
+
+            case QOperatorType.CT0 | QOperatorType.CT1:
+                gate = MCRY(
+                    quantum_operator.theta,
+                    [circuit.qubit_at(quantum_operator.control_qubit_index)],
+                    [quantum_operator.control_qubit_phase],
+                    circuit.qubit_at(quantum_operator.target_qubit_index),
+                )
 
         # and record the quantum_operator
-        record[next_state] = curr_state, quantum_operator
+        record[next_state] = curr_state, gate
 
-    curr_state = copy.deepcopy(target_state)
-    curr_cost = curr_state.get_lower_bound()
+        return next_state
+
+    curr_state = target_state
+    curr_cost = AStarCost(0, 0, curr_state.get_lower_bound())
     state_queue.put((curr_cost, curr_state))
     enquened_states[curr_state] = curr_cost
 
     solution_reached: bool = False
-    
+
+    sparsity = target_state.get_sparsity()
+    supports = target_state.get_supports()
+
     # This function is called by the search loop.
     while not state_queue.empty():
         curr_cost, curr_state = state_queue.get()
 
-        canonical_state = lookup_repr(curr_state)
-        visited_states.add(canonical_state)
+        # print(f"curr_state: {curr_state}, curr_cost: {curr_cost}")
 
-        if len(canonical_state) == 0:
+        if curr_state == initial_state:
             # then we have found the solution
             solution_reached = True
             break
 
-        for target_qubit in range(srg.num_qubits):
-            pos_cofactor, neg_cofactor = curr_state.cofactors(target_qubit)
+        _sparsity = curr_state.get_sparsity()
+        if _sparsity >= 2 and _sparsity < sparsity:
+            sparsity = _sparsity
+            print(f"sparsity: {sparsity}")
 
-            # skip if the target qubit is already 1
-            if curr_state.patterns[target_qubit] == 0:
-                continue
+            if not exact_optimal:
+                state_queue = PriorityQueue()
 
-            for control_qubit in range(srg.num_qubits):
-                if control_qubit == target_qubit:
-                    continue
+        _supports = curr_state.get_supports()
+        if len(_supports) < len(supports):
+            supports = _supports
+            print(f"supports: {supports}")
 
-                if curr_state.patterns[control_qubit] == 0:
-                    continue
+            if not exact_optimal:
+                state_queue = PriorityQueue()
 
-                for phase in [True, False]:
-                    pos_cofactor, neg_cofactor = curr_state.controlled_cofactors(
-                        target_qubit, control_qubit, phase
-                    )
+        visited_states.add(curr_state)
+        supports = curr_state.get_supports()
 
-                    if len(pos_cofactor) > 0 and pos_cofactor == neg_cofactor:
-                        # apply merge0
-                        quantum_operator = MCRYOperator(
-                            target_qubit,
-                            QuantizedRotationType.MERGE0,
-                            [control_qubit],
-                            [phase],
+        search_done = False
+
+        # apply merge0
+        if not search_done:
+            for target_qubit in supports:
+                quantum_operator = TROperator(target_qubit, True)
+                explore_state(curr_state, quantum_operator, curr_cost)
+                quantum_operator = TROperator(target_qubit, False)
+                next_state = explore_state(curr_state, quantum_operator, curr_cost)
+                if not exact_optimal and next_state is not None:
+                    search_done = True
+                    break
+
+        # apply cmerge
+        if not search_done:
+            for target_qubit in supports:
+                if search_done:
+                    break
+                for control_qubit in supports:
+                    if control_qubit == target_qubit:
+                        continue
+                    if search_done:
+                        break
+                    for phase in [True, False]:
+                        if search_done:
+                            break
+                        for target_phase in [True, False]:
+                            quantum_operator = CTROperator(
+                                target_qubit, target_phase, control_qubit, phase
+                            )
+                            next_state = explore_state(
+                                curr_state, quantum_operator, curr_cost
+                            )
+                            if not exact_optimal and next_state is not None:
+                                search_done = True
+                                break
+
+        # CNOT
+        if not search_done:
+            for target_qubit in supports:
+                if search_done:
+                    break
+                for control_qubit in supports:
+                    if control_qubit == target_qubit:
+                        continue
+                    if search_done:
+                        break
+                    for phase in [True, False]:
+                        quantum_operator = CXOperator(
+                            target_qubit, control_qubit, phase
                         )
-                        explore_state(srg, curr_state, quantum_operator, curr_cost)
-
-                        # apply merge1
-                        quantum_operator = MCRYOperator(
-                            target_qubit,
-                            QuantizedRotationType.MERGE1,
-                            [control_qubit],
-                            [phase],
+                        next_state = explore_state(
+                            curr_state, quantum_operator, curr_cost
                         )
-                        explore_state(srg, curr_state, quantum_operator, curr_cost)
+                        if not exact_optimal:
+                            if (
+                                next_state is not None
+                                and next_state.get_supports()
+                                < curr_state.get_supports()
+                            ):
+                                search_done = True
+                                break
 
-                # CNOT
-                for phase in [True]:
-                    quantum_operator = MCRYOperator(
-                        target_qubit,
-                        QuantizedRotationType.SWAP,
-                        [control_qubit],
-                        [phase],
-                    )
-                    explore_state(srg, curr_state, quantum_operator, curr_cost)
+        # apply x
+        if not search_done:
+            if not exact_optimal and curr_state.get_sparsity() != 1:
+                pass
+            else:
+                for target_qubit in supports:
+                    quantum_operator = XOperator(target_qubit)
+                    explore_state(curr_state, quantum_operator, curr_cost)
 
     assert solution_reached
-    # assert QState.ground_state(srg.num_qubits) in record
-    curr_basis = curr_state.to_index_set()
-    print('\n'.join([f"{i:0{srg.num_qubits}b}: {weights[i]}" for i in curr_basis]))
 
-    state_tranformations = []
     while curr_state in record:
-        prev_state, quantum_operator = record[curr_state]
-
-        state_before = prev_state.to_index_set()
-        state_after = curr_state.to_index_set()
-        state_tranformations.append((state_before, quantum_operator, state_after))
-        curr_state = prev_state
-
-    # initialize the circuit
-    circuit = QCircuit(srg.num_qubits)
-    gates = []
-    
-    
-    for state_before, quantum_operator, state_after in reversed(state_tranformations):
-        
-        if verbose_level == 2:
-            state_before_str = "\n".join([f"{i:0{circuit.get_num_qubits()}b} {weights[i]}" for i in state_before])
-            print(f"quantum_operator: {quantum_operator}")
-            print(f"state_before: \n{state_before_str}")
-            print(weights)
-        
-        if quantum_operator.operator_type == QOperatorType.X:
-            gate = X(circuit.qubit_at(quantum_operator.target_qubit_index))
-            gates.append(gate)
-
-        else:
-            new_weights = np.zeros(1 << srg.num_qubits)
-
-            control_qubits = [
-                circuit.qubit_at(i) for i in quantum_operator.control_qubit_indices
-            ]
-            phases = quantum_operator.control_qubit_phases
-            target_qubit = circuit.qubit_at(quantum_operator.target_qubit_index)
-
-            # CX or X
-            if quantum_operator.rotation_type == QuantizedRotationType.SWAP:
-                for idx in state_before:
-                    ridx = idx ^ (1 << quantum_operator.target_qubit_index)
-                    if not quantum_operator.is_controlled(idx):
-                        # if the state is controlled, we need to check if the control qubits are all 1
-                        new_weights[idx] += weights[idx]
-                        weights[idx] = 0
-                    else:
-                        new_weights[ridx] += weights[idx]
-                        weights[idx] = 0
-                gate = MCRY(np.pi, control_qubits, phases, target_qubit)
-                gates.append(gate)
-
-            # U(2)
-            else:
-                thetas = {}
-                for idx in state_before:
-                    ridx = idx ^ (1 << quantum_operator.target_qubit_index)
-                    if not quantum_operator.is_controlled(idx):
-                        new_weights[idx] += weights[idx]
-                        weights[idx] = 0
-                    else:
-                        if weights[idx] + weights[ridx] == 0:
-                            continue
-
-                        theta = 2 * np.arccos(
-                            np.sqrt(weights[idx] / (weights[idx] + weights[ridx]))
-                        )
-                        thetas[theta] = idx
-                        new_weights[idx] += weights[idx] + weights[ridx]
-                        weights[idx] = 0
-                        weights[ridx] = 0
-                if len(thetas) == 0:
-                    assert False, "No theta found"
-
-                elif len(thetas) == 1:
-                    theta = list(thetas.keys())[0]
-                    gate = MCRY(theta, control_qubits, phases, target_qubit)
-                    gates.append(gate)
-
-                else:
-                    if len(thetas) == 2:
-
-                        state1, state2, *_ = list(thetas.values())
-
-                        # find the first different bit, use it as the decision variable
-                        decision_variable: int = (state1 ^ state2).bit_length() - 1
-
-                        phase1 = (int(state1) >> decision_variable) & 1
-                        phase2 = (int(state2) >> decision_variable) & 1
-
-                        control_qubits.append(circuit.qubit_at(decision_variable))
-
-                        phases1 = phases + [phase1]
-                        phases2 = phases + [phase2]
-
-                        theta1 = list(thetas.keys())[0]
-                        theta2 = list(thetas.keys())[1]
-                        
-                        print(f"theta1: {theta1}, theta2: {theta2}")
-
-                        if len(control_qubits) == 1:
-                            # special case
-                            gate = MULTIPLEXY(
-                                theta1, theta2, control_qubits[0], target_qubit
-                            )
-                            gates.append(gate)
-
-                        else:
-                            gate1 = MCRY(theta1, control_qubits, phases1, target_qubit)
-                            gate2 = MCRY(theta2, control_qubits, phases2, target_qubit)
-                            gates.append(gate1)
-                            gates.append(gate2)
-                    else:
-                        raise NotImplementedError
-        weights = new_weights[:] # copy
-        if verbose_level == 2:
-            state_after_str = "\n".join([f"{i:0{circuit.get_num_qubits()}b}: {weights[i]}" for i in state_after])
-            print(f"state_after: \n{state_after_str}")
-            print(weights)
-
-    for gate in gates[::-1]:
-        print(gate)
+        prev_state, gate = record[curr_state]
         circuit.add_gate(gate)
-
+        curr_state = prev_state
+        print(f"curr_state: {curr_state}")
     return circuit
