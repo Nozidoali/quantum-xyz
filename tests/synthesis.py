@@ -35,9 +35,9 @@ def test_synthesis():
     """Test that the synthesis is used ."""
 
     # state = rand_state(4, 5)
-    state = D_state(7, 2)
+    state = D_state(6, 2)
     with stopwatch("synthesis"):
-        circuit = synthesize(state, verbose_level=2)
+        circuit = synthesize(state, optimality_level=1)
         circ = circuit.to_qiskit()
         print(circ)
         simulator = Aer.get_backend("aer_simulator")

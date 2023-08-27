@@ -32,7 +32,7 @@ from xyz.circuit import QCircuit, X, MCRY
 
 
 def synthesize(
-    state_vector: np.ndarray, exact_optimal: bool = False, verbose_level: int = 0
+    state_vector: np.ndarray, optimality_level: int = 3, verbose_level: int = 0
 ) -> SRGraph:
     """
     @brief Runs the search based state synthesis
@@ -88,18 +88,20 @@ def synthesize(
             curr_cost.unitary_cost + 1,
             next_state.get_lower_bound(),
         )
+        
+        next_state_repr = next_state.repr()
 
         # we skip the state if it is already visited
-        if next_state in visited_states:
+        if next_state_repr in visited_states:
             return None
 
         # we skip the state if it is already enquened and the cost is higher
-        if next_state in enquened_states and next_cost >= enquened_states[next_state]:
+        if next_state_repr in enquened_states and next_cost >= enquened_states[next_state_repr]:
             return None
 
         # now we add the state to the queue
         state_queue.put((next_cost, next_state))
-        enquened_states[next_state] = next_cost
+        enquened_states[next_state_repr] = next_cost
 
         # we record the gate
         gate: QGate = None
@@ -136,7 +138,6 @@ def synthesize(
     curr_state = target_state
     curr_cost = AStarCost(0, 0, curr_state.get_lower_bound())
     state_queue.put((curr_cost, curr_state))
-    enquened_states[curr_state] = curr_cost
 
     solution_reached: bool = False
 
@@ -159,18 +160,21 @@ def synthesize(
             sparsity = _sparsity
             print(f"sparsity: {sparsity}")
 
-            if not exact_optimal:
+            if optimality_level <= 2:
                 state_queue = PriorityQueue()
+                enquened_states = {}
 
         _supports = curr_state.get_supports()
         if len(_supports) < len(supports):
             supports = _supports
             print(f"supports: {supports}")
 
-            if not exact_optimal:
+            if optimality_level <= 1:
                 state_queue = PriorityQueue()
+                enquened_states = {}
 
-        visited_states.add(curr_state)
+        curr_state_repr = curr_state.repr()
+        visited_states.add(curr_state_repr)
         supports = curr_state.get_supports()
 
         search_done = False
@@ -182,7 +186,7 @@ def synthesize(
                 explore_state(curr_state, quantum_operator, curr_cost)
                 quantum_operator = TROperator(target_qubit, False)
                 next_state = explore_state(curr_state, quantum_operator, curr_cost)
-                if not exact_optimal and next_state is not None:
+                if optimality_level <= 2 and next_state is not None:
                     search_done = True
                     break
 
@@ -206,7 +210,7 @@ def synthesize(
                             next_state = explore_state(
                                 curr_state, quantum_operator, curr_cost
                             )
-                            if not exact_optimal and next_state is not None:
+                            if optimality_level <= 1 and next_state is not None:
                                 search_done = True
                                 break
 
@@ -227,7 +231,7 @@ def synthesize(
                         next_state = explore_state(
                             curr_state, quantum_operator, curr_cost
                         )
-                        if not exact_optimal:
+                        if optimality_level <= 1:
                             if (
                                 next_state is not None
                                 and next_state.get_supports()
@@ -238,7 +242,7 @@ def synthesize(
 
         # apply x
         if not search_done:
-            if not exact_optimal and curr_state.get_sparsity() != 1:
+            if optimality_level <= 2 and curr_state.get_sparsity() != 1:
                 pass
             else:
                 for target_qubit in supports:

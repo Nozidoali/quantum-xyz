@@ -8,6 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-19 13:40:18
 """
 
+from inspect import signature
 from typing import List
 import numpy as np
 import copy
@@ -313,13 +314,27 @@ class QState:
     def __lt__(self, o: object) -> bool:
         if not isinstance(o, QState):
             return False
+        sorted_index_set = sorted(self.index_set, reverse=True)
+        sorted_o_index_set = sorted(o.index_set, reverse=True)
+        for i, index in enumerate(sorted_index_set):
+            if i >= len(sorted_o_index_set):
+                return False
+            if index < sorted_o_index_set[i]:
+                return True
+            elif index > sorted_o_index_set[i]:
+                return False
         return False
 
     def __hash__(self) -> int:
         value = 0
         for index in sorted(self.index_set):
             value = value << self.num_qubits | index
-        return value
+        return hash(value)
+    
+    def repr(self) -> int:
+        self.index_set = sorted(self.index_set)
+        signatures = self.to_signatures()
+        return hash(tuple(sorted(signatures, key=lambda x: bin(x).count("1"))))
 
 
 def quantize_state(state_vector: np.ndarray):
