@@ -28,6 +28,7 @@ def rand_state(num_qubit: int, sparsity: int) -> QState:
         random.random() for i in range(sparsity)
     ]
     np.random.shuffle(state_array)
+
     return state_array
 
 
@@ -35,9 +36,9 @@ def test_synthesis():
     """Test that the synthesis is used ."""
 
     # state = rand_state(4, 5)
-    state = D_state(6, 2)
+    state = D_state(5, 2)
     with stopwatch("synthesis"):
-        circuit = synthesize(state, optimality_level=1)
+        circuit = synthesize(state, optimality_level=3)
         circ = circuit.to_qiskit()
         print(circ)
         simulator = Aer.get_backend("aer_simulator")

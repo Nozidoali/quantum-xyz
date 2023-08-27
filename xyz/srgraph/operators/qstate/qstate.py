@@ -31,7 +31,7 @@ class QState:
         :return: [description]
         :rtype: List[int]
         """
-        signatures = self.to_signatures()
+        signatures = self.get_qubit_signatures()
         qubit_indices = []
         for qubit, pattern in enumerate(signatures):
             if pattern != 0:
@@ -261,7 +261,7 @@ class QState:
             raise ValueError("The state is not a valid state.")
         return QState(index_to_weight, self.num_qubits), theta
 
-    def to_signatures(self) -> List[int]:
+    def get_qubit_signatures(self) -> List[int]:
         """Transpose the state array ."""
         signatures = [0 for i in range(self.num_qubits)]
         for _, value in enumerate(self.index_set):
@@ -290,7 +290,7 @@ class QState:
         :rtype: int
         """
         lower_bound: int = 0
-        signatures = self.to_signatures()
+        signatures = self.get_qubit_signatures()
         for pattern in signatures:
             if pattern != 0:
                 lower_bound += 1
@@ -330,10 +330,10 @@ class QState:
         for index in sorted(self.index_set):
             value = value << self.num_qubits | index
         return hash(value)
-    
+
     def repr(self) -> int:
         self.index_set = sorted(self.index_set)
-        signatures = self.to_signatures()
+        signatures = self.get_qubit_signatures()
         return hash(tuple(sorted(signatures, key=lambda x: bin(x).count("1"))))
 
 
