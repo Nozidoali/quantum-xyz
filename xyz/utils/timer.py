@@ -11,6 +11,7 @@ Last Modified time: 2023-03-11 20:53:23
 #
 # reference: https://realpython.com/python-with-statement/#writing-a-sample-class-based-context-manager
 #
+import re
 import time
 
 from .colors import print_green
@@ -24,7 +25,7 @@ class stopwatch:
     """
 
     # name the functions run inside this context
-    def __init__(self, name: str):
+    def __init__(self, name: str, verbose: bool = False):
         """
         @brief Initialize a : class : ` Stopwatch `. This is the constructor for : class : ` Stopwatch `.
         @param name The name of the stopwatch. Must be at least 25 characters
@@ -33,12 +34,14 @@ class stopwatch:
         self.name = name
         self.tic = None
         self.toc = None
+        self.verbose = verbose
 
     def __enter__(self):
         """
         @brief Called when the thread enters. Stores the time in self. tic and returns it to __
         """
         self.tic = time.perf_counter()
+        return self
 
     # reference: https://realpython.com/python-timer/#your-first-python-timer
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -50,7 +53,8 @@ class stopwatch:
         """
         self.toc = time.perf_counter()
         duration = self.toc - self.tic
-        print_green(f"{self.name:<25}: {duration:>8.02f} sec")
+        if self.name is not None and self.verbose:
+            print_green(f"{self.name:<25}: {duration:>8.02f} sec")
 
     def time(self):
         """

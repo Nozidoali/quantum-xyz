@@ -184,20 +184,26 @@ def synthesize(
             break
 
         _sparsity = curr_state.get_sparsity()
+        _supports = curr_state.get_supports()
+        
+        num_supports = len(_supports)
+        _optimality_level = optimality_level if num_supports > 5 else 3
+        
         if _sparsity >= 2 and _sparsity < sparsity:
             sparsity = _sparsity
-            print(f"sparsity: {sparsity}")
+            if verbose_level >= 1:
+                print(f"sparsity: {sparsity}")
 
-            if optimality_level <= 2:
+            if _optimality_level <= 2:
                 state_queue = PriorityQueue()
                 enquened_states = {}
 
-        _supports = curr_state.get_supports()
         if len(_supports) < len(best_supports):
             best_supports = _supports[:]
-            print(f"supports: {_supports}, length = {len(_supports)}")
+            if verbose_level >= 1:
+                print(f"supports: {_supports}, length = {len(_supports)}")
 
-            if optimality_level <= 2:
+            if _optimality_level <= 2:
                 state_queue = PriorityQueue()
                 enquened_states = {}
 
@@ -239,7 +245,7 @@ def synthesize(
                     signature_to_qubits[signature] = qubit_index
 
             # try higher level dependency analysis
-            if optimality_level <= 2:
+            if _optimality_level <= 2:
                 for qubit_index1, signature1 in enumerate(signatures):
                     if signature1 == 0 or signature1 == const1:
                         continue
@@ -305,7 +311,7 @@ def synthesize(
                 explore_state(curr_state, quantum_operator, curr_cost)
                 quantum_operator = TROperator(target_qubit, False)
                 next_state = explore_state(curr_state, quantum_operator, curr_cost)
-                if optimality_level <= 3 and next_state is not None:
+                if _optimality_level <= 3 and next_state is not None:
                     search_done = True
                     break
 
@@ -329,7 +335,7 @@ def synthesize(
                             next_state = explore_state(
                                 curr_state, quantum_operator, curr_cost
                             )
-                            if optimality_level <= 1 and next_state is not None:
+                            if _optimality_level <= 1 and next_state is not None:
                                 if (
                                     next_state.get_sparsity()
                                     <= curr_state.get_sparsity() - 1
@@ -357,18 +363,20 @@ def synthesize(
 
         # apply x
         if not search_done:
-            if optimality_level <= 3 and curr_state.get_sparsity() != 1:
+            if _optimality_level <= 3 and curr_state.get_sparsity() != 1:
                 pass
             else:
                 for target_qubit in supports:
                     quantum_operator = XOperator(target_qubit)
                     explore_state(curr_state, quantum_operator, curr_cost)
 
-    assert solution_reached
+    if not solution_reached:
+        raise ValueError("No solution found")
 
     while curr_state in record:
         prev_state, gate = record[curr_state]
         circuit.add_gate(gate)
         curr_state = prev_state
-        print(f"curr_state: {curr_state}")
+        if verbose_level >= 1:
+            print(f"curr_state: {curr_state}")
     return circuit
