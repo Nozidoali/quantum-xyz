@@ -8,6 +8,5 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-17 08:11:27
 """
 
-from .Synthesis import *
 from .colors import *
 from .timer import *

@@ -10,10 +10,10 @@ Last Modified time: 2023-08-18 21:09:09
 
 import random
 import numpy as np
-from qiskit import Aer, transpile
 from itertools import combinations
+from qiskit import Aer, transpile
 
-from xyz import QState, synthesize, stopwatch, from_val, D_state
+from xyz import QState, exact_cnot_synthesis, stopwatch, D_state
 
 
 def rand_state(num_qubit: int, sparsity: int) -> QState:
@@ -32,6 +32,7 @@ def rand_state(num_qubit: int, sparsity: int) -> QState:
 
     return state_array
 
+
 def place_ones(size, count):
     """Place one or more lists into one .
 
@@ -47,6 +48,7 @@ def place_ones(size, count):
         for i in positions:
             p[i] = 1
         yield p
+
 
 def all_states(num_qubit: int, sparsity: int) -> QState:
     """Return a QState with all states of the given number of qubit .
@@ -69,15 +71,16 @@ def test_synthesis():
 
     with stopwatch("synthesis") as timer:
         try:
-            circuit = synthesize(state, optimality_level=3)
+            circuit = exact_cnot_synthesis(state, optimality_level=3)
         except ValueError:
-            print(f"cannot synthesize state {state}")
+            print(f"cannot exact_cnot_synthesis state {state}")
             exit(1)
         circ = circuit.to_qiskit()
         print(circ)
         simulator = Aer.get_backend("aer_simulator")
         circ = transpile(circ, simulator)
 
+        print(f"{timer.time():0.02f} seconds")
 
     # Run and get counts
     result = simulator.run(circ).result()
@@ -86,6 +89,7 @@ def test_synthesis():
     print(counts)
     num_cnot = circ.count_ops()["cx"] if "cx" in circ.count_ops() else 0
     print(f"cnot = {num_cnot}")
+
 
 if __name__ == "__main__":
     test_synthesis()

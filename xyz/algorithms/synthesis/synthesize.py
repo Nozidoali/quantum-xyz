@@ -12,7 +12,6 @@ Last Modified time: 2023-06-28 11:02:26
 import logging
 from queue import PriorityQueue
 import numpy as np
-from pandas import ExcelFile
 from xyz.circuit.basic_gates.base.gate import QGate
 from xyz.circuit.basic_gates.cx import CX
 
@@ -31,7 +30,7 @@ from xyz.srgraph import (
 from xyz.circuit import QCircuit, X, MCRY
 
 
-def synthesize(
+def exact_cnot_synthesis(
     state_vector: np.ndarray, optimality_level: int = 3, verbose_level: int = 0
 ) -> SRGraph:
     """
@@ -185,10 +184,10 @@ def synthesize(
 
         _sparsity = curr_state.get_sparsity()
         _supports = curr_state.get_supports()
-        
+
         num_supports = len(_supports)
         _optimality_level = optimality_level if num_supports > 5 else 3
-        
+
         if _sparsity >= 2 and _sparsity < sparsity:
             sparsity = _sparsity
             if verbose_level >= 1:

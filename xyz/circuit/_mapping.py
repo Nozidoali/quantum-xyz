@@ -12,7 +12,7 @@ from typing import List
 import numpy as np
 
 from .basic_gates import QGate, QGateType, RY, CX, MULTIPLEXY, QBit
-from xyz.utils.Synthesis.MultiControl import synthesize_multi_controlled_rotations
+from .decomposition import decompose_mcry
 
 
 def control_sequence_to_gates(
@@ -51,7 +51,7 @@ def __map_muxy(gate: MULTIPLEXY) -> List[QGate]:
     assert gate.type == QGateType.MULTIPLEX_Y
     rotation_table = [gate.theta0, gate.theta1]
 
-    control_sequence = synthesize_multi_controlled_rotations(rotation_table)
+    control_sequence = decompose_mcry(rotation_table)
 
     gates = control_sequence_to_gates(
         control_sequence, [gate.control_qubit], gate.target_qubit
@@ -94,7 +94,7 @@ def __map_mcry(gate: QGate) -> List[QGate]:
     # only rotate the target qubit if the control qubits are in the positive phase
     rotation_table[rotated_index] = gate.theta
 
-    control_sequence = synthesize_multi_controlled_rotations(rotation_table)
+    control_sequence = decompose_mcry(rotation_table)
 
     gates = control_sequence_to_gates(control_sequence, control_qubits, target_qubit)
 

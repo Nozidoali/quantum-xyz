@@ -19,7 +19,7 @@ class QState:
 
     def __init__(self, index_to_weight: dict, num_qubit: int) -> None:
         self.num_qubits = num_qubit
-        
+
         self.sparsity: int = len(index_to_weight)
         self.index_set = index_to_weight.keys()
         self.index_to_weight = copy.deepcopy(index_to_weight)
