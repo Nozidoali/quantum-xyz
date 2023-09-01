@@ -77,6 +77,13 @@ class BasicGate(QGate):
         assert isinstance(target_qubit, QBit)
         self.target_qubit: QBit = target_qubit
 
+    def get_target_qubit(self) -> QBit:
+        """Returns the target qubit .
+
+        :return: [description]
+        :rtype: QBit
+        """
+        return self.target_qubit
 
 class AdvancedGate(QGate):
     """Class method that creates a AdvancedGate class .

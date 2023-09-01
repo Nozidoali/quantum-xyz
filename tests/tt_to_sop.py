@@ -13,7 +13,7 @@ from xyz.boolean.sum_of_product import sop_to_str
 
 
 def test_tt_to_sop():
-    tt = read_truth_table("11001000")
+    tt = read_truth_table("110-1-00")
 
     sop = convert_tt_to_sop(tt)
 

@@ -227,6 +227,39 @@ class TruthTable:
                 return False
         return True
 
+    def __xor__(self, __value: object) -> bool:
+        tt_xor = TruthTable(self._num_lits)
+        for i in range(2**self._num_lits):
+            if self._table[i] == TruthTableEntry.DONT_CARE:
+                continue
+            if __value._table[i] == TruthTableEntry.DONT_CARE:
+                continue
+            if self._table[i] != __value._table[i]:
+                tt_xor._table[i] = TruthTableEntry.ONE
+            else:
+                tt_xor._table[i] = TruthTableEntry.ZERO
+        return tt_xor
+
+    def get_bit(self, bit):
+        """Get the bit value of the given bit .
+
+        :param bit: [description]
+        :type bit: [type]
+        :return: [description]
+        :rtype: [type]
+        """
+        return self._table[bit]
+
+    def get_bit_str(self, bit):
+        """Get the bit string of the given bit .
+
+        :param bit: [description]
+        :type bit: [type]
+        :return: [description]
+        :rtype: [type]
+        """
+        return TT_STR[self._table[bit]]
+
 
 def create_truth_table(num_lits: int, idx: int):
     """Create a truth table with the given number of literals and the given index .

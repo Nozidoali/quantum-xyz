@@ -8,17 +8,23 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-18 21:09:09
 """
 
+import datetime
+from math import log2
 import random
 from re import sub
 import subprocess
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
+from pytest import mark
 from qiskit import Aer, transpile
 from itertools import combinations
 import seaborn as sns
+from tomlkit import date
 
-from xyz import QState, exact_cnot_synthesis, stopwatch, quantize_state
+from xyz import QState, cnot_synthesis, stopwatch, quantize_state
+from xyz.srgraph.operators.qstate.common.dicke_state import D_state
+from xyz.srgraph.operators.qstate.common.w_state import W_state
 
 
 def rand_state(
@@ -76,29 +82,29 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
         yield perm[:]
 
 
-def test_synthesis(num_qubit: int):
+def test_synthesis():
     """Test that the synthesis is used ."""
 
     # state = rand_state(4, 5)
 
     datas = []
 
-    for sparsity in range(1, 2**num_qubit):
+    for num_qubits in range(3, 12, 1):
+        sparsity = num_qubits
+
         valid_states: int = 0
-        num_tries = 1000
-        num_valid_states = 10
-        for i in range(num_tries):
-            state = rand_state(num_qubit, sparsity)
+        num_tries = 10000
+        num_valid_states = 1
+
+        # state = rand_state(num_qubits, sparsity)
+        for sparsity in range(1, 4):
+            state = D_state(num_qubits, sparsity)
 
             qstate = quantize_state(state)
-            if len(qstate.get_supports()) != num_qubit:
+            if len(qstate.get_supports()) != num_qubits:
                 continue
 
-            valid_states += 1
-            if valid_states > num_valid_states:
-                break
-
-            # for state in all_states(num_qubit, sparsity):
+            # for state in all_states(num_qubits, sparsity):
 
             baseline = None
 
@@ -125,9 +131,9 @@ def test_synthesis(num_qubit: int):
 
             with stopwatch("synthesis") as timer:
                 try:
-                    circuit = exact_cnot_synthesis(state, optimality_level=3)
+                    circuit = cnot_synthesis(state, optimality_level=3, verbose_level=0)
                 except ValueError:
-                    print(f"cannot exact_cnot_synthesis state {state}")
+                    print(f"cannot cnot_synthesis state {state}")
                     continue
                 circ = circuit.to_qiskit()
                 simulator = Aer.get_backend("aer_simulator")
@@ -140,11 +146,11 @@ def test_synthesis(num_qubit: int):
             # print(counts)
             ours = circ.count_ops()["cx"] if "cx" in circ.count_ops() else 0
             print(
-                f"num_qubit = {num_qubit} sparsity = {sparsity} state = {state} baseline = {baseline} ours = {ours}, time = {timer.time()}"
+                f"num_qubit = {num_qubits} sparsity = {sparsity} state = {qstate} baseline = {baseline} ours = {ours}, time = {timer.time()}"
             )
 
             data = {
-                "num_qubit": num_qubit,
+                "num_qubit": num_qubits,
                 "sparsity": sparsity,
                 "baseline": baseline,
                 "ours": ours,
@@ -153,19 +159,21 @@ def test_synthesis(num_qubit: int):
             datas.append(data)
 
     df = pd.DataFrame(datas)
-    df.to_csv(f"synthesis_{num_qubit}.csv")
+    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
+    df.to_csv(f"synthesis_{timestamp}.csv")
 
 
-def analyze_runtime(num_qubit: int):
+def analyze_runtime(filename: str):
     plt.rcParams["figure.figsize"] = (10, 10)
 
-    global_font_size = 30
+    global_font_size = 32
 
     # move up the bottom of the plot
     plt.rcParams["figure.subplot.bottom"] = 0.1
 
     # adjust the margin
-    plt.rcParams["figure.subplot.left"] = 0.2
+    plt.rcParams["figure.subplot.left"] = 0.10
     plt.rcParams["figure.subplot.right"] = 0.99
 
     # axis font size
@@ -181,41 +189,56 @@ def analyze_runtime(num_qubit: int):
     plt.rcParams["legend.title_fontsize"] = global_font_size
 
     # read the data
-    df = pd.read_csv(f"synthesis_{num_qubit}.csv")
+    # time stamp
+    df = pd.read_csv(filename)
+    
+    df = df[df["num_qubit"] >= 4]
 
-    # add some random noise to the cnot count
-    df["ours"] = df["ours"] + np.random.normal(0, 0.1, len(df))
 
-    # scatter plot of the runtime, with respect to the CNOT count, hue by the sparsity
-    sns.scatterplot(
-        data=df,
-        x="ours",
-        y="time",
-        hue="sparsity",
-        palette="rocket_r",
-        markers=True,
-        alpha=0.8,
-        s=300,
+    # change the name of sparsity
+    df["sparsity"] = df["sparsity"].map(
+        {1: r"$m\sim n$", 2: r"$m\sim n^2$", 3: r"$m\sim n^3$"}
     )
 
-    # y axis log scale
+    # scatter plot
+    sns.scatterplot(
+        data=df,
+        x="num_qubit",
+        y="time",
+        hue="sparsity",
+        palette=sns.color_palette("hls", 3),
+        marker="s",
+        s=200,
+    )
+
+    # line plot for each sparsity
+    sns.lineplot(
+        data=df,
+        x="num_qubit",
+        y="time",
+        hue="sparsity",
+        palette=sns.color_palette("hls", 3),
+        linewidth=3,
+        legend=False,
+    )
+
+    # y log scale
     plt.yscale("log")
 
     # x axis title
-    plt.xlabel("Number of CNOTs")
+    plt.xlabel("Number of qubits")
+
+    plt.xticks([4, 5, 6, 7, 8, 9, 10, 11])
 
     # y axis title
     plt.ylabel("Runtime (sec)")
 
-    # x ticks
-    plt.xticks(np.arange(0, 12, 2))
-
     plt.show()
 
 
-def analyze_data(num_qubit: int):
+def analyze_data(filename: str):
     # adjust figure size
-    plt.rcParams["figure.figsize"] = (20, 5)
+    plt.rcParams["figure.figsize"] = (8, 6)
 
     global_font_size = 24
 
@@ -229,23 +252,27 @@ def analyze_data(num_qubit: int):
     plt.rcParams["legend.fontsize"] = global_font_size
 
     # move up the bottom of the plot
-    plt.rcParams["figure.subplot.bottom"] = 0.18
+    plt.rcParams["figure.subplot.bottom"] = 0.15
+    plt.rcParams["figure.subplot.top"] = 0.99
 
     # adjust the margin
     plt.rcParams["figure.subplot.left"] = 0.08
-    plt.rcParams["figure.subplot.right"] = 0.99
+    plt.rcParams["figure.subplot.right"] = 0.92
 
-    df = pd.read_csv(f"synthesis_{num_qubit}.csv")
+    df = pd.read_csv(filename)
 
-    # aggregate based on sparsity
-    df_agg = df.groupby(["sparsity"]).agg(
+    # only qubits from 4 to 9
+    df = df[df["num_qubit"] >= 4]
+
+    # aggregate based on num_qubit
+    df_agg = df.groupby(["num_qubit"]).agg(
         {"baseline": "mean", "ours": "mean", "time": "mean"}
     )
     # calculate the standard deviation
-    df_agg["num_cnot_baseline_std"] = df.groupby(["sparsity"]).agg({"baseline": "std"})[
-        "baseline"
-    ]
-    df_agg["num_cnot_std"] = df.groupby(["sparsity"]).agg({"ours": "std"})["ours"]
+    df_agg["num_cnot_baseline_std"] = df.groupby(["num_qubit"]).agg(
+        {"baseline": "std"}
+    )["baseline"]
+    df_agg["num_cnot_std"] = df.groupby(["num_qubit"]).agg({"ours": "std"})["ours"]
 
     # plot the bar plot, with the error bar
     df_agg.plot.bar(y=["baseline", "ours"], rot=0)
@@ -253,14 +280,14 @@ def analyze_data(num_qubit: int):
     # data points
     if False:
         plt.scatter(
-            df["sparsity"] - 2 - 0.13,
+            df["num_qubit"] - 2 - 0.13,
             df["baseline"],
             marker="x",
             color="black",
             alpha=0.2,
         )
         plt.scatter(
-            df["sparsity"] - 2 + 0.13, df["ours"], marker="x", color="black", alpha=0.2
+            df["num_qubit"] - 2 + 0.13, df["ours"], marker="x", color="black", alpha=0.2
         )
 
     # data labels of the mean
@@ -268,45 +295,35 @@ def analyze_data(num_qubit: int):
     precision = 0
     for index, row in df_agg.iterrows():
         plt.text(
-            index - 2 - 0.11,
-            row["baseline"] + 10 + 0.1,
+            index - 4 - 0.11 - 0.5,
+            row["baseline"] + 150,
             f"{row['baseline']:.{precision}f}",
             color="black",
             fontsize=data_label_font_size,
         )
         plt.text(
-            index - 2 + 0.15,
-            row["ours"] + 0.1,
+            index - 4 + 0.15,
+            row["ours"] - 10,
             f"{row['ours']:.{precision}f}",
             color="black",
             fontsize=data_label_font_size,
         )
 
-    # with an offset
-    plt.errorbar(
-        df_agg.index - 2 - 0.13,
-        df_agg["baseline"],
-        yerr=df_agg["num_cnot_baseline_std"],
-        fmt="none",
-        ecolor="black",
-        capsize=5,
-    )
-    plt.errorbar(
-        df_agg.index - 2 + 0.13,
-        df_agg["ours"],
-        yerr=df_agg["num_cnot_std"],
-        fmt="none",
-        ecolor="black",
-        capsize=5,
-    )
-
     # y axis title
     plt.ylabel("Number of CNOTs")
+    
+    plt.yticks([])
+
+    # y log scale
+    # plt.yscale("log")
+
+    # x axis title
+    plt.xlabel("Number of qubits")
 
     plt.show()
 
 
 if __name__ == "__main__":
-    test_synthesis(4)
-    # analyze_data(4)
-    # analyze_runtime(4)
+    # test_synthesis()
+    analyze_data("nm.csv")
+    # analyze_runtime("nm2.csv")

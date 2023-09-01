@@ -8,9 +8,11 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-31 12:46:16
 """
 
+from typing import List
 import numpy as np
 
 from scipy.linalg import solve
+from ..basic_gates import QGate, RY, CX, QBit
 
 
 def find_thetas(alphas):
@@ -72,3 +74,28 @@ def decompose_mcry(rotation_table: list):
         control_sequence.append((theta, control_id))
 
     return control_sequence
+
+
+def control_sequence_to_gates(
+    control_sequence: list, control_qubits: List[QBit], target_qubit: QBit
+) -> List[QGate]:
+    """Convert a control sequence into a list of gates .
+
+    :param control_sequence: [description]
+    :type control_sequence: list
+    :param control_qubits: [description]
+    :type control_qubits: List[QBit]
+    :param target_qubit: [description]
+    :type target_qubit: QBit
+    :return: [description]
+    :rtype: List[QGate]
+    """
+    gates: List[QGate] = []
+
+    for control in control_sequence:
+        rotation_theta, control_id = control
+
+        gates.append(RY(rotation_theta, target_qubit))
+        gates.append(CX(control_qubits[control_id], 1, target_qubit))
+
+    return gates

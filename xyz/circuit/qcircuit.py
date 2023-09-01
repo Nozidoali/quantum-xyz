@@ -23,7 +23,7 @@ from ._qiskit import _to_qiskit
 class QCircuit:
     """the class of quantum circuit"""
 
-    def __init__(self, num_qubits: int) -> None:
+    def __init__(self, num_qubits: int, map_gates: bool = False) -> None:
         """Initialize the gate .
 
         :param num_qubits: [description]
@@ -32,6 +32,9 @@ class QCircuit:
         self.__gates: List[QGate] = []
         self.__qubits: List[QBit] = []
         self.init_qubits(num_qubits)
+        
+        # configures
+        self.map_gates = map_gates
 
     def get_num_qubits(self) -> int:
         """

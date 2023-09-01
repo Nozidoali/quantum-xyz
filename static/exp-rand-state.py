@@ -8,7 +8,6 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-18 21:09:09
 """
 
-import datetime
 import random
 from re import sub
 import subprocess
@@ -18,9 +17,8 @@ import pandas as pd
 from qiskit import Aer, transpile
 from itertools import combinations
 import seaborn as sns
-from tomlkit import date
 
-from xyz import QState, exact_cnot_synthesis, stopwatch, quantize_state
+from xyz import QState, cnot_synthesis, stopwatch, quantize_state
 
 
 def rand_state(
@@ -78,31 +76,29 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
         yield perm[:]
 
 
-def test_synthesis():
+def test_synthesis(num_qubit: int):
     """Test that the synthesis is used ."""
 
     # state = rand_state(4, 5)
 
     datas = []
 
-    for num_qubits in range(2, 8):
-        sparsity = num_qubits
-
+    for sparsity in range(1, 2**num_qubit):
         valid_states: int = 0
-        num_tries = 10000
-        num_valid_states = 100
+        num_tries = 1000
+        num_valid_states = 10
         for i in range(num_tries):
-            state = rand_state(num_qubits, sparsity)
+            state = rand_state(num_qubit, sparsity)
 
             qstate = quantize_state(state)
-            if len(qstate.get_supports()) != num_qubits:
+            if len(qstate.get_supports()) != num_qubit:
                 continue
 
             valid_states += 1
             if valid_states > num_valid_states:
                 break
 
-            # for state in all_states(num_qubits, sparsity):
+            # for state in all_states(num_qubit, sparsity):
 
             baseline = None
 
@@ -129,9 +125,9 @@ def test_synthesis():
 
             with stopwatch("synthesis") as timer:
                 try:
-                    circuit = exact_cnot_synthesis(state, optimality_level=1)
+                    circuit = cnot_synthesis(state, optimality_level=3)
                 except ValueError:
-                    print(f"cannot exact_cnot_synthesis state {state}")
+                    print(f"cannot cnot_synthesis state {state}")
                     continue
                 circ = circuit.to_qiskit()
                 simulator = Aer.get_backend("aer_simulator")
@@ -144,11 +140,11 @@ def test_synthesis():
             # print(counts)
             ours = circ.count_ops()["cx"] if "cx" in circ.count_ops() else 0
             print(
-                f"num_qubit = {num_qubits} sparsity = {sparsity} state = {state} baseline = {baseline} ours = {ours}, time = {timer.time()}"
+                f"num_qubit = {num_qubit} sparsity = {sparsity} state = {state} baseline = {baseline} ours = {ours}, time = {timer.time()}"
             )
 
             data = {
-                "num_qubit": num_qubits,
+                "num_qubit": num_qubit,
                 "sparsity": sparsity,
                 "baseline": baseline,
                 "ours": ours,
@@ -157,15 +153,13 @@ def test_synthesis():
             datas.append(data)
 
     df = pd.DataFrame(datas)
-    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-
-    df.to_csv(f"synthesis_{timestamp}.csv")
+    df.to_csv(f"synthesis_{num_qubit}.csv")
 
 
-def analyze_runtime(filename: str):
+def analyze_runtime(num_qubit: int):
     plt.rcParams["figure.figsize"] = (10, 10)
 
-    global_font_size = 24
+    global_font_size = 30
 
     # move up the bottom of the plot
     plt.rcParams["figure.subplot.bottom"] = 0.1
@@ -187,54 +181,41 @@ def analyze_runtime(filename: str):
     plt.rcParams["legend.title_fontsize"] = global_font_size
 
     # read the data
-    # time stamp
-    df = pd.read_csv(filename)
+    df = pd.read_csv(f"synthesis_{num_qubit}.csv")
 
-    # aggregate based on num_qubit
-    df_agg = df.groupby(["num_qubit"]).agg({"time": "mean"})
-    # calculate the standard deviation
-    df_agg["num_cnot_std"] = df.groupby(["num_qubit"]).agg({"time": "std"})["time"]
+    # add some random noise to the cnot count
+    df["ours"] = df["ours"] + np.random.normal(0, 0.1, len(df))
 
-    # plot the bar plot, with the error bar
-    df_agg.plot.bar(y=["time"], rot=0)
-
-    # data labels of the mean
-    data_label_font_size = global_font_size
-    precision = 2
-    for index, row in df_agg.iterrows():
-        plt.text(
-            index - 3 + 0.15,
-            row["time"] + 0.1,
-            f"{row['time']:.{precision}f}",
-            color="black",
-            fontsize=data_label_font_size,
-        )
-
-    # error bar
-    plt.errorbar(
-        df_agg.index - 3,
-        df_agg["time"],
-        yerr=df_agg["num_cnot_std"],
-        fmt="none",
-        ecolor="black",
-        capsize=5,
+    # scatter plot of the runtime, with respect to the CNOT count, hue by the sparsity
+    sns.scatterplot(
+        data=df,
+        x="ours",
+        y="time",
+        hue="sparsity",
+        palette="rocket_r",
+        markers=True,
+        alpha=0.8,
+        s=300,
     )
 
-    # y log scale
-    # plt.yscale("log")
+    # y axis log scale
+    plt.yscale("log")
 
     # x axis title
-    plt.xlabel("Number of qubits")
+    plt.xlabel("Number of CNOTs")
 
     # y axis title
     plt.ylabel("Runtime (sec)")
 
+    # x ticks
+    plt.xticks(np.arange(0, 12, 2))
+
     plt.show()
 
 
-def analyze_data(filename: str):
+def analyze_data(num_qubit: int):
     # adjust figure size
-    plt.rcParams["figure.figsize"] = (8, 6)
+    plt.rcParams["figure.figsize"] = (20, 5)
 
     global_font_size = 24
 
@@ -248,23 +229,23 @@ def analyze_data(filename: str):
     plt.rcParams["legend.fontsize"] = global_font_size
 
     # move up the bottom of the plot
-    plt.rcParams["figure.subplot.bottom"] = 0.2
+    plt.rcParams["figure.subplot.bottom"] = 0.18
 
     # adjust the margin
-    plt.rcParams["figure.subplot.left"] = 0.10
+    plt.rcParams["figure.subplot.left"] = 0.08
     plt.rcParams["figure.subplot.right"] = 0.99
 
-    df = pd.read_csv(filename)
+    df = pd.read_csv(f"synthesis_{num_qubit}.csv")
 
-    # aggregate based on num_qubit
-    df_agg = df.groupby(["num_qubit"]).agg(
+    # aggregate based on sparsity
+    df_agg = df.groupby(["sparsity"]).agg(
         {"baseline": "mean", "ours": "mean", "time": "mean"}
     )
     # calculate the standard deviation
-    df_agg["num_cnot_baseline_std"] = df.groupby(["num_qubit"]).agg(
-        {"baseline": "std"}
-    )["baseline"]
-    df_agg["num_cnot_std"] = df.groupby(["num_qubit"]).agg({"ours": "std"})["ours"]
+    df_agg["num_cnot_baseline_std"] = df.groupby(["sparsity"]).agg({"baseline": "std"})[
+        "baseline"
+    ]
+    df_agg["num_cnot_std"] = df.groupby(["sparsity"]).agg({"ours": "std"})["ours"]
 
     # plot the bar plot, with the error bar
     df_agg.plot.bar(y=["baseline", "ours"], rot=0)
@@ -272,14 +253,14 @@ def analyze_data(filename: str):
     # data points
     if False:
         plt.scatter(
-            df["num_qubit"] - 2 - 0.13,
+            df["sparsity"] - 2 - 0.13,
             df["baseline"],
             marker="x",
             color="black",
             alpha=0.2,
         )
         plt.scatter(
-            df["num_qubit"] - 2 + 0.13, df["ours"], marker="x", color="black", alpha=0.2
+            df["sparsity"] - 2 + 0.13, df["ours"], marker="x", color="black", alpha=0.2
         )
 
     # data labels of the mean
@@ -287,14 +268,14 @@ def analyze_data(filename: str):
     precision = 0
     for index, row in df_agg.iterrows():
         plt.text(
-            index - 3 - 0.11,
+            index - 2 - 0.11,
             row["baseline"] + 10 + 0.1,
             f"{row['baseline']:.{precision}f}",
             color="black",
             fontsize=data_label_font_size,
         )
         plt.text(
-            index - 3 + 0.15,
+            index - 2 + 0.15,
             row["ours"] + 0.1,
             f"{row['ours']:.{precision}f}",
             color="black",
@@ -303,7 +284,7 @@ def analyze_data(filename: str):
 
     # with an offset
     plt.errorbar(
-        df_agg.index - 3 - 0.13,
+        df_agg.index - 2 - 0.13,
         df_agg["baseline"],
         yerr=df_agg["num_cnot_baseline_std"],
         fmt="none",
@@ -311,7 +292,7 @@ def analyze_data(filename: str):
         capsize=5,
     )
     plt.errorbar(
-        df_agg.index - 3 + 0.13,
+        df_agg.index - 2 + 0.13,
         df_agg["ours"],
         yerr=df_agg["num_cnot_std"],
         fmt="none",
@@ -321,14 +302,14 @@ def analyze_data(filename: str):
 
     # y axis title
     plt.ylabel("Number of CNOTs")
-
+    
     # x axis title
-    plt.xlabel("Number of qubits")
+    plt.xlabel(r"State density ($m$)")
 
     plt.show()
 
 
 if __name__ == "__main__":
-    test_synthesis()
-    # analyze_data("synthesis_7_20230829-195112.csv")
-    # analyze_runtime("synthesis_7_20230829-195112.csv")
+    # test_synthesis(4)
+    analyze_data(4)
+    # analyze_runtime(4)

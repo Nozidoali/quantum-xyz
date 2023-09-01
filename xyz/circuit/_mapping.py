@@ -11,33 +11,8 @@ Last Modified time: 2023-06-23 00:14:40
 from typing import List
 import numpy as np
 
-from .basic_gates import QGate, QGateType, RY, CX, MULTIPLEXY, QBit
-from .decomposition import decompose_mcry
-
-
-def control_sequence_to_gates(
-    control_sequence: list, control_qubits: List[QBit], target_qubit: QBit
-) -> List[QGate]:
-    """Convert a control sequence into a list of gates .
-
-    :param control_sequence: [description]
-    :type control_sequence: list
-    :param control_qubits: [description]
-    :type control_qubits: List[QBit]
-    :param target_qubit: [description]
-    :type target_qubit: QBit
-    :return: [description]
-    :rtype: List[QGate]
-    """
-    gates: List[QGate] = []
-
-    for control in control_sequence:
-        rotation_theta, control_id = control
-
-        gates.append(RY(rotation_theta, target_qubit))
-        gates.append(CX(control_qubits[control_id], 1, target_qubit))
-
-    return gates
+from .basic_gates import QGate, QGateType, MULTIPLEXY
+from .decomposition import decompose_mcry, control_sequence_to_gates
 
 
 def __map_muxy(gate: MULTIPLEXY) -> List[QGate]:
@@ -101,12 +76,14 @@ def __map_mcry(gate: QGate) -> List[QGate]:
     return gates
 
 
-def _add_gate_mapped(self, gate: QGate) -> None:
+def add_gate_mapped(self, gate: QGate) -> None:
     """Add a gate to the circuit .
 
     :param gate: [description]
     :type gate: QGate
     """
+    if not self.map_gates:
+        self.append_gate(gate)
 
     match gate.qgate_type:
         case QGateType.MULTIPLEX_Y:

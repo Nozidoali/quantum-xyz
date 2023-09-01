@@ -8,4 +8,4 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-31 12:46:26
 """
 
-from .decompose_mcry import decompose_mcry
+from .decompose_mcry import *

@@ -17,4 +17,4 @@ class CX(BasicGate, ControlledGate):
         ControlledGate.__init__(self, control_qubit, phase)
 
     def __str__(self) -> str:
-        return f"CX({self.control_qubit}, {self.target_qubit}) {self.phase}"
+        return f"C({self.control_qubit} = {self.phase})X({self.target_qubit})"

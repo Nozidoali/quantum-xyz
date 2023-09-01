@@ -11,7 +11,7 @@ Last Modified time: 2023-06-22 23:43:32
 from typing import List
 from .basic_gates import QGate, QGateType, X, CX, RY, CRY
 
-from ._mapping import _add_gate_mapped
+from ._mapping import add_gate_mapped
 
 
 def _add_gate_optimized(self, gate: QGate) -> None:
@@ -29,13 +29,13 @@ def _add_gate_optimized(self, gate: QGate) -> None:
                 reduced_gate = X(gate.target_qubit)
                 _add_gate_optimized(self, reduced_gate)
             else:
-                _add_gate_mapped(self, gate)
+                add_gate_mapped(self, gate)
         case QGateType.CRY:
             if gate.is_pi():
                 reduced_gate = CX(gate.control_qubit, gate.phase, gate.target_qubit)
                 _add_gate_optimized(self, reduced_gate)
             else:
-                _add_gate_mapped(self, gate)
+                add_gate_mapped(self, gate)
         case QGateType.MCRY:
             if gate.has_zero_controls():
                 reduced_gate = RY(gate.theta, gate.target_qubit)
@@ -52,9 +52,9 @@ def _add_gate_optimized(self, gate: QGate) -> None:
                 _add_gate_optimized(self, reduced_gate)
 
             else:
-                _add_gate_mapped(self, gate)
+                add_gate_mapped(self, gate)
         case _:
-            _add_gate_mapped(self, gate)
+            add_gate_mapped(self, gate)
 
 
 def _add_gates_optimized(self, gates: List[QGate]) -> None:

@@ -74,10 +74,15 @@ def sop_to_str(sop: List[List[Lit]]):
     :return: [description]
     :rtype: [type]
     """
-    return " + ".join([term_to_str(term) for term in sop])
+    return " ^ ".join([term_to_str(term) for term in sop])
 
 
-def convert_tt_to_sop(tt: TruthTable):
+def convert_tt_to_sop(
+    tt: TruthTable,
+    supports: List[int] = None,
+    use_esop: bool = True,
+    optimality_level: int = 1,
+):
     """Convert a truth table to a sum of product .
 
     :param tt: [description]
@@ -86,58 +91,42 @@ def convert_tt_to_sop(tt: TruthTable):
     :rtype: [type]
     """
 
-    sum_terms = []
-
     num_lits = len(tt)
 
-    print(f"tt = {tt}")
-
-    # apply a BFS
-    q = PriorityQueue()
-    enqueued = {}
-    prev = {}
-
-    def visit(new_cost: int, new_tt: TruthTable, curr_tt: TruthTable, lit: Lit):
-        """Visit a new truth table .
-
-        :param new_cost: [description]
-        :type new_cost: int
-        :param new_tt: [description]
-        :type new_tt: TruthTable
-        """
-        if str(new_tt) in enqueued and enqueued[str(new_tt)] <= new_cost:
-            return False
-        enqueued[str(new_tt)] = new_cost
-        prev[str(new_tt)] = (curr_tt, lit)
-        q.put((new_cost, new_tt))
-        return True
-
-    # record the current cost and the current truth table
-    curr_tt = None
-
-    visit(0, const0_truth_table(num_lits), None, None)
+    all_lits = range(num_lits) if supports is None else supports
 
     lit_to_tt = {}
     unate_terms = []
     binate_terms = []
-    for lit in range(num_lits):
-        tt_lit_pos = create_truth_table(num_lits, lit)
-        tt_lit_neg = ~tt_lit_pos
-        lit_to_tt[Lit(lit, True)] = tt_lit_pos
-        lit_to_tt[Lit(lit, False)] = tt_lit_neg
 
-        print(f"tt_lit_pos = {tt_lit_pos}, tt_lit_neg = {tt_lit_neg}")
+    # preprocess some unate terms from the binate terms
+    if not use_esop:
+        for lit in all_lits:
+            tt_lit_pos = create_truth_table(num_lits, lit)
+            tt_lit_neg = ~tt_lit_pos
+            lit_to_tt[Lit(lit, True)] = tt_lit_pos
+            lit_to_tt[Lit(lit, False)] = tt_lit_neg
 
-        if tt_lit_pos < tt:
-            unate_terms.append([Lit(lit, True)])
+            if tt_lit_pos < tt:
+                unate_terms.append([Lit(lit, True)])
 
-        if tt_lit_neg < tt:
-            unate_terms.append([Lit(lit, False)])
+            if tt_lit_neg < tt:
+                unate_terms.append([Lit(lit, False)])
 
-        if not tt_lit_pos < ~tt:
+            if not tt_lit_pos < ~tt:
+                binate_terms.append(Lit(lit, True))
+
+            if not tt_lit_neg < ~tt:
+                binate_terms.append(Lit(lit, False))
+    # if we use ESOP, we need to add all the binate terms
+    else:
+        for lit in all_lits:
+            tt_lit_pos = create_truth_table(num_lits, lit)
+            tt_lit_neg = ~tt_lit_pos
+            lit_to_tt[Lit(lit, True)] = tt_lit_pos
+            lit_to_tt[Lit(lit, False)] = tt_lit_neg
+
             binate_terms.append(Lit(lit, True))
-
-        if not tt_lit_neg < ~tt:
             binate_terms.append(Lit(lit, False))
 
     # we can do a DFS here to find all the unate terms
@@ -172,6 +161,44 @@ def convert_tt_to_sop(tt: TruthTable):
 
     dfs(const1_truth_table(num_lits), [])
 
+    if optimality_level <= 1:
+        sum_terms = []
+        unate_terms = sorted(unate_terms, key=lambda term: len(term))
+        curr_tt = tt
+        while curr_tt != const0_truth_table(num_lits):
+            for term in unate_terms:
+                term_tt = sop_to_tt([term], num_lits, use_esop)
+
+                if term_tt < curr_tt:
+                    curr_tt = curr_tt ^ term_tt
+                    sum_terms.append(term)
+        return sum_terms
+
+    # apply a BFS
+    q = PriorityQueue()
+    enqueued = {}
+    prev = {}
+
+    def visit(new_cost: int, new_tt: TruthTable, curr_tt: TruthTable, lit: Lit):
+        """Visit a new truth table .
+
+        :param new_cost: [description]
+        :type new_cost: int
+        :param new_tt: [description]
+        :type new_tt: TruthTable
+        """
+        if str(new_tt) in enqueued and enqueued[str(new_tt)] <= new_cost:
+            return False
+        enqueued[str(new_tt)] = new_cost
+        prev[str(new_tt)] = (curr_tt, lit)
+        q.put((new_cost, new_tt))
+        return True
+
+    # record the current cost and the current truth table
+    curr_tt = None
+
+    visit(0, const0_truth_table(num_lits), None, None)
+
     while not q.empty():
         curr_cost, curr_tt = q.get()
 
@@ -193,11 +220,17 @@ def convert_tt_to_sop(tt: TruthTable):
 
             if not term_tt < curr_tt:
                 next_cost = curr_cost + term_cost
-                next_tt = curr_tt | term_tt
+                if use_esop:
+                    next_tt = curr_tt ^ term_tt
+                else:
+                    next_tt = curr_tt | term_tt
                 visit(next_cost, next_tt, curr_tt, term)
 
     if not curr_tt == tt:
         return None
+
+    # we reconstruct the sum of product
+    sum_terms = []
 
     prev_tt = curr_tt
     while prev_tt is not None:
@@ -210,3 +243,26 @@ def convert_tt_to_sop(tt: TruthTable):
 
     # we return a list of list
     return sum_terms
+
+
+def sop_to_tt(sop: List[List[Lit]], num_lits: int, use_esop: bool = True):
+    """Convert a sum of product to a truth table .
+
+    :param sop: [description]
+    :type sop: List[List[Lit]]
+    :return: [description]
+    :rtype: [type]
+    """
+    tt = const0_truth_table(num_lits)
+    for term in sop:
+        term_tt = const1_truth_table(num_lits)
+        for lit in term:
+            if lit.phase:
+                term_tt = term_tt & create_truth_table(num_lits, lit.lit)
+            else:
+                term_tt = term_tt & ~create_truth_table(num_lits, lit.lit)
+        if use_esop:
+            tt = tt ^ term_tt
+        else:
+            tt = tt | term_tt
+    return tt
