@@ -13,6 +13,7 @@ from typing import List, Tuple
 import numpy as np
 import copy
 
+
 class QState:
     """Class method for QState"""
 
@@ -268,20 +269,20 @@ class QState:
             for j in range(self.num_qubits):
                 signatures[j] = signatures[j] << 1 | (value >> j & 1)
         return signatures
-    
+
     def cofactors(self, pivot_qubit: int) -> Tuple["QState", "QState"]:
         """Returns the cofactors of the given qubit .
 
         :return: [description]
         :rtype: [type]
         """
-    
+
         index_to_weight0 = {}
         index_to_weight1 = {}
-        
+
         total_weights0 = 0
         total_weights1 = 0
-        
+
         for idx in self.index_set:
             if (idx >> pivot_qubit) & 1 == 0:
                 index_to_weight0[idx] = self.index_to_weight[idx]
@@ -289,8 +290,13 @@ class QState:
             else:
                 index_to_weight1[idx ^ (1 << pivot_qubit)] = self.index_to_weight[idx]
                 total_weights1 += self.index_to_weight[idx]
-    
-        return QState(index_to_weight0, self.num_qubits), QState(index_to_weight1, self.num_qubits), total_weights0, total_weights1
+
+        return (
+            QState(index_to_weight0, self.num_qubits),
+            QState(index_to_weight1, self.num_qubits),
+            total_weights0,
+            total_weights1,
+        )
 
     @staticmethod
     def ground_state(num_qubits: int) -> "QState":

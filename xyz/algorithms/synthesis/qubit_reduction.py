@@ -164,7 +164,6 @@ def _reduce_qubit(state: QState, target_qubit: int, control_qubit: int, phase: b
 
 
 def _get_rotation_supports(index_to_theta: dict, num_lits: int, target_qubit: int):
-
     lit_to_val = {}
     supports = set()
     for index, _ in index_to_theta.items():
@@ -212,7 +211,6 @@ def _qubit_reduction_impl(
             if qubit == control_qubit:
                 continue
             for phase in [0, 1]:
-
                 try:
                     esop, index_to_thetas, cost = _reduce_qubit(
                         state, qubit, control_qubit, phase
@@ -289,7 +287,6 @@ def _qubit_reduction_impl(
 
     target_qubit = circuit.qubit_at(best_target_qubit)
     for term in best_esop:
-
         # we need to decide which gate to add
         if len(term) == 1:
             lit = term[0]

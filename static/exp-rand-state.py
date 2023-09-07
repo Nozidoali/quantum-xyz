@@ -213,7 +213,7 @@ def analyze_runtime(num_qubit: int):
     plt.show()
 
 
-def analyze_data(num_qubit: int):
+def analyze_data(filename: str):
     # adjust figure size
     plt.rcParams["figure.figsize"] = (20, 5)
 
@@ -235,7 +235,13 @@ def analyze_data(num_qubit: int):
     plt.rcParams["figure.subplot.left"] = 0.08
     plt.rcParams["figure.subplot.right"] = 0.99
 
-    df = pd.read_csv(f"synthesis_{num_qubit}.csv")
+    df = pd.read_csv(filename)
+
+    # add a row to the density
+    df_mean = df.copy()
+    df_mean["sparsity"] = 16  # maximum sparsity
+
+    df = pd.concat([df, df_mean])
 
     # aggregate based on sparsity
     df_agg = df.groupby(["sparsity"]).agg(
@@ -248,7 +254,7 @@ def analyze_data(num_qubit: int):
     df_agg["num_cnot_std"] = df.groupby(["sparsity"]).agg({"ours": "std"})["ours"]
 
     # plot the bar plot, with the error bar
-    df_agg.plot.bar(y=["baseline", "ours"], rot=0)
+    ax = df_agg.plot.bar(y=["baseline", "ours"], rot=0)
 
     # data points
     if False:
@@ -302,14 +308,18 @@ def analyze_data(num_qubit: int):
 
     # y axis title
     plt.ylabel("Number of CNOTs")
-    
+
     # x axis title
     plt.xlabel(r"State density ($m$)")
+
+    labels = [item.get_text() for item in ax.get_xticklabels()]
+    labels[-1] = "Avg."
+    ax.set_xticklabels(labels)
 
     plt.show()
 
 
 if __name__ == "__main__":
     # test_synthesis(4)
-    analyze_data(4)
+    analyze_data("exp-rand-4.csv")
     # analyze_runtime(4)

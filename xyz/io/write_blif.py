@@ -10,8 +10,8 @@ Last Modified time: 2023-03-19 00:41:28
 
 from xyz.network import Network
 
-def write_blif_to_string(ntk: Network) -> str:
 
+def write_blif_to_string(ntk: Network) -> str:
     """
     write the blif to a string
     """

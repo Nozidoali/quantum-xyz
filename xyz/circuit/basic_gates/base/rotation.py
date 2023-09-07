@@ -33,7 +33,7 @@ class RotationGate:
         :rtype: bool
         """
         return np.isclose(self.theta, np.pi) or np.isclose(self.theta, -np.pi)
-    
+
     def get_theta(self) -> float:
         """Get the theta of the rotation gate .
 

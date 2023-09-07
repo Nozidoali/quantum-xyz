@@ -191,9 +191,8 @@ def analyze_runtime(filename: str):
     # read the data
     # time stamp
     df = pd.read_csv(filename)
-    
-    df = df[df["num_qubit"] >= 4]
 
+    df = df[df["num_qubit"] >= 4]
 
     # change the name of sparsity
     df["sparsity"] = df["sparsity"].map(
@@ -311,7 +310,7 @@ def analyze_data(filename: str):
 
     # y axis title
     plt.ylabel("Number of CNOTs")
-    
+
     plt.yticks([])
 
     # y log scale

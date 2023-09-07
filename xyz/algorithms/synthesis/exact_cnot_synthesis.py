@@ -80,7 +80,7 @@ def exact_cnot_synthesis(
     state_queue = PriorityQueue()
     enquened_states = {}
     record = {}
-    
+
     def map_qubit(qubit_index: int) -> int:
         return circuit.qubit_at(qubit_index)
 

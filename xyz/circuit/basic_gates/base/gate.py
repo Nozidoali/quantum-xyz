@@ -85,6 +85,7 @@ class BasicGate(QGate):
         """
         return self.target_qubit
 
+
 class AdvancedGate(QGate):
     """Class method that creates a AdvancedGate class .
 

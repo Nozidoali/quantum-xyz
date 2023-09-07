@@ -21,7 +21,7 @@ class ControlledGate:
 
         assert isinstance(control_qubit, QBit)
         self.control_qubit = control_qubit
-        
+
     def get_control_qubit(self) -> QBit:
         """Returns the control qubit .
 
@@ -29,7 +29,7 @@ class ControlledGate:
         :rtype: QBit
         """
         return self.control_qubit
-    
+
     def get_phase(self) -> int:
         """Returns the phase .
 
@@ -69,7 +69,7 @@ class MultiControlledGate:
         :rtype: List[QBit]
         """
         return self.control_qubits
-    
+
     def get_phases(self) -> List[int]:
         """Returns the phases .
 

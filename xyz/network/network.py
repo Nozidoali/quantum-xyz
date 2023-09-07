@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
 
-'''
+"""
 Author: Hanyu Wang
 Created time: 2023-09-03 11:15:09
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-09-03 21:24:34
-'''
+Last Modified time: 2023-09-06 10:33:15
+"""
+
 
 class Network:
-    """A class method for creating a network .
-    """
-    def __init__(self):
+    """A class method for creating a network ."""
 
+    def __init__(self):
         self.__top_module = ""
         self.__inputs = set()
         self.__outputs = set()
@@ -37,7 +37,7 @@ class Network:
         self.__node_fanouts: dict = {}
 
         self.__submodules = {}
-        
+
     def get_name(self):
         """Returns name of the module .
 
@@ -45,7 +45,7 @@ class Network:
         :rtype: [type]
         """
         return self.__top_module
-    
+
     def set_name(self, name: str):
         """AI is creating summary for set_name
 
@@ -53,7 +53,7 @@ class Network:
         :type name: str
         """
         self.__top_module = name
-        
+
     def get_func(self, node: str):
         """Returns the function func for the given node
 
@@ -63,9 +63,9 @@ class Network:
         :rtype: [type]
         """
         return self.__node_funcs[node]
-        
+
     def ro_to_ris(self):
-        """Returns a dictionary mapping from ro to 
+        """Returns a dictionary mapping from register_output to
 
         :return: [description]
         :rtype: [type]
@@ -201,7 +201,9 @@ class Network:
         :return: [description]
         :rtype: [type]
         """
-        return sorted(self.__inputs | self.__register_outputs | self.__const0 | self.__const1)
+        return sorted(
+            self.__inputs | self.__register_outputs | self.__const0 | self.__const1
+        )
 
     def constant0s(self):
         """Returns a list of constant 0s .
@@ -260,7 +262,7 @@ class Network:
         :rtype: [type]
         """
         return sorted(self.__node_fanins[signal])
-    
+
     def get_nodes(self):
         """Get the list of nodes sorted by their indices .
 
@@ -272,13 +274,11 @@ class Network:
     # sort __signals in a topological order
     # TODO: support runtime modification and maintain the topogical order
     def traverse(self):
-        """Traverse the CIS .
-        """
+        """Traverse the CIS ."""
         self.__signals = []
         for signal in self.cis():
             assert signal not in self.__signals
             self.__signals.append(signal)
-
 
         for signal in self.cos():
             self.trav_rec(signal)
@@ -303,7 +303,7 @@ class Network:
         """
         if signal in self.__signals:
             return
-        
+
         if signal not in self.__node_fanins:
             print(f"recursion stoped at node {signal}")
             exit()
@@ -428,14 +428,14 @@ class Network:
         """
         self.create_node(name=fout, fanins=set([fin]), func=["1 1"])
 
-    def create_latch(self, ri: str, ro: str):
+    def create_latch(self, register_input: str, register_output: str):
         """Creates a Latch with the given RAP and R .
 
-        :param ri: [description]
-        :type ri: str
-        :param ro: [description]
-        :type ro: str
+        :param register_input: [description]
+        :type register_input: str
+        :param register_output: [description]
+        :type register_output: str
         """
-        self.__register_inputs.add(ri)
-        self.__register_outputs.add(ro)
-        self.__ro_to_ri[ro] = ri
+        self.__register_inputs.add(register_input)
+        self.__register_outputs.add(register_output)
+        self.__ro_to_ri[register_output] = register_input

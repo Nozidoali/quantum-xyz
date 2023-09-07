@@ -32,7 +32,7 @@ class QCircuit:
         self.__gates: List[QGate] = []
         self.__qubits: List[QBit] = []
         self.init_qubits(num_qubits)
-        
+
         # configures
         self.map_gates = map_gates
 
