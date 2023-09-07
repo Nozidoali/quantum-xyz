@@ -1,0 +1,92 @@
+{
+  "d_3_1.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.0017692280016490258,
+    "date_time": "2023-09-08 00:47:49",
+    "num_cnots": 4
+  },
+  "d_4_1.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.10918210900126724,
+    "date_time": "2023-09-08 00:45:06",
+    "num_cnots": 7
+  },
+  "d_5_1.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.20645017799688503,
+    "date_time": "2023-09-08 00:45:21",
+    "num_cnots": 22
+  },
+  "d_6_1.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.21811653299664613,
+    "date_time": "2023-09-08 00:47:50",
+    "num_cnots": 46
+  },
+  "d_7_1.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.22763383299752604,
+    "date_time": "2023-09-08 00:45:07",
+    "num_cnots": 94
+  },
+  "d_8_1.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.24472139499994228,
+    "date_time": "2023-09-08 00:44:15",
+    "num_cnots": 190
+  },
+  "d_9_1.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.2747209470035159,
+    "date_time": "2023-09-08 00:44:00",
+    "num_cnots": 382
+  },
+  "d_5_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.5246317970013479,
+    "date_time": "2023-09-08 00:44:01",
+    "num_cnots": 46
+  },
+  "d_6_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.6495675449987175,
+    "date_time": "2023-09-08 00:45:21",
+    "num_cnots": 140
+  },
+  "d_7_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 1.019161192998581,
+    "date_time": "2023-09-08 00:44:04",
+    "num_cnots": 376
+  },
+  "d_8_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 1.3590660839981865,
+    "date_time": "2023-09-08 00:44:02",
+    "num_cnots": 944
+  },
+  "d_9_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 1.7279315979976673,
+    "date_time": "2023-09-08 00:45:21",
+    "num_cnots": 2272
+  },
+  "d_7_3.json": {
+    "optimality_level": 3,
+    "cpu_time": 1.9812495820006006,
+    "date_time": "2023-09-08 00:44:14",
+    "num_cnots": 660
+  },
+  "d_8_3.json": {
+    "optimality_level": 3,
+    "cpu_time": 3.114217779999308,
+    "date_time": "2023-09-08 00:45:16",
+    "num_cnots": 2076
+  },
+  "d_9_3.json": {
+    "optimality_level": 3,
+    "cpu_time": 4.980787808999594,
+    "date_time": "2023-09-08 00:44:32",
+    "num_cnots": 6044
+  }
+}

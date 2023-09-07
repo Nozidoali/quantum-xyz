@@ -84,6 +84,7 @@ def add_gate_mapped(self, gate: QGate) -> None:
     """
     if not self.map_gates:
         self.append_gate(gate)
+        return
 
     match gate.qgate_type:
         case QGateType.MULTIPLEX_Y:

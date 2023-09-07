@@ -33,3 +33,11 @@ class MULTIPLEXY(AdvancedGate):
 
     def __str__(self) -> str:
         return f"MULTIPLEXY({self.theta0}, {self.theta1}, {self.control_qubit}, {self.target_qubit})"
+
+    def get_cnot_cost(self) -> int:
+        """Returns the cost of the cost of the gate.
+
+        :return: [description]
+        :rtype: int
+        """
+        return 2

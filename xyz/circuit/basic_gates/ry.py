@@ -26,3 +26,11 @@ class RY(RotationGate, BasicGate):
 
     def __str__(self) -> str:
         return f"RY({self.theta:0.02f})"
+
+    def get_cnot_cost(self) -> int:
+        """Returns the cost of the cost of the gate.
+
+        :return: [description]
+        :rtype: int
+        """
+        return 0

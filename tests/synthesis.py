@@ -13,7 +13,7 @@ import numpy as np
 from itertools import combinations
 from qiskit import Aer, transpile
 
-from xyz import QState, cnot_synthesis, stopwatch, D_state
+from xyz import QState, cnot_synthesis, stopwatch, D_state, quantize_state
 
 
 def rand_state(num_qubit: int, sparsity: int) -> QState:
@@ -67,13 +67,14 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
 def test_synthesis():
     """Test that the synthesis is used ."""
 
-    state = D_state(4, 3)
+    state = D_state(7, 3)
+    target_state = quantize_state(state)
 
     with stopwatch("synthesis") as timer:
         try:
-            circuit = cnot_synthesis(state, optimality_level=1, verbose_level=1)
+            circuit = cnot_synthesis(target_state, optimality_level=3, verbose_level=1)
         except ValueError:
-            print(f"cannot cnot_synthesis state {state}")
+            print(f"cannot cnot_synthesis state {target_state}")
             exit(1)
         circ = circuit.to_qiskit()
         print(circ)

@@ -12,3 +12,4 @@ from .algorithms import *
 from .srgraph import *
 from .utils import *
 from .boolean import *
+from .circuit import *

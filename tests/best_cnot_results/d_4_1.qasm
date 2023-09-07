@@ -1,0 +1,21 @@
+OPENQASM 2.0;
+include "qelib1.inc";
+gate cx_oFalse q0,q1 { x q0; cx q0,q1; x q0; }
+qreg q3[4];
+creg c3[4];
+ry(pi/2) q3[0];
+ry(pi/4) q3[1];
+cx q3[0],q3[1];
+ry(-pi/4) q3[1];
+cx q3[0],q3[1];
+ry(pi/4) q3[2];
+cx q3[0],q3[2];
+ry(pi/4) q3[2];
+cx q3[0],q3[2];
+cx q3[0],q3[3];
+cx_oFalse q3[2],q3[3];
+cx q3[1],q3[0];
+measure q3[0] -> c3[0];
+measure q3[1] -> c3[1];
+measure q3[2] -> c3[2];
+measure q3[3] -> c3[3];

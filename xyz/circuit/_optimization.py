@@ -62,4 +62,4 @@ def _add_gates_optimized(self, gates: List[QGate]) -> None:
     Add a list of gates to the circuit, with optimization
     """
     for gate in gates:
-        self.add_gate(gate)
+        _add_gate_optimized(self, gate)

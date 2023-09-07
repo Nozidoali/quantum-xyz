@@ -104,7 +104,16 @@ class QCircuit:
         if gate_type is None:
             return len(self.__gates)
         else:
-            return len([gate for gate in self.__gates if gate.get_type() == gate_type])
+            return len([gate for gate in self.__gates if gate.get_qgate_type() == gate_type])
+        
+    def get_cnot_cost(self) -> int:
+        """
+        Get the number of CNOT gates in the circuit
+        """
+        cnot_cost: int = 0
+        for gate in self.__gates:
+            cnot_cost += gate.get_cnot_cost()
+        return cnot_cost
 
     def to_qiskit(self, with_measurement: bool = True, with_tomography: bool = False):
         """Convert the sequence to a Qiskit string .

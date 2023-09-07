@@ -43,3 +43,11 @@ class MCRY(RotationGate, BasicGate, MultiControlledGate):
             ]
         )
         return f"MCRY({self.theta:0.02f}, {control_str})"
+
+    def get_cnot_cost(self) -> int:
+        """Returns the cost of the cost of the gate.
+
+        :return: [description]
+        :rtype: int
+        """
+        return 1 << len(self.control_qubits)

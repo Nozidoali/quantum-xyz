@@ -15,6 +15,7 @@ import numpy as np
 
 from xyz.circuit import QCircuit
 from xyz.srgraph import quantize_state
+from xyz.srgraph.operators.qstate.qstate import QState
 
 from .qubit_reduction import qubit_reduction
 from .qubit_decomposition import qubit_decomposition
@@ -51,7 +52,7 @@ def intialize_logger():
 
 
 def cnot_synthesis(
-    state_vector: np.ndarray, optimality_level: int = 3, verbose_level: int = 0
+    state: QState, optimality_level: int = 3, verbose_level: int = 0
 ):
     """
     @brief Runs the search based state synthesis
@@ -60,25 +61,25 @@ def cnot_synthesis(
 
     log = intialize_logger()
 
-    target_state = quantize_state(state_vector)
-    num_qubits = target_state.num_qubits
+    num_qubits = state.num_qubits
 
     # initialize the circuit
-    circuit = QCircuit(num_qubits)
+    circuit = QCircuit(num_qubits, map_gates=True)
     post_processing_gates = []
 
     # reduce the number of qubits
     if optimality_level <= 0:
-        gates = qubit_reduction(circuit, target_state, optimality_level)
+        gates = qubit_reduction(circuit, state, optimality_level)
         for gate in gates[::-1]:
             post_processing_gates.append(gate)
 
-    gates = qubit_decomposition(circuit, target_state, optimality_level, verbose_level)
+    gates = qubit_decomposition(circuit, state, optimality_level, verbose_level)
 
     for gate in gates:
         circuit.add_gate(gate)
 
     for gate in post_processing_gates:
         circuit.add_gate(gate)
+        
 
     return circuit

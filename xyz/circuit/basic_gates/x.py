@@ -23,3 +23,11 @@ class X(BasicGate):
 
     def __str__(self) -> str:
         return f"X({self.target_qubit})"
+
+    def get_cnot_cost(self) -> int:
+        """Returns the cost of the cost of the gate.
+
+        :return: [description]
+        :rtype: int
+        """
+        return 0

@@ -21,3 +21,11 @@ class CRY(RotationGate, BasicGate, ControlledGate):
 
     def __str__(self) -> str:
         return f"CRY({self.theta:0.02f}, {self.control_qubit}[{self.phase}])"
+
+    def get_cnot_cost(self) -> int:
+        """Returns the cost of the cost of the gate.
+
+        :return: [description]
+        :rtype: int
+        """
+        return 2
