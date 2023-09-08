@@ -52,7 +52,7 @@ def intialize_logger():
 
 
 def cnot_synthesis(
-    state: QState, optimality_level: int = 3, verbose_level: int = 0
+    state: QState, optimality_level: int = 3, map_gates: bool = False, verbose_level: int = 0
 ):
     """
     @brief Runs the search based state synthesis
@@ -64,7 +64,7 @@ def cnot_synthesis(
     num_qubits = state.num_qubits
 
     # initialize the circuit
-    circuit = QCircuit(num_qubits, map_gates=True)
+    circuit = QCircuit(num_qubits, map_gates=map_gates)
     post_processing_gates = []
 
     # reduce the number of qubits

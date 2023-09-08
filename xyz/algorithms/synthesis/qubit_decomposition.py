@@ -8,9 +8,12 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-09-01 13:05:14
 """
 
-from calendar import c
-import numpy as np
+import threading
 import random
+import numpy as np
+
+from typing import List
+
 from xyz.circuit import QGate, QGateType, QBit, CX, CRY
 from xyz.circuit.basic_gates.mcry import MCRY
 from xyz.circuit.basic_gates.ry import RY
@@ -19,7 +22,6 @@ from xyz.circuit.qcircuit import QCircuit
 from xyz.srgraph.operators.qstate.qstate import QState
 
 from .exact_cnot_synthesis import exact_cnot_synthesis
-
 
 def to_controlled_gate(gate: QGate, control_qubit: QBit, control_phase: bool):
     """Return a controlled gate .
@@ -62,17 +64,19 @@ def to_controlled_gate(gate: QGate, control_qubit: QBit, control_phase: bool):
 
 
 def _qubit_decomposition_impl(
-    circuit: QCircuit, state: QState, optimality_level: int, verbose_level: int
+    circuit: QCircuit, gates: List[QGate], state: QState, optimality_level: int = 3, multi_thread: bool = False, verbose_level: int = 0
 ):
+    assert len(gates) == 0
+    
     supports = state.get_supports()
     num_supports = len(supports)
 
     if num_supports <= 4:
-        gates = exact_cnot_synthesis(circuit, state, optimality_level, verbose_level)
-        return gates
+        exact_gates = exact_cnot_synthesis(circuit, state, optimality_level, verbose_level)
+        for gate in exact_gates:
+            gates.append(gate)
+        return
 
-    # else we divide and conquer
-    gates = []
 
     # randomly choose a qubit to split
     pivot = random.choice(supports)
@@ -86,12 +90,27 @@ def _qubit_decomposition_impl(
     gates.append(gate)
 
     # then we recursively decompose the two substates
-    pos_gates = _qubit_decomposition_impl(
-        circuit, pos_state, optimality_level, verbose_level
-    )
-    neg_gates = _qubit_decomposition_impl(
-        circuit, neg_state, optimality_level, verbose_level
-    )
+    pos_gates = []
+    neg_gates = []
+    
+    # using multi_thread, we can parallelize the decomposition
+    if multi_thread:
+        thread_pos = threading.Thread(target=_qubit_decomposition_impl, args=(circuit, pos_gates, pos_state, optimality_level, multi_thread, verbose_level))
+        thread_neg = threading.Thread(target=_qubit_decomposition_impl, args=(circuit, neg_gates, neg_state, optimality_level, multi_thread, verbose_level))
+        
+        thread_pos.start()
+        thread_neg.start()
+        
+        thread_pos.join()
+        thread_neg.join()
+    
+    else:
+        _qubit_decomposition_impl(
+            circuit, pos_gates, pos_state, optimality_level, multi_thread, verbose_level
+        )
+        _qubit_decomposition_impl(
+            circuit, neg_gates, neg_state, optimality_level, multi_thread, verbose_level
+        )
 
     for gate in pos_gates:
         controlled_gate = to_controlled_gate(gate, pivot_qubit, True)
@@ -101,7 +120,6 @@ def _qubit_decomposition_impl(
         controlled_gate = to_controlled_gate(gate, pivot_qubit, False)
         gates.append(controlled_gate)
 
-    return gates
 
 
 def qubit_decomposition(
@@ -118,7 +136,11 @@ def qubit_decomposition(
     :return: [description]
     :rtype: [type]
     """
+    
+    gates = []
 
-    return _qubit_decomposition_impl(
-        circuit, target_state, optimality_level, verbose_level
+    _qubit_decomposition_impl(
+        circuit, gates, target_state, optimality_level, True, verbose_level
     )
+    
+    return gates

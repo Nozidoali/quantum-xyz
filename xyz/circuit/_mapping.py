@@ -13,6 +13,7 @@ import numpy as np
 
 from .basic_gates import QGate, QGateType, MULTIPLEXY
 from .decomposition import decompose_mcry, control_sequence_to_gates
+from xyz.utils import call_with_global_timer
 
 
 def __map_muxy(gate: MULTIPLEXY) -> List[QGate]:
@@ -75,7 +76,7 @@ def __map_mcry(gate: QGate) -> List[QGate]:
 
     return gates
 
-
+@call_with_global_timer
 def add_gate_mapped(self, gate: QGate) -> None:
     """Add a gate to the circuit .
 

@@ -13,7 +13,7 @@ import numpy as np
 from itertools import combinations
 from qiskit import Aer, transpile
 
-from xyz import QState, cnot_synthesis, stopwatch, D_state, quantize_state
+from xyz import QState, cnot_synthesis, stopwatch, D_state, quantize_state, get_time
 
 
 def rand_state(num_qubit: int, sparsity: int) -> QState:
@@ -67,7 +67,7 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
 def test_synthesis():
     """Test that the synthesis is used ."""
 
-    state = D_state(7, 3)
+    state = D_state(14, 1)
     target_state = quantize_state(state)
 
     with stopwatch("synthesis") as timer:
@@ -82,6 +82,9 @@ def test_synthesis():
         circ = transpile(circ, simulator)
 
         print(f"{timer.time():0.02f} seconds")
+        
+        map_time = get_time("add_gate_mapped")
+        print(f"time mapping = {map_time}")
 
     # Run and get counts
     result = simulator.run(circ).result()

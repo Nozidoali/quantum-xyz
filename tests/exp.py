@@ -36,7 +36,7 @@ def get_result(results: dict, filename: str):
     return results[filename]
 
 
-def run_experiment(filename: str, optimality_level: int = 3, run_all: bool = True):
+def run_experiment(filename: str, optimality_level: int = 3, map_gates: bool = False, run_all: bool = True):
     """Run all the experiments in the current directory .
 
     :param run_all: [description], defaults to True
@@ -48,17 +48,17 @@ def run_experiment(filename: str, optimality_level: int = 3, run_all: bool = Tru
     state: QState = load_state(os.path.join(EXAMPLE_FOLDER, filename))
     
     print(f"Running {filename}... state density = {len(state.index_to_weight)}, num_qubits = {state.num_qubits},")
-    if len(state.index_to_weight) > 1e2:
-        return {}
-    if state.num_qubits >= 10:
-        return {}
-    
+
     # run the experiment
     with stopwatch("synthesis") as timer:
-        circuit = cnot_synthesis(state, optimality_level=optimality_level, verbose_level=0)
+        circuit = cnot_synthesis(state, optimality_level=optimality_level, map_gates=map_gates, verbose_level=0)
 
         # get the CNOT gate count
-        num_cnots: int = circuit.num_gates(QGateType.CX)
+        
+        if map_gates:
+            num_cnots: int = circuit.num_gates(QGateType.CX)
+        else:
+            num_cnots: int = circuit.get_cnot_cost()
         
         circ = circuit.to_qiskit()
         
@@ -67,20 +67,22 @@ def run_experiment(filename: str, optimality_level: int = 3, run_all: bool = Tru
         # generate a qasm string    
         qasm_str = circ.qasm()
         
-    # double check if the circuit is mapped correctly
-    num_cnots_qiskit: int = 0
-    for gate, gate_count in circ.count_ops().items():
-        if gate == "cx":
-            num_cnots_qiskit += gate_count
-        elif gate == "cx_oFalse":
-            num_cnots_qiskit += gate_count
-        elif gate not in ["measure", "ry", "x"]:
-            print(f"Illegal gate {gate} in {filename}")
-            exit(1)
-            pass
+    if map_gates:
+        
+        # double check if the circuit is mapped correctly
+        num_cnots_qiskit: int = 0
+        for gate, gate_count in circ.count_ops().items():
+            if gate == "cx":
+                num_cnots_qiskit += gate_count
+            elif gate == "cx_oFalse":
+                num_cnots_qiskit += gate_count
+            elif gate not in ["measure", "ry", "x"]:
+                print(f"Illegal gate {gate} in {filename}")
+                exit(1)
+                pass
 
-    #TODO: verify the gate count is correct
-    assert num_cnots == num_cnots_qiskit, f"num_cnots = {num_cnots}, num_cnots_qiskit = {num_cnots_qiskit}"
+        #TODO: verify the gate count is correct
+        assert num_cnots == num_cnots_qiskit, f"num_cnots = {num_cnots}, num_cnots_qiskit = {num_cnots_qiskit}"
 
     cpu_time = timer.time()
     
@@ -93,7 +95,7 @@ def run_experiment(filename: str, optimality_level: int = 3, run_all: bool = Tru
         "cpu_time": cpu_time,
         "qasm_str": qasm_str,
         "date_time": date_time,
-        "num_cnots": num_cnots_qiskit,
+        "num_cnots": num_cnots,
     }
         
     # save the results
@@ -190,8 +192,20 @@ if __name__ == "__main__":
     
     # run all experiments in the examples directory
     for filename in os.listdir(EXAMPLE_FOLDER):
+        
         if not filename.endswith(".json"):
             continue
         
-        new_results = run_experiment(filename)
+        # parse the num_qubit and sparsity from the filename
+        filename_base = filename.replace(".json", "")
+        
+        num_qubit = int(filename_base.split("_")[1])
+        sparsity = int(filename_base.split("_")[2])
+        if sparsity > 3:
+            continue
+
+        if num_qubit >= 21:
+            continue
+    
+        new_results = run_experiment(filename, map_gates = False)
         update_results(new_results)
