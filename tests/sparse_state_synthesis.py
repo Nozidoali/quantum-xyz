@@ -8,13 +8,13 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-18 21:09:09
 """
 
-from ast import In
 import random
 import numpy as np
 from itertools import combinations
 from qiskit import Aer, transpile
 
 from xyz import QState, cnot_synthesis, stopwatch, D_state, quantize_state, get_time
+from xyz.algorithms.synthesis import sparse_state_synthesis
 
 
 def rand_state(num_qubit: int, sparsity: int) -> QState:
@@ -66,45 +66,34 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
 
 
 def test_synthesis():
-    """Test that the synthesis is correct ."""
+    """Test that the synthesis is used ."""
 
-    state = D_state(5, 2)
-    
-    # we first run baseline
-    from baseline import run_baseline
-    
-    try:
-        num_qubit, depth, cx = run_baseline(state)
-        print(f"baseline: qubits = {num_qubit}, depth = {depth}, cx = {cx}")
-    except:
-        print(f"cannot run baseline")
-    
+    state = D_state(4, 1)
     target_state = quantize_state(state)
 
     with stopwatch("synthesis") as timer:
         try:
-            circuit = cnot_synthesis(target_state, optimality_level=3, verbose_level=0)
+            circuit = sparse_state_synthesis(target_state, verbose_level=3)
         except ValueError:
             print(f"cannot cnot_synthesis state {target_state}")
             exit(1)
-            
-    circ = circuit.to_qiskit()
-    print(circ)
-    simulator = Aer.get_backend("qasm_simulator")
-    transpiled = transpile(circ, basis_gates=['u', 'cx'], optimization_level=0)
-    cx = transpiled.count_ops().get('cx', 0)
+        circ = circuit.to_qiskit()
+        print(circ)
+        simulator = Aer.get_backend("aer_simulator")
+        circ = transpile(circ, simulator)
 
-    print(f"{timer.time():0.02f} seconds")
-    
-    map_time = get_time("add_gate_mapped")
-    print(f"time mapping = {map_time}")
+        print(f"{timer.time():0.02f} seconds")
+        
+        map_time = get_time("add_gate_mapped")
+        print(f"time mapping = {map_time}")
 
     # Run and get counts
-    result = simulator.run(transpiled).result()
-    counts = result.get_counts(transpiled)
+    result = simulator.run(circ).result()
+    counts = result.get_counts(circ)
 
     print(counts)
-    print(f"cnot = {cx}")
+    num_cnot = circ.count_ops()["cx"] if "cx" in circ.count_ops() else 0
+    print(f"cnot = {num_cnot}")
 
 
 if __name__ == "__main__":

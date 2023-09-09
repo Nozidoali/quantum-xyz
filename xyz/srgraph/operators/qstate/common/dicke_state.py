@@ -22,4 +22,4 @@ def D_state(num_qubits: int, num_bits: int) -> np.ndarray:
             state[i] = 1
             ones += 1
 
-    return state / np.sqrt(ones)
+    return 1 / np.sqrt(ones) * state 

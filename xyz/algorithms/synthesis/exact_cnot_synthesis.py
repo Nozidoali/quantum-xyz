@@ -10,6 +10,7 @@ Last Modified time: 2023-09-01 12:56:17
 
 from queue import PriorityQueue
 import numpy as np
+from xyz.algorithms.synthesis import ground_state_calibration
 from xyz.circuit.basic_gates.base.gate import QGate
 from xyz.circuit.basic_gates.cx import CX
 from xyz.circuit import QCircuit, X, MCRY
@@ -25,6 +26,7 @@ from xyz.srgraph import (
     quantize_state,
 )
 
+from .ground_state_calibration import ground_state_calibration
 
 class AStarCost:
     """AStarCost class ."""
@@ -166,6 +168,8 @@ def exact_cnot_synthesis(
     while not state_queue.empty():
         curr_cost, curr_state = state_queue.get()
 
+            
+        
         if curr_state == initial_state:
             # then we have found the solution
             solution_reached = True
@@ -176,6 +180,10 @@ def exact_cnot_synthesis(
 
         num_supports = len(_supports)
         _optimality_level = optimality_level if num_supports > 4 else 3
+        
+        if _sparsity == 1:
+            solution_reached = True
+            break
 
         if _sparsity >= 2 and _sparsity < sparsity:
             sparsity = _sparsity
@@ -348,8 +356,12 @@ def exact_cnot_synthesis(
 
     if not solution_reached:
         raise ValueError("No solution found")
+    
+    final_state = QState(curr_state.index_to_weight, curr_state.num_qubits)
+    
+    x_gates = ground_state_calibration(circuit, final_state)
 
-    gates = []
+    gates = x_gates[:]
     while curr_state in record:
         prev_state, gate = record[curr_state]
         gates.append(gate)
