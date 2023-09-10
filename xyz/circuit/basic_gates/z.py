@@ -23,7 +23,7 @@ class Z(BasicGate):
 
     def __str__(self) -> str:
         return f"Z({self.target_qubit})"
-    
+
     def get_cnot_cost(self) -> int:
         """Returns the cost of the cost of the gate.
 

@@ -13,8 +13,9 @@ import numpy as np
 from itertools import combinations
 from qiskit import Aer, transpile
 
-from xyz import QState, cnot_synthesis, stopwatch, D_state, quantize_state, get_time
+from xyz import QState, stopwatch, D_state, quantize_state, get_time
 from xyz.algorithms.synthesis import sparse_state_synthesis
+from xyz.circuit.qcircuit import QCircuit
 
 
 def rand_state(num_qubit: int, sparsity: int) -> QState:
@@ -68,22 +69,24 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
 def test_synthesis():
     """Test that the synthesis is used ."""
 
-    state = D_state(4, 1)
+    state = D_state(8, 2)
     target_state = quantize_state(state)
 
     with stopwatch("synthesis") as timer:
-        try:
-            circuit = sparse_state_synthesis(target_state, verbose_level=3)
-        except ValueError:
-            print(f"cannot cnot_synthesis state {target_state}")
-            exit(1)
+        circuit = QCircuit(target_state.num_qubits)
+        
+        gates = sparse_state_synthesis(circuit, target_state, verbose_level=3)
+
+        for gate in gates:
+            circuit.add_gate(gate)
+
         circ = circuit.to_qiskit()
         print(circ)
         simulator = Aer.get_backend("aer_simulator")
         circ = transpile(circ, simulator)
 
         print(f"{timer.time():0.02f} seconds")
-        
+
         map_time = get_time("add_gate_mapped")
         print(f"time mapping = {map_time}")
 

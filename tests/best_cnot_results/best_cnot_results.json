@@ -1,170 +1,290 @@
 {
   "d_3_1.json": {
     "optimality_level": 3,
-    "cpu_time": 0.00198644299962325,
-    "date_time": "2023-09-08 00:36:09",
+    "cpu_time": 0.007210037962067872,
+    "date_time": "2023-09-10 18:39:00",
     "num_cnots": 4
   },
   "d_4_1.json": {
     "optimality_level": 3,
-    "cpu_time": 0.11285169599796063,
-    "date_time": "2023-09-08 00:35:57",
+    "cpu_time": 0.007816486991941929,
+    "date_time": "2023-09-10 18:37:46",
     "num_cnots": 7
   },
   "d_5_1.json": {
     "optimality_level": 3,
-    "cpu_time": 0.21968874499725644,
-    "date_time": "2023-09-08 00:36:12",
-    "num_cnots": 22
-  },
-  "d_5_2.json": {
-    "optimality_level": 3,
-    "cpu_time": 0.535445258999971,
-    "date_time": "2023-09-08 00:35:55",
-    "num_cnots": 46
+    "cpu_time": 0.008219723997171968,
+    "date_time": "2023-09-10 18:39:17",
+    "num_cnots": 10
   },
   "d_6_1.json": {
     "optimality_level": 3,
-    "cpu_time": 0.23783238499891013,
-    "date_time": "2023-09-08 00:36:09",
-    "num_cnots": 46
+    "cpu_time": 0.009789588977582753,
+    "date_time": "2023-09-10 18:39:04",
+    "num_cnots": 13
   },
   "d_7_1.json": {
     "optimality_level": 3,
-    "cpu_time": 0.24913859499793034,
-    "date_time": "2023-09-08 00:35:58",
-    "num_cnots": 94
-  },
-  "d_6_2.json": {
-    "optimality_level": 3,
-    "cpu_time": 0.650418893997994,
-    "date_time": "2023-09-08 00:36:12",
-    "num_cnots": 140
+    "cpu_time": 0.007810698996763676,
+    "date_time": "2023-09-10 18:37:46",
+    "num_cnots": 16
   },
   "d_8_1.json": {
     "optimality_level": 3,
-    "cpu_time": 0.2602964069992595,
-    "date_time": "2023-09-08 00:36:09",
-    "num_cnots": 190
-  },
-  "d_7_2.json": {
-    "optimality_level": 3,
-    "cpu_time": 1.0551392689994827,
-    "date_time": "2023-09-08 00:35:58",
-    "num_cnots": 376
+    "cpu_time": 0.009407336998265237,
+    "date_time": "2023-09-10 18:38:59",
+    "num_cnots": 19
   },
   "d_9_1.json": {
     "optimality_level": 3,
-    "cpu_time": 0.28282025800217525,
-    "date_time": "2023-09-08 00:35:54",
-    "num_cnots": 382
-  },
-  "d_7_3.json": {
-    "optimality_level": 3,
-    "cpu_time": 2.089886817997467,
-    "date_time": "2023-09-08 00:36:09",
-    "num_cnots": 660
+    "cpu_time": 0.06656649999786168,
+    "date_time": "2023-09-10 18:37:31",
+    "num_cnots": 22
   },
   "d_10_1.json": {
     "optimality_level": 3,
-    "cpu_time": 0.34732517899828963,
-    "date_time": "2023-09-08 08:33:54",
-    "num_cnots": 766
-  },
-  "d_8_2.json": {
-    "optimality_level": 3,
-    "cpu_time": 1.3744628569984343,
-    "date_time": "2023-09-08 00:35:56",
-    "num_cnots": 944
+    "cpu_time": 0.010259469971060753,
+    "date_time": "2023-09-10 18:37:57",
+    "num_cnots": 25
   },
   "d_11_1.json": {
     "optimality_level": 3,
-    "cpu_time": 0.5343885549955303,
-    "date_time": "2023-09-08 08:34:03",
-    "num_cnots": 1534
-  },
-  "d_8_3.json": {
-    "optimality_level": 3,
-    "cpu_time": 3.291136051997455,
-    "date_time": "2023-09-08 00:36:06",
-    "num_cnots": 2076
-  },
-  "d_9_2.json": {
-    "optimality_level": 3,
-    "cpu_time": 1.850031038000452,
-    "date_time": "2023-09-08 00:36:11",
-    "num_cnots": 2272
+    "cpu_time": 0.010004404000937939,
+    "date_time": "2023-09-10 18:38:32",
+    "num_cnots": 28
   },
   "d_12_1.json": {
     "optimality_level": 3,
-    "cpu_time": 1.1634314000039012,
-    "date_time": "2023-09-08 08:34:17",
-    "num_cnots": 3070
+    "cpu_time": 0.010239070979878306,
+    "date_time": "2023-09-10 18:39:04",
+    "num_cnots": 31
   },
-  "d_10_2.json": {
+  "d_13_1.json": {
     "optimality_level": 3,
-    "cpu_time": 2.67427122600202,
-    "date_time": "2023-09-08 08:34:00",
-    "num_cnots": 5312
-  },
-  "d_9_3.json": {
-    "optimality_level": 3,
-    "cpu_time": 4.940389616000175,
-    "date_time": "2023-09-08 00:36:03",
-    "num_cnots": 6044
-  },
-  "d_11_2.json": {
-    "optimality_level": 3,
-    "cpu_time": 4.473440551002568,
-    "date_time": "2023-09-08 08:34:22",
-    "num_cnots": 12160
+    "cpu_time": 0.01035228098044172,
+    "date_time": "2023-09-10 18:39:04",
+    "num_cnots": 34
   },
   "d_14_1.json": {
     "optimality_level": 3,
-    "cpu_time": 0.7770257810043404,
-    "date_time": "2023-09-08 08:55:28",
-    "num_cnots": 12286
+    "cpu_time": 0.010835380002390593,
+    "date_time": "2023-09-10 18:37:46",
+    "num_cnots": 37
   },
-  "d_12_2.json": {
+  "d_15_1.json": {
     "optimality_level": 3,
-    "cpu_time": 10.743254511995474,
-    "date_time": "2023-09-08 08:34:14",
-    "num_cnots": 27392
+    "cpu_time": 0.01401572598842904,
+    "date_time": "2023-09-10 18:38:30",
+    "num_cnots": 40
   },
-  "d_11_3.json": {
+  "d_16_1.json": {
     "optimality_level": 3,
-    "cpu_time": 16.87555541900656,
-    "date_time": "2023-09-08 08:42:21",
-    "num_cnots": 43900
+    "cpu_time": 0.012655247002840042,
+    "date_time": "2023-09-10 18:39:00",
+    "num_cnots": 43
   },
   "d_17_1.json": {
     "optimality_level": 3,
-    "cpu_time": 1.0392610460039577,
-    "date_time": "2023-09-08 08:52:50",
-    "num_cnots": 98302
+    "cpu_time": 0.0136698639835231,
+    "date_time": "2023-09-10 18:37:31",
+    "num_cnots": 46
+  },
+  "d_18_1.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.012903737020678818,
+    "date_time": "2023-09-10 18:39:17",
+    "num_cnots": 49
+  },
+  "d_19_1.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.014068835007492453,
+    "date_time": "2023-09-10 18:38:32",
+    "num_cnots": 52
   },
   "d_20_1.json": {
     "optimality_level": 3,
-    "cpu_time": 1.3267436270034523,
-    "date_time": "2023-09-08 08:55:30",
-    "num_cnots": 786430
+    "cpu_time": 0.014241948025301099,
+    "date_time": "2023-09-10 18:37:46",
+    "num_cnots": 55
+  },
+  "d_5_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.0363157419487834,
+    "date_time": "2023-09-10 18:37:31",
+    "num_cnots": 63
+  },
+  "d_6_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.050188259978313,
+    "date_time": "2023-09-10 18:39:05",
+    "num_cnots": 118
+  },
+  "d_7_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.06922223197761923,
+    "date_time": "2023-09-10 18:37:46",
+    "num_cnots": 184
+  },
+  "d_8_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.09582897700602189,
+    "date_time": "2023-09-10 18:37:31",
+    "num_cnots": 263
+  },
+  "d_9_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.12204906699480489,
+    "date_time": "2023-09-10 18:39:04",
+    "num_cnots": 355
+  },
+  "d_10_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.14936964504886419,
+    "date_time": "2023-09-10 18:38:06",
+    "num_cnots": 460
+  },
+  "d_7_3.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.20989183901110664,
+    "date_time": "2023-09-10 18:38:07",
+    "num_cnots": 481
+  },
+  "d_11_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.19802443805383518,
+    "date_time": "2023-09-10 18:39:05",
+    "num_cnots": 578
+  },
+  "d_12_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.23578411299968138,
+    "date_time": "2023-09-10 18:38:59",
+    "num_cnots": 709
+  },
+  "d_13_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.2815841470146552,
+    "date_time": "2023-09-10 18:38:06",
+    "num_cnots": 853
+  },
+  "d_8_3.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.5122943739988841,
+    "date_time": "2023-09-10 18:37:58",
+    "num_cnots": 883
+  },
+  "d_14_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.33241410000482574,
+    "date_time": "2023-09-10 18:38:07",
+    "num_cnots": 1010
+  },
+  "d_15_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.43145527597516775,
+    "date_time": "2023-09-10 18:39:00",
+    "num_cnots": 1180
+  },
+  "d_16_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.4870059890090488,
+    "date_time": "2023-09-10 18:39:00",
+    "num_cnots": 1363
+  },
+  "d_9_3.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.7788606199901551,
+    "date_time": "2023-09-10 18:37:57",
+    "num_cnots": 1440
+  },
+  "d_17_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.5026920799864456,
+    "date_time": "2023-09-10 18:38:59",
+    "num_cnots": 1559
+  },
+  "d_18_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.5804529369925149,
+    "date_time": "2023-09-10 18:38:30",
+    "num_cnots": 1768
+  },
+  "d_19_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.7138296969933435,
+    "date_time": "2023-09-10 18:39:04",
+    "num_cnots": 1990
+  },
+  "d_10_3.json": {
+    "optimality_level": 3,
+    "cpu_time": 1.1829890150111169,
+    "date_time": "2023-09-10 18:39:05",
+    "num_cnots": 2152
+  },
+  "d_20_2.json": {
+    "optimality_level": 3,
+    "cpu_time": 0.7611883550416678,
+    "date_time": "2023-09-10 18:38:29",
+    "num_cnots": 2225
+  },
+  "d_11_3.json": {
+    "optimality_level": 3,
+    "cpu_time": 1.9365609139786102,
+    "date_time": "2023-09-10 18:38:32",
+    "num_cnots": 3261
+  },
+  "d_12_3.json": {
+    "optimality_level": 3,
+    "cpu_time": 3.148171861015726,
+    "date_time": "2023-09-10 18:39:03",
+    "num_cnots": 4697
+  },
+  "d_13_3.json": {
+    "optimality_level": 3,
+    "cpu_time": 3.6067081509972923,
+    "date_time": "2023-09-10 18:38:58",
+    "num_cnots": 6134
+  },
+  "d_14_3.json": {
+    "optimality_level": 3,
+    "cpu_time": 5.858619449019898,
+    "date_time": "2023-09-10 18:38:38",
+    "num_cnots": 8801
   },
   "d_15_3.json": {
     "optimality_level": 3,
-    "cpu_time": 75.23145491900505,
-    "date_time": "2023-09-08 08:58:33",
-    "num_cnots": 1628156
+    "cpu_time": 8.338164208980743,
+    "date_time": "2023-09-10 18:38:06",
+    "num_cnots": 12285
   },
   "d_16_3.json": {
     "optimality_level": 3,
-    "cpu_time": 94.73997182700259,
-    "date_time": "2023-09-08 08:57:04",
-    "num_cnots": 3842044
+    "cpu_time": 10.3114962829859,
+    "date_time": "2023-09-10 18:37:56",
+    "num_cnots": 14733
+  },
+  "d_17_3.json": {
+    "optimality_level": 3,
+    "cpu_time": 11.479751405015122,
+    "date_time": "2023-09-10 18:39:17",
+    "num_cnots": 17739
   },
   "d_18_3.json": {
     "optimality_level": 3,
-    "cpu_time": 152.92691575899516,
-    "date_time": "2023-09-08 08:55:25",
-    "num_cnots": 20643836
+    "cpu_time": 14.309282178001013,
+    "date_time": "2023-09-10 18:37:46",
+    "num_cnots": 21504
+  },
+  "d_19_3.json": {
+    "optimality_level": 3,
+    "cpu_time": 16.946057416964322,
+    "date_time": "2023-09-10 18:38:55",
+    "num_cnots": 25134
+  },
+  "d_20_3.json": {
+    "optimality_level": 3,
+    "cpu_time": 21.483713536988944,
+    "date_time": "2023-09-10 18:38:28",
+    "num_cnots": 31352
   }
 }

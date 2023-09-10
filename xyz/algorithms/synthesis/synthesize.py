@@ -12,6 +12,7 @@ Last Modified time: 2023-06-28 11:02:26
 import logging
 
 import numpy as np
+from scipy import sparse
 
 from xyz.circuit import QCircuit
 from xyz.srgraph import quantize_state
@@ -19,7 +20,7 @@ from xyz.srgraph.operators.qstate.qstate import QState
 
 from .qubit_reduction import qubit_reduction
 from .qubit_decomposition import qubit_decomposition
-
+from .sparse_state_synthesis import sparse_state_synthesis
 
 def intialize_logger():
     """Initialize the logger .
@@ -52,7 +53,11 @@ def intialize_logger():
 
 
 def cnot_synthesis(
-    state: QState, optimality_level: int = 3, map_gates: bool = False, verbose_level: int = 0
+    state: QState,
+    optimality_level: int = 3,
+    map_gates: bool = False,
+    verbose_level: int = 0,
+    runtime_limit: int = None,
 ):
     """
     @brief Runs the search based state synthesis
@@ -73,13 +78,18 @@ def cnot_synthesis(
         for gate in gates[::-1]:
             post_processing_gates.append(gate)
 
-    gates = qubit_decomposition(circuit, state, optimality_level, verbose_level)
+    gates = sparse_state_synthesis(
+        circuit, state, optimality_level, verbose_level
+    )
+
+    # gates = qubit_decomposition(
+    #     circuit, state, optimality_level, verbose_level, runtime_limit=runtime_limit
+    # )
 
     for gate in gates:
         circuit.add_gate(gate)
 
     for gate in post_processing_gates:
         circuit.add_gate(gate)
-        
 
     return circuit

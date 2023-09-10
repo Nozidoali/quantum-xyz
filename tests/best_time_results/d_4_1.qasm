@@ -1,21 +1,17 @@
 OPENQASM 2.0;
 include "qelib1.inc";
 gate cx_oFalse q0,q1 { x q0; cx q0,q1; x q0; }
-qreg q3[4];
-creg c3[4];
-ry(pi/2) q3[0];
-ry(pi/4) q3[1];
-cx q3[0],q3[1];
-ry(-pi/4) q3[1];
-cx q3[0],q3[1];
-ry(pi/4) q3[2];
-cx q3[0],q3[2];
-ry(pi/4) q3[2];
-cx q3[0],q3[2];
-cx q3[0],q3[3];
-cx_oFalse q3[2],q3[3];
-cx q3[1],q3[0];
-measure q3[0] -> c3[0];
-measure q3[1] -> c3[1];
-measure q3[2] -> c3[2];
-measure q3[3] -> c3[3];
+gate cry_o0(param0) q0,q1 { x q0; cry(1.9106332362490186) q0,q1; x q0; }
+qreg q1042[4];
+creg c5[4];
+x q1042[2];
+ry(2*pi/3) q1042[2];
+cx_oFalse q1042[2],q1042[3];
+cry_o0(1.9106332362490186) q1042[2],q1042[1];
+cx q1042[1],q1042[3];
+cry(pi/2) q1042[1],q1042[0];
+cx q1042[0],q1042[1];
+measure q1042[0] -> c5[0];
+measure q1042[1] -> c5[1];
+measure q1042[2] -> c5[2];
+measure q1042[3] -> c5[3];

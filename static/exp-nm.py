@@ -89,7 +89,7 @@ def test_synthesis():
 
     datas = []
 
-    for num_qubits in range(3, 12, 1):
+    for num_qubits in range(3, 21, 1):
         sparsity = num_qubits
 
         valid_states: int = 0
@@ -129,22 +129,26 @@ def test_synthesis():
             if baseline is None:
                 continue
 
+            state = quantize_state(state)
             with stopwatch("synthesis") as timer:
                 try:
-                    circuit = cnot_synthesis(state, optimality_level=3, verbose_level=0)
+                    circuit = cnot_synthesis(
+                        state, optimality_level=3, verbose_level=0, runtime_limit=10
+                    )
                 except ValueError:
                     print(f"cannot cnot_synthesis state {state}")
                     continue
-                circ = circuit.to_qiskit()
-                simulator = Aer.get_backend("aer_simulator")
-                circ = transpile(circ, simulator)
+            circ = circuit.to_qiskit()
+            simulator = Aer.get_backend("aer_simulator")
+            transpiled = transpile(circ, basis_gates=["u", "cx"], optimization_level=0)
+            cx = transpiled.count_ops().get("cx", 0)
 
             # Run and get counts
-            result = simulator.run(circ).result()
-            counts = result.get_counts(circ)
+            result = simulator.run(transpiled).result()
+            counts = result.get_counts(transpiled)
 
             # print(counts)
-            ours = circ.count_ops()["cx"] if "cx" in circ.count_ops() else 0
+            ours = cx
             print(
                 f"num_qubit = {num_qubits} sparsity = {sparsity} state = {qstate} baseline = {baseline} ours = {ours}, time = {timer.time()}"
             )
@@ -323,6 +327,6 @@ def analyze_data(filename: str):
 
 
 if __name__ == "__main__":
-    # test_synthesis()
-    analyze_data("nm.csv")
+    test_synthesis()
+    # analyze_data("nm.csv")
     # analyze_runtime("nm2.csv")

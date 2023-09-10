@@ -76,6 +76,7 @@ def __map_mcry(gate: QGate) -> List[QGate]:
 
     return gates
 
+
 @call_with_global_timer
 def add_gate_mapped(self, gate: QGate) -> None:
     """Add a gate to the circuit .

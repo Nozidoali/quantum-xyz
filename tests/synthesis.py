@@ -15,6 +15,7 @@ from itertools import combinations
 from qiskit import Aer, transpile
 
 from xyz import QState, cnot_synthesis, stopwatch, D_state, quantize_state, get_time
+from xyz.utils.colors import print_red, print_yellow
 
 
 def rand_state(num_qubit: int, sparsity: int) -> QState:
@@ -68,17 +69,17 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
 def test_synthesis():
     """Test that the synthesis is correct ."""
 
-    state = D_state(5, 2)
-    
+    state = D_state(8, 2)
+
     # we first run baseline
     from baseline import run_baseline
-    
+
     try:
         num_qubit, depth, cx = run_baseline(state)
         print(f"baseline: qubits = {num_qubit}, depth = {depth}, cx = {cx}")
     except:
-        print(f"cannot run baseline")
-    
+        print_yellow(f"cannot run baseline")
+
     target_state = quantize_state(state)
 
     with stopwatch("synthesis") as timer:
@@ -87,15 +88,15 @@ def test_synthesis():
         except ValueError:
             print(f"cannot cnot_synthesis state {target_state}")
             exit(1)
-            
+
     circ = circuit.to_qiskit()
     print(circ)
     simulator = Aer.get_backend("qasm_simulator")
-    transpiled = transpile(circ, basis_gates=['u', 'cx'], optimization_level=0)
-    cx = transpiled.count_ops().get('cx', 0)
+    transpiled = transpile(circ, basis_gates=["u", "cx"], optimization_level=0)
+    cx = transpiled.count_ops().get("cx", 0)
 
     print(f"{timer.time():0.02f} seconds")
-    
+
     map_time = get_time("add_gate_mapped")
     print(f"time mapping = {map_time}")
 

@@ -14,6 +14,7 @@ import numpy as np
 import copy
 import json
 
+
 class QState:
     """Class method for QState"""
 
@@ -380,23 +381,24 @@ def quantize_state(state_vector: np.ndarray):
             index_to_weight[idx] = coefficient**2
     return QState(index_to_weight, num_qubits)
 
+
 def load_state(filename: str):
     """Loads the state of a given file .
 
     :param filename: [description]
     :type filename: str
     """
-    
+
     # read the dict from the file
     with open(filename, "r") as f:
         state_dict = json.load(f)
-        
+
     num_qubits: int = None
     index_to_weight = {}
     for index_str, weight in state_dict.items():
         if num_qubits is None:
             num_qubits = len(index_str)
-        
+
         try:
             index = int(index_str, 2)
         except ValueError:
@@ -406,6 +408,7 @@ def load_state(filename: str):
 
     # convert the dict to a QState
     return QState(index_to_weight, num_qubits)
+
 
 def from_val(val: int, num_qubits: int) -> QState:
     """Return the state from the vector representation .

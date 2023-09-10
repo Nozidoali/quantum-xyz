@@ -16,4 +16,4 @@ class QBit:
         self.index = index
 
     def __str__(self) -> str:
-        return f"QBit({self.index})"
+        return f"q{self.index}"

@@ -8,6 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-09-01 12:56:17
 """
 
+import time
 from queue import PriorityQueue
 import numpy as np
 from xyz.algorithms.synthesis import ground_state_calibration
@@ -27,6 +28,7 @@ from xyz.srgraph import (
 )
 
 from .ground_state_calibration import ground_state_calibration
+
 
 class AStarCost:
     """AStarCost class ."""
@@ -59,6 +61,7 @@ def exact_cnot_synthesis(
     target_state: QState,
     optimality_level: int = 3,
     verbose_level: int = 0,
+    runtime_limit: int = None,
 ):
     """This function finds the exact cnot_cnot_synthesis of a circuit .
 
@@ -164,12 +167,17 @@ def exact_cnot_synthesis(
     sparsity = target_state.get_sparsity()
     best_supports = target_state.get_supports()
 
+    start_time = time.time()
+
     # This function is called by the search loop.
     while not state_queue.empty():
         curr_cost, curr_state = state_queue.get()
 
-            
-        
+        now_time = time.time()
+        seconds_ellapsed = now_time - start_time
+        if runtime_limit is not None and seconds_ellapsed > runtime_limit:
+            break
+
         if curr_state == initial_state:
             # then we have found the solution
             solution_reached = True
@@ -179,8 +187,8 @@ def exact_cnot_synthesis(
         _supports = curr_state.get_supports()
 
         num_supports = len(_supports)
-        _optimality_level = optimality_level if num_supports > 4 else 3
-        
+        _optimality_level = optimality_level
+
         if _sparsity == 1:
             solution_reached = True
             break
@@ -356,9 +364,9 @@ def exact_cnot_synthesis(
 
     if not solution_reached:
         raise ValueError("No solution found")
-    
+
     final_state = QState(curr_state.index_to_weight, curr_state.num_qubits)
-    
+
     x_gates = ground_state_calibration(circuit, final_state)
 
     gates = x_gates[:]

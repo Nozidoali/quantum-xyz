@@ -17,7 +17,8 @@ class CX(BasicGate, ControlledGate):
         ControlledGate.__init__(self, control_qubit, phase)
 
     def __str__(self) -> str:
-        return f"C({self.control_qubit} = {self.phase})X({self.target_qubit})"
+        phase_str = "" if self.phase == 1 else "~"
+        return f"C({phase_str}{self.control_qubit})X({self.target_qubit})"
 
     def get_cnot_cost(self) -> int:
         """Returns the cost of the cost of the gate.
