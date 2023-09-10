@@ -111,7 +111,7 @@ def density_reduction(circuit: QCircuit, state: QState, verbose_level: int = 0):
 
     # now we select the second index
     index2_candidates = set()
-    for index in state.index_set - indices:
+    for index in set(state.index_set) - indices:
         violated: bool = False
         for _diff_qubit, _diff_value in diff_lits:
             if (index >> _diff_qubit) & 1 != _diff_value:

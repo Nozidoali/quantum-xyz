@@ -64,8 +64,6 @@ def to_controlled_gate(gate: QGate, control_qubit: QBit, control_phase: bool):
             )
 
 
-OPTIZATION_COMPLEXITY2 = 1 << 8
-OPTIZATION_COMPLEXITY1 = 1 << 10
 
 
 def _qubit_decomposition_impl(
@@ -96,6 +94,8 @@ def _qubit_decomposition_impl(
         return
 
     complexity_estimation = (1 << num_supports) * state.get_sparsity()
+    OPTIZATION_COMPLEXITY2 = 1 << 8
+    OPTIZATION_COMPLEXITY1 = 1 << 10
     if complexity_estimation <= OPTIZATION_COMPLEXITY2:
         # we can use optimality_level=2
         exact_gates = exact_cnot_synthesis(

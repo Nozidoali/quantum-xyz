@@ -220,7 +220,7 @@ def exact_cnot_synthesis(
         # try dependency analysis
         if not search_done:
             signatures = curr_state.get_qubit_signatures()
-            const1 = (1 << num_qubits) - 1
+            const1 = curr_state.get_const1_signature()
             signature_to_qubits = {}
             for qubit_index, signature in enumerate(signatures):
                 if signature == 0 or signature == const1:

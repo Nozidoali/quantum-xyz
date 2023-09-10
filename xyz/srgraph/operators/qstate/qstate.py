@@ -270,6 +270,14 @@ class QState:
             for j in range(self.num_qubits):
                 signatures[j] = signatures[j] << 1 | (value >> j & 1)
         return signatures
+    
+    def get_const1_signature(self) -> int:
+        """Returns the number of signed unsigned signatures .
+
+        :return: [description]
+        :rtype: int
+        """
+        return (1<<len(self.index_set))-1
 
     def cofactors(self, pivot_qubit: int) -> Tuple["QState", "QState"]:
         """Returns the cofactors of the given qubit .
