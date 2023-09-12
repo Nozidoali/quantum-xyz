@@ -10,6 +10,8 @@ Last Modified time: 2023-06-22 20:14:09
 
 from .base import BasicGate, QGateType, QBit
 
+# pylint: disable=C0103
+
 
 class Z(BasicGate):
     """Classmethod to create a Gate class .

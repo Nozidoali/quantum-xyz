@@ -9,9 +9,9 @@ Last Modified time: 2023-09-09 14:41:40
 """
 
 
-from xyz.circuit.basic_gates.x import X
-from xyz.circuit.qcircuit import QCircuit
-from xyz.srgraph import QState
+from xyz.circuit import X
+from xyz.circuit import QCircuit
+from xyz.qstate import QState
 
 
 def ground_state_calibration(circuit: QCircuit, state: QState):

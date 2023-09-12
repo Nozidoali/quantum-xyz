@@ -19,8 +19,7 @@ from xyz.circuit.basic_gates.mcry import MCRY
 from xyz.circuit.basic_gates.ry import RY
 
 from xyz.circuit.qcircuit import QCircuit
-from xyz.srgraph.operators.qstate.qstate import QState
-
+from xyz.qstate import QState
 from .exact_cnot_synthesis import exact_cnot_synthesis
 
 
@@ -62,8 +61,6 @@ def to_controlled_gate(gate: QGate, control_qubit: QBit, control_phase: bool):
             raise NotImplementedError(
                 f"Controlled gate {gate.get_qgate_type()} is not implemented"
             )
-
-
 
 
 def _qubit_decomposition_impl(

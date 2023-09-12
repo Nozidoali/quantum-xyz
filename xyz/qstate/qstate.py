@@ -270,14 +270,14 @@ class QState:
             for j in range(self.num_qubits):
                 signatures[j] = signatures[j] << 1 | (value >> j & 1)
         return signatures
-    
+
     def get_const1_signature(self) -> int:
         """Returns the number of signed unsigned signatures .
 
         :return: [description]
         :rtype: int
         """
-        return (1<<len(self.index_set))-1
+        return (1 << len(self.index_set)) - 1
 
     def cofactors(self, pivot_qubit: int) -> Tuple["QState", "QState"]:
         """Returns the cofactors of the given qubit .
@@ -380,14 +380,15 @@ class QState:
         :return: [description]
         :rtype: np.ndarray
         """
-        vector = np.zeros(2 ** self.num_qubits)
+        vector = np.zeros(2**self.num_qubits)
         for idx, weight in self.index_to_weight.items():
             vector[idx] = np.sqrt(weight)
-            
+
         # normalize the vector
         vector /= np.linalg.norm(vector)
-        
+
         return vector
+
 
 def quantize_state(state_vector: np.ndarray):
     """Quantize a state to the number of qubits .

@@ -13,6 +13,13 @@ import numpy as np
 
 
 def GHZ_state(num_qubits: int) -> np.ndarray:
+    """Return a GHZ state .
+
+    :param num_qubits: [description]
+    :type num_qubits: int
+    :return: [description]
+    :rtype: np.ndarray
+    """
     state = np.zeros(2**num_qubits)
 
     state[0] = 1

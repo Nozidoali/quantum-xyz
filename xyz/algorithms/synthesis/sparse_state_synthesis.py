@@ -9,25 +9,19 @@ Last Modified time: 2023-09-10 17:52:33
 """
 
 
-import random
 import copy
 import numpy as np
-
-"""
-reference: https://github.com/qclib/qclib/blob/master/qclib/state_preparation/merge.py
-"""
 
 
 from xyz.circuit.basic_gates.cx import CX
 from xyz.circuit.basic_gates.mcry import MCRY
 from xyz.circuit.qcircuit import QCircuit
 
-from xyz.srgraph.operators.qstate.qstate import QState
+from xyz.qstate import QState
 from .ground_state_calibration import ground_state_calibration
 
-def _maximize_difference_once(
-    state: QState, indices: set, diff_lit: dict, verbose_level: int = 0
-):
+
+def _maximize_difference_once(state: QState, indices: set, diff_lit: dict):
     max_difference: int = -1
 
     best_index_set_0 = set()
@@ -88,12 +82,10 @@ def density_reduction(circuit: QCircuit, state: QState, verbose_level: int = 0):
 
     # we first select the indices that maximize the difference
     diff_lits = []
-    
+
     indices = set(list(state.index_set)[:])
     while len(indices) > 1:
-        index_set, qubit, value = _maximize_difference_once(
-            state, indices, diff_lits, verbose_level
-        )
+        index_set, qubit, value = _maximize_difference_once(state, indices, diff_lits)
 
         diff_lits.append((qubit, value))
 
@@ -125,15 +117,15 @@ def density_reduction(circuit: QCircuit, state: QState, verbose_level: int = 0):
     # we select the second index
     indices = set(list(index2_candidates)[:])
     while len(indices) > 1:
-        index_set, qubit, value = _maximize_difference_once(
-            state, indices, diff_lits, verbose_level
-        )
+        index_set, qubit, value = _maximize_difference_once(state, indices, diff_lits)
 
         diff_lits.append((qubit, value))
         indices = index_set
 
-    assert len(indices) == 1, f"indices: {indices}, index2_candidates: {index2_candidates}, diff_lits: {diff_lits}"
-    
+    assert (
+        len(indices) == 1
+    ), f"indices: {indices}, index2_candidates: {index2_candidates}, diff_lits: {diff_lits}"
+
     index2 = list(indices)[0]
 
     if verbose_level >= 3:
@@ -184,7 +176,9 @@ def density_reduction(circuit: QCircuit, state: QState, verbose_level: int = 0):
     assert index2 in index_to_weight
     reversed_index2 = index2 ^ (1 << diff_qubit)
     if verbose_level >= 3:
-        print(f"index2 = {index2}, reversed_index2: {reversed_index2}, index_to_weight: {index_to_weight}")
+        print(
+            f"index2 = {index2}, reversed_index2: {reversed_index2}, index_to_weight: {index_to_weight}"
+        )
     assert reversed_index2 in index_to_weight
 
     theta = 2 * np.arccos(
@@ -204,10 +198,12 @@ def density_reduction(circuit: QCircuit, state: QState, verbose_level: int = 0):
     return new_state, gates
 
 
-def sparse_state_synthesis(
-    circuit, state: QState, map_gates: bool = False, verbose_level: int = 0
-):
-    """This function is used to synthesis sparse state."""
+def sparse_state_synthesis(circuit, state: QState, verbose_level: int = 0):
+    """This function is used to synthesis sparse state.
+
+    reference: https://github.com/qclib/qclib/blob/master/qclib/state_preparation/merge.py
+
+    """
 
     # deep copy
     curr_state = QState(state.index_to_weight, state.num_qubits)
@@ -216,7 +212,7 @@ def sparse_state_synthesis(
 
     while True:
         density = len(curr_state.index_set)
-        
+
         if verbose_level >= 3:
             print(f"Current state: {curr_state}, density: {density}")
 
@@ -224,12 +220,14 @@ def sparse_state_synthesis(
         if density == 1:
             break
 
-        new_state, _gates = density_reduction(circuit, curr_state, verbose_level=verbose_level)
+        new_state, _gates = density_reduction(
+            circuit, curr_state, verbose_level=verbose_level
+        )
         for gate in _gates:
             gates.append(gate)
 
         curr_state = new_state
-        
+
     preprocessing_gates = ground_state_calibration(circuit, curr_state)
 
     return preprocessing_gates + gates[::-1]

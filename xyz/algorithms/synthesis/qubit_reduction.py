@@ -19,8 +19,7 @@ from xyz.boolean.truth_table import (
     const1_truth_table,
 )
 from xyz.circuit import MCRY, CX, RY, decompose_mcry, control_sequence_to_gates
-
-from xyz.srgraph import QState
+from xyz.qstate import QState
 
 
 def _get_flip_truth_table(
@@ -151,7 +150,6 @@ def _reduce_qubit(state: QState, target_qubit: int, control_qubit: int, phase: b
         for index in index_to_thetas:
             if truth_table_real.get_bit(index) == TruthTableEntry.ONE:
                 index_to_thetas[index] += np.pi
-                pass
 
         for index in state.index_set:
             if index not in index_to_thetas:
@@ -232,7 +230,7 @@ def _qubit_reduction_impl(
     assert best_esop is not None
 
     # debug
-    if False:
+    if verbose:
         print(
             f"best_cost = {best_cost}, best_target_qubit = {best_target_qubit}, best_control_qubit = {best_control_qubit}, best_phase = {best_phase}, best_esop = {sop_to_str(best_esop)}"
         )

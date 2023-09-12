@@ -12,6 +12,14 @@ from .base import BasicGate, ControlledGate, QBit, QGateType
 
 
 class CX(BasicGate, ControlledGate):
+    """Classmethod to create a CX and ControlledGate .
+
+    :param BasicGate: [description]
+    :type BasicGate: [type]
+    :param ControlledGate: [description]
+    :type ControlledGate: [type]
+    """
+
     def __init__(self, control_qubit: QBit, phase: int, target_qubit: QBit) -> None:
         BasicGate.__init__(self, QGateType.CX, target_qubit)
         ControlledGate.__init__(self, control_qubit, phase)

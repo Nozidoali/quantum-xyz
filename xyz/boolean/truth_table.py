@@ -10,11 +10,7 @@ Last Modified time: 2023-08-31 16:34:17
 
 from enum import Enum, auto
 from math import log
-from re import sub
-import types
 from typing import Any
-
-from sympy import false
 
 
 class TruthTableEntry(Enum):
@@ -100,7 +96,7 @@ class TruthTable:
                 self._table[i] == TruthTableEntry.ONE
                 and other._table[i] == TruthTableEntry.ZERO
             ):
-                return false
+                return False
 
         return True
 

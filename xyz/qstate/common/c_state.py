@@ -12,6 +12,15 @@ import numpy as np
 
 
 def C_state(num_qubits: int, threshold: int) -> np.ndarray:
+    """Return the C state corresponding to the given number of qubits and the given threshold .
+
+    :param num_qubits: [description]
+    :type num_qubits: int
+    :param threshold: [description]
+    :type threshold: int
+    :return: [description]
+    :rtype: np.ndarray
+    """
     state = np.zeros(2**num_qubits)
 
     ones: float = 0

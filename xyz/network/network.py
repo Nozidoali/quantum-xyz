@@ -36,8 +36,6 @@ class Network:
 
         self.__node_fanouts: dict = {}
 
-        self.__submodules = {}
-
     def get_name(self):
         """Returns name of the module .
 

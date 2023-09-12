@@ -11,7 +11,6 @@ Last Modified time: 2023-03-11 20:53:23
 #
 # reference: https://realpython.com/python-with-statement/#writing-a-sample-class-based-context-manager
 #
-import re
 import time
 
 from .colors import print_green

@@ -8,7 +8,6 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-31 16:45:33
 """
 
-from curses import nonl
 from typing import List
 from queue import PriorityQueue
 
@@ -40,6 +39,11 @@ class Lit:
         return hash(self.lit << 1 | self.phase)
 
     def to_value(self):
+        """Convert to a bit value .
+
+        :return: [description]
+        :rtype: [type]
+        """
         return self.lit << 1 | self.phase
 
     def __lt__(self, other):
@@ -50,9 +54,18 @@ class Lit:
 
 
 def powerset(iterable):
-    "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
-    s = list(iterable)
-    return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
+    """Poweret of an iterable .
+
+    powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
+    :param iterable: [description]
+    :type iterable: [type]
+    :return: [description]
+    :rtype: [type]
+    """
+    elements = list(iterable)
+    return chain.from_iterable(
+        combinations(elements, r) for r in range(len(elements) + 1)
+    )
 
 
 def term_to_str(term: List[Lit]):
@@ -78,20 +91,20 @@ def sop_to_str(sop: List[List[Lit]]):
 
 
 def convert_tt_to_sop(
-    tt: TruthTable,
+    truth_table: TruthTable,
     supports: List[int] = None,
     use_esop: bool = True,
     optimality_level: int = 1,
 ):
     """Convert a truth table to a sum of product .
 
-    :param tt: [description]
-    :type tt: TruthTable
+    :param truth_table: [description]
+    :type truth_table: TruthTable
     :return: [description]
     :rtype: [type]
     """
 
-    num_lits = len(tt)
+    num_lits = len(truth_table)
 
     all_lits = range(num_lits) if supports is None else supports
 
@@ -107,16 +120,16 @@ def convert_tt_to_sop(
             lit_to_tt[Lit(lit, True)] = tt_lit_pos
             lit_to_tt[Lit(lit, False)] = tt_lit_neg
 
-            if tt_lit_pos < tt:
+            if tt_lit_pos < truth_table:
                 unate_terms.append([Lit(lit, True)])
 
-            if tt_lit_neg < tt:
+            if tt_lit_neg < truth_table:
                 unate_terms.append([Lit(lit, False)])
 
-            if not tt_lit_pos < ~tt:
+            if not tt_lit_pos < ~truth_table:
                 binate_terms.append(Lit(lit, True))
 
-            if not tt_lit_neg < ~tt:
+            if not tt_lit_neg < ~truth_table:
                 binate_terms.append(Lit(lit, False))
     # if we use ESOP, we need to add all the binate terms
     else:
@@ -139,7 +152,7 @@ def convert_tt_to_sop(
         :type curr_term: List[Lit]
         """
         nonlocal unate_terms
-        nonlocal tt
+        nonlocal truth_table
 
         if curr_tt == const0_truth_table(num_lits):
             return
@@ -148,7 +161,7 @@ def convert_tt_to_sop(
             unate_terms.append(curr_term[:])
 
         # keep adding the literals would not make the truth table smaller
-        if curr_tt < tt:
+        if curr_tt < truth_table:
             return
 
         for lit in binate_terms:
@@ -163,8 +176,8 @@ def convert_tt_to_sop(
 
     if optimality_level <= 1:
         sum_terms = []
-        unate_terms = sorted(unate_terms, key=lambda term: len(term))
-        curr_tt = tt
+        unate_terms = sorted(unate_terms)
+        curr_tt = truth_table
         while curr_tt != const0_truth_table(num_lits):
             for term in unate_terms:
                 term_tt = sop_to_tt([term], num_lits, use_esop)
@@ -202,7 +215,7 @@ def convert_tt_to_sop(
     while not q.empty():
         curr_cost, curr_tt = q.get()
 
-        if curr_tt == tt:
+        if curr_tt == truth_table:
             break
 
         for term in unate_terms:
@@ -226,7 +239,7 @@ def convert_tt_to_sop(
                     next_tt = curr_tt | term_tt
                 visit(next_cost, next_tt, curr_tt, term)
 
-    if not curr_tt == tt:
+    if not curr_tt == truth_table:
         return None
 
     # we reconstruct the sum of product
@@ -253,7 +266,7 @@ def sop_to_tt(sop: List[List[Lit]], num_lits: int, use_esop: bool = True):
     :return: [description]
     :rtype: [type]
     """
-    tt = const0_truth_table(num_lits)
+    truth_table = const0_truth_table(num_lits)
     for term in sop:
         term_tt = const1_truth_table(num_lits)
         for lit in term:
@@ -262,7 +275,7 @@ def sop_to_tt(sop: List[List[Lit]], num_lits: int, use_esop: bool = True):
             else:
                 term_tt = term_tt & ~create_truth_table(num_lits, lit.lit)
         if use_esop:
-            tt = tt ^ term_tt
+            truth_table = truth_table ^ term_tt
         else:
-            tt = tt | term_tt
-    return tt
+            truth_table = truth_table | term_tt
+    return truth_table

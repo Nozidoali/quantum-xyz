@@ -9,7 +9,8 @@ Last Modified time: 2023-06-28 14:40:59
 """
 
 from .algorithms import *
-from .srgraph import *
+from .operator import *
+from .qstate import *
 from .utils import *
 from .boolean import *
 from .circuit import *

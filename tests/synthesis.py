@@ -38,7 +38,7 @@ def rand_state(num_qubit: int, sparsity: int, uniform: bool = True) -> QState:
             random.random() for i in range(sparsity)
         ]
     np.random.shuffle(state_array)
-    
+
     # now we need to normalize the state
     state_array = state_array / np.linalg.norm(state_array)
 
@@ -86,7 +86,7 @@ def test_synthesis():
 
     num_qubit, depth, cx = run_sparse_state_synthesis(state)
     print(f"baseline1: cx = {cx}")
-    
+
     cx = run_dd_based_method(state)
     print(f"baseline2: cx = {cx}")
 

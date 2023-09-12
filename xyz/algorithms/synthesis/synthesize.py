@@ -12,21 +12,17 @@ Last Modified time: 2023-06-28 11:02:26
 import logging
 from sys import stdout
 
-import numpy as np
-from scipy import sparse
-
 from xyz.utils.colors import print_green
-from .exact_cnot_synthesis import exact_cnot_synthesis
 
 from xyz.circuit import QCircuit
-from xyz.srgraph import quantize_state
-from xyz.srgraph import QState
+from xyz.qstate import QState
 
+from .exact_cnot_synthesis import exact_cnot_synthesis
 from .qubit_reduction import qubit_reduction
-from .qubit_decomposition import qubit_decomposition
-from .sparse_state_synthesis import sparse_state_synthesis, density_reduction
+from .sparse_state_synthesis import density_reduction
 from .ground_state_calibration import ground_state_calibration
 from .support_reduction import support_reduction
+
 
 def intialize_logger():
     """Initialize the logger .
@@ -70,8 +66,6 @@ def cnot_synthesis(
     @param verbose_level Whether to print out the state of the search
     """
 
-    log = intialize_logger()
-
     num_qubits = state.num_qubits
 
     # initialize the circuit
@@ -89,29 +83,31 @@ def cnot_synthesis(
     curr_state = QState(state.index_to_weight, state.num_qubits)
 
     gates = []
-    
+
     skip_exact_cnot_synthesis: bool = False
-    
+
     while True:
         density = len(curr_state.index_set)
-        
+
         if verbose_level >= 3:
             print(f"Current state: {curr_state}, density: {density}")
 
         # we reach the end of the state
         if density == 1:
-            
             _gates = ground_state_calibration(circuit, curr_state)
             for gate in _gates:
                 pre_processing_gates.append(gate)
             break
-        
+
         num_supports = len(curr_state.get_supports())
 
         if not skip_exact_cnot_synthesis and num_supports <= 4:
             try:
                 if verbose_level >= 2:
-                    print(f"running exact cnot synthesis with optimality_level={optimality_level}", end="...")
+                    print(
+                        f"running exact cnot synthesis with optimality_level={optimality_level}",
+                        end="...",
+                    )
                 stdout.flush()
                 _gates = exact_cnot_synthesis(
                     circuit,
@@ -121,44 +117,45 @@ def cnot_synthesis(
                     runtime_limit=runtime_limit,
                 )
                 if verbose_level >= 2:
-                    print_green(f"done")
+                    print_green("done")
                 for gate in _gates:
                     gates.append(gate)
-                    
+
                 break
             except ValueError:
                 skip_exact_cnot_synthesis = True
-                pass
-            
+
         if verbose_level >= 2:
             print(f"reducing density, current density = {density}", end="...")
         stdout.flush()
-        new_state, _gates = density_reduction(circuit, curr_state, verbose_level=verbose_level)
+        new_state, _gates = density_reduction(
+            circuit, curr_state, verbose_level=verbose_level
+        )
         if verbose_level >= 2:
-            print_green(f"done")
-        
+            print_green("done")
+
         # if verbose_level >= 2:
         for gate in _gates:
             post_processing_gates.append(gate)
-            
+
         if verbose_level >= 2:
             print(f"reducing supports, num_supports = {num_supports}", end="...")
         stdout.flush()
-        support_reduced_state, support_reduction_gates = support_reduction(circuit, new_state)
+        support_reduced_state, support_reduction_gates = support_reduction(
+            circuit, new_state
+        )
         if verbose_level >= 2:
-            print_green(f"done")
-        
+            print_green("done")
+
         for gate in support_reduction_gates:
             post_processing_gates.append(gate)
 
         curr_state = support_reduced_state
-        
-
 
     # gates = qubit_decomposition(
     #     circuit, state, optimality_level, verbose_level, runtime_limit=runtime_limit
     # )
-    
+
     for gate in pre_processing_gates:
         circuit.add_gate(gate)
 

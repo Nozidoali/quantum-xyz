@@ -118,7 +118,6 @@ def run_experiment(
     except:
         cx_sparse_uniform = None
 
-
     # record the results
     new_results[filename] = {
         "optimality_level": optimality_level,

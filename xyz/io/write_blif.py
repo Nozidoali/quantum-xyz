@@ -37,8 +37,8 @@ def write_blif_to_string(ntk: Network) -> str:
 
     blif_string += "\n"
 
-    for ro, ri in ntk.ro_to_ris().items():
-        blif_string += ".latch\t" + ri + " " + ro + " 2\n"
+    for register_output, register_input in ntk.ro_to_ris().items():
+        blif_string += ".latch\t" + register_input + " " + register_output + " 2\n"
 
     for node in ntk.constant0s():
         blif_string += ".names\t" + node + "\n0\n"
@@ -69,6 +69,6 @@ def write_blif(ntk: Network, filename: str):
             - consider also the blackboxes
     """
 
-    f = open(filename, "w")
-    f.write(write_blif_to_string(ntk))
-    f.close()
+    file = open(filename, "w", encoding="utf-8")
+    file.write(write_blif_to_string(ntk))
+    file.close()

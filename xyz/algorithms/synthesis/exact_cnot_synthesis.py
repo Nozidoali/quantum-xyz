@@ -10,22 +10,12 @@ Last Modified time: 2023-09-01 12:56:17
 
 import time
 from queue import PriorityQueue
-import numpy as np
-from xyz.algorithms.synthesis import ground_state_calibration
 from xyz.circuit.basic_gates.base.gate import QGate
 from xyz.circuit.basic_gates.cx import CX
 from xyz.circuit import QCircuit, X, MCRY
-from xyz.srgraph import (
-    QState,
-    SRGraph,
-    QOperatorType,
-    QOperator,
-    TROperator,
-    XOperator,
-    CXOperator,
-    CTROperator,
-    quantize_state,
-)
+
+import xyz.qstate as qs
+import xyz.operator as op
 
 from .ground_state_calibration import ground_state_calibration
 
@@ -58,7 +48,7 @@ class AStarCost:
 
 def exact_cnot_synthesis(
     circuit: QCircuit,
-    target_state: QState,
+    target_state: qs.QState,
     optimality_level: int = 3,
     verbose_level: int = 0,
     runtime_limit: int = None,
@@ -70,7 +60,7 @@ def exact_cnot_synthesis(
     :param qubit_mapping: [description]
     :type qubit_mapping: dict
     :param target_state: [description]
-    :type target_state: QState
+    :type target_state: qs.QState
     :param optimality_level: [description], defaults to 3
     :type optimality_level: int, optional
     :param verbose_level: [description], defaults to 0
@@ -90,8 +80,8 @@ def exact_cnot_synthesis(
         return circuit.qubit_at(qubit_index)
 
     def explore_state(
-        curr_state: QState, quantum_operator: QOperator, curr_cost: AStarCost
-    ) -> QState:
+        curr_state: qs.QState, quantum_operator: op.QOperator, curr_cost: AStarCost
+    ) -> qs.QState:
         """Explore a state in a SRGraph ."""
         nonlocal visited_states, state_queue, enquened_states, record
         try:
@@ -125,15 +115,15 @@ def exact_cnot_synthesis(
         # we record the gate
         gate: QGate = None
         match quantum_operator.operator_type:
-            case QOperatorType.X:
+            case op.QOperatorType.X:
                 gate = X(map_qubit(quantum_operator.target_qubit_index))
-            case QOperatorType.CX:
+            case op.QOperatorType.CX:
                 gate = CX(
                     map_qubit(quantum_operator.control_qubit_index),
                     quantum_operator.control_qubit_phase,
                     map_qubit(quantum_operator.target_qubit_index),
                 )
-            case QOperatorType.T0 | QOperatorType.T1:
+            case op.QOperatorType.T0 | op.QOperatorType.T1:
                 gate = MCRY(
                     quantum_operator.theta,
                     [],
@@ -141,7 +131,7 @@ def exact_cnot_synthesis(
                     map_qubit(quantum_operator.target_qubit_index),
                 )
 
-            case QOperatorType.CT0 | QOperatorType.CT1:
+            case op.QOperatorType.CT0 | op.QOperatorType.CT1:
                 gate = MCRY(
                     quantum_operator.theta,
                     [map_qubit(quantum_operator.control_qubit_index)],
@@ -156,7 +146,7 @@ def exact_cnot_synthesis(
 
     # begin of the exact synthesis algorithm
     num_qubits = target_state.num_qubits
-    initial_state = QState.ground_state(num_qubits)
+    initial_state = qs.QState.ground_state(num_qubits)
 
     curr_state = target_state
     curr_cost = AStarCost(0, 0, curr_state.get_lower_bound())
@@ -186,7 +176,6 @@ def exact_cnot_synthesis(
         _sparsity = curr_state.get_sparsity()
         _supports = curr_state.get_supports()
 
-        num_supports = len(_supports)
         _optimality_level = optimality_level
 
         if _sparsity == 1:
@@ -226,14 +215,14 @@ def exact_cnot_synthesis(
                 if signature == 0 or signature == const1:
                     continue
                 if signature in signature_to_qubits:
-                    quantum_operator = CXOperator(
+                    quantum_operator = op.CXOperator(
                         qubit_index, signature_to_qubits[signature], True
                     )
                     next_state = explore_state(curr_state, quantum_operator, curr_cost)
                     search_done = True
                     break
                 elif signature ^ const1 in signature_to_qubits:
-                    quantum_operator = CXOperator(
+                    quantum_operator = op.CXOperator(
                         qubit_index, signature_to_qubits[signature ^ const1], False
                     )
                     next_state = explore_state(curr_state, quantum_operator, curr_cost)
@@ -254,7 +243,7 @@ def exact_cnot_synthesis(
                             continue
 
                         if signature1 ^ signature2 in signature_to_qubits:
-                            quantum_operator = CXOperator(
+                            quantum_operator = op.CXOperator(
                                 qubit_index1,
                                 signature_to_qubits[signature1 ^ signature2],
                                 True,
@@ -263,7 +252,7 @@ def exact_cnot_synthesis(
                                 curr_state, quantum_operator, curr_cost
                             )
                             if next_state is not None:
-                                quantum_operator = CXOperator(
+                                quantum_operator = op.CXOperator(
                                     qubit_index2,
                                     signature_to_qubits[signature1 ^ signature2],
                                     True,
@@ -273,7 +262,7 @@ def exact_cnot_synthesis(
                             search_done = True
                             break
                         elif signature1 ^ signature2 ^ const1 in signature_to_qubits:
-                            quantum_operator = CXOperator(
+                            quantum_operator = op.CXOperator(
                                 qubit_index1,
                                 signature_to_qubits[signature1 ^ signature2 ^ const1],
                                 True,
@@ -282,7 +271,7 @@ def exact_cnot_synthesis(
                                 curr_state, quantum_operator, curr_cost
                             )
                             if next_state is not None:
-                                quantum_operator = CXOperator(
+                                quantum_operator = op.CXOperator(
                                     qubit_index2,
                                     signature_to_qubits[
                                         signature1 ^ signature2 ^ const1
@@ -299,9 +288,9 @@ def exact_cnot_synthesis(
         # apply merge0
         if not search_done:
             for target_qubit in supports:
-                quantum_operator = TROperator(target_qubit, True)
+                quantum_operator = op.TROperator(target_qubit, True)
                 explore_state(curr_state, quantum_operator, curr_cost)
-                quantum_operator = TROperator(target_qubit, False)
+                quantum_operator = op.TROperator(target_qubit, False)
                 next_state = explore_state(curr_state, quantum_operator, curr_cost)
                 if _optimality_level <= 3 and next_state is not None:
                     search_done = True
@@ -321,7 +310,7 @@ def exact_cnot_synthesis(
                         if search_done:
                             break
                         for target_phase in [True, False]:
-                            quantum_operator = CTROperator(
+                            quantum_operator = op.CTROperator(
                                 target_qubit, target_phase, control_qubit, phase
                             )
                             next_state = explore_state(
@@ -346,7 +335,7 @@ def exact_cnot_synthesis(
                     if search_done:
                         break
                     for phase in [True, False]:
-                        quantum_operator = CXOperator(
+                        quantum_operator = op.CXOperator(
                             target_qubit, control_qubit, phase
                         )
                         next_state = explore_state(
@@ -359,13 +348,13 @@ def exact_cnot_synthesis(
                 pass
             else:
                 for target_qubit in supports:
-                    quantum_operator = XOperator(target_qubit)
+                    quantum_operator = op.XOperator(target_qubit)
                     explore_state(curr_state, quantum_operator, curr_cost)
 
     if not solution_reached:
         raise ValueError("No solution found")
 
-    final_state = QState(curr_state.index_to_weight, curr_state.num_qubits)
+    final_state = qs.QState(curr_state.index_to_weight, curr_state.num_qubits)
 
     x_gates = ground_state_calibration(circuit, final_state)
 

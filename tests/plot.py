@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
 
-'''
+"""
 Author: Hanyu Wang
 Created time: 2023-09-12 02:08:25
 Last Modified by: Hanyu Wang
 Last Modified time: 2023-09-12 02:43:21
-'''
+"""
 
 # pylint: skip-file
 
@@ -15,7 +15,6 @@ import json
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-
 
 
 def analyze_data(filename: str):
@@ -42,7 +41,7 @@ def analyze_data(filename: str):
     plt.rcParams["figure.subplot.right"] = 0.92
 
     df = pd.read_csv(filename)
-    
+
     # we only keep the num_qubit every 3
     df = df[df["num_qubit"] % 3 == 2]
 
@@ -82,14 +81,14 @@ def analyze_data(filename: str):
     precision = 0
     for index, row in df_agg.iterrows():
         plt.text(
-            num_bars * (index - min_qubit) / (max_qubit - min_qubit) - 0.6, 
+            num_bars * (index - min_qubit) / (max_qubit - min_qubit) - 0.6,
             row["baseline"],
             f"{row['baseline']:.{precision}f}",
             color="black",
             fontsize=data_label_font_size,
         )
         plt.text(
-            num_bars * (index - min_qubit) / (max_qubit - min_qubit), 
+            num_bars * (index - min_qubit) / (max_qubit - min_qubit),
             row["ours"],
             f"{row['ours']:.{precision}f}",
             color="black",
@@ -108,6 +107,7 @@ def analyze_data(filename: str):
     plt.xlabel("Number of qubits")
 
     plt.show()
+
 
 def analyze_runtime(filename: str):
     plt.rcParams["figure.figsize"] = (10, 10)
@@ -176,21 +176,23 @@ def analyze_runtime(filename: str):
     plt.ylabel("Runtime (sec)")
 
     plt.show()
-    
+
+
 BEST_CNOT_QASM_FOLDER = "best_cnot_results"
 BEST_CNOT_RESULT_FILE = "best_cnot_results.json"
 
 if __name__ == "__main__":
-    
-    best_cnot_results = json.load(open(os.path.join(BEST_CNOT_QASM_FOLDER, BEST_CNOT_RESULT_FILE), "r"))
-    
+    best_cnot_results = json.load(
+        open(os.path.join(BEST_CNOT_QASM_FOLDER, BEST_CNOT_RESULT_FILE), "r")
+    )
+
     datas = []
     for filename, result in best_cnot_results.items():
         num_qubits, sparsity = filename.replace(".json", "").split("_")[1:]
-        
+
         num_qubits = int(num_qubits)
         sparsity = int(sparsity)
-        
+
         data = {
             "num_qubit": num_qubits,
             "sparsity": sparsity,
@@ -198,12 +200,12 @@ if __name__ == "__main__":
             "ours": result["num_cnots"],
             "baseline": result["num_cnots_sparse_uniform"],
         }
-        
+
         datas.append(data)
-        
+
     df = pd.DataFrame(datas)
-    
+
     df.to_csv("data.csv", index=False)
-    
+
     # analyze_data("data.csv")
     analyze_runtime("data.csv")

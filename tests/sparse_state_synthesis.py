@@ -74,7 +74,7 @@ def test_synthesis():
 
     with stopwatch("synthesis") as timer:
         circuit = QCircuit(target_state.num_qubits)
-        
+
         gates = sparse_state_synthesis(circuit, target_state, verbose_level=3)
 
         for gate in gates:

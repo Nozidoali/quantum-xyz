@@ -40,8 +40,8 @@ def build_state_dict_fixed(state: np.ndarray):
             state_dict[binary_string] = value
     return state_dict
 
-def run_dd_based_method(state: np.ndarray):
 
+def run_dd_based_method(state: np.ndarray):
     cx = None
 
     # get the bit string
@@ -61,8 +61,9 @@ def run_dd_based_method(state: np.ndarray):
             if "cnots" in line:
                 cx = int(re.sub("[^0-9]", "", line))
                 break
-            
+
     return cx
+
 
 def run_sparse_state_synthesis(state: np.ndarray):
     """Run the baseline pipeline .
@@ -97,8 +98,9 @@ def run_sparse_state_synthesis(state: np.ndarray):
     backend = Aer.get_backend("qasm_simulator")
     transpiled.save_statevector()
     state_vector = backend.run(transpiled).result().get_statevector()
-    
 
-    assert np.allclose(state_vector, state), f"state vector is not correct, {state_vector} != {state}"
+    assert np.allclose(
+        state_vector, state
+    ), f"state vector is not correct, {state_vector} != {state}"
 
     return qubits, depth, cx
