@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2023-09-10 19:24:34
 Last Modified by: Hanyu Wang
-Last Modified time: 2023-09-10 20:14:24
+Last Modified time: 2023-09-10 22:25:33
 '''
 
 import copy
@@ -50,29 +50,29 @@ def support_reduction(circuit: QCircuit, state: QState):
             new_state = operation(new_state)
             continue
         
-        # # this is not a support if we use a CNOT gate
-        # if signature in signature_to_qubits:
-        #     control_qubit = circuit.qubit_at(signature_to_qubits[signature])
-        #     target_qubit = circuit.qubit_at(qubit_index)
-        #     control_phase = True
+        # this is not a support if we use a CNOT gate
+        if signature in signature_to_qubits:
+            control_qubit = circuit.qubit_at(signature_to_qubits[signature])
+            target_qubit = circuit.qubit_at(qubit_index)
+            control_phase = True
             
-        #     gate = CX(control_qubit, control_phase, target_qubit)
-        #     gates.append(gate)
-        #     operation = CXOperator(qubit_index, signature_to_qubits[signature], target_qubit)
-        #     new_state = operation(new_state)
-        #     continue
+            gate = CX(control_qubit, control_phase, target_qubit)
+            gates.append(gate)
+            operation = CXOperator(qubit_index, signature_to_qubits[signature], target_qubit)
+            new_state = operation(new_state)
+            continue
             
-        # # this is not a support if we use a CNOT gate
-        # if signature ^ const1 in signature_to_qubits:
-        #     control_qubit = circuit.qubit_at(signature_to_qubits[signature ^ const1])
-        #     target_qubit = circuit.qubit_at(qubit_index)
-        #     control_phase = False
+        # this is not a support if we use a CNOT gate
+        if signature ^ const1 in signature_to_qubits:
+            control_qubit = circuit.qubit_at(signature_to_qubits[signature ^ const1])
+            target_qubit = circuit.qubit_at(qubit_index)
+            control_phase = False
             
-        #     gate = CX(control_qubit, control_phase, target_qubit)
-        #     gates.append(gate)
-        #     operation = CXOperator(qubit_index, signature_to_qubits[signature ^ const1], target_qubit)
-        #     new_state = operation(new_state)
-        #     continue
+            gate = CX(control_qubit, control_phase, target_qubit)
+            gates.append(gate)
+            operation = CXOperator(qubit_index, signature_to_qubits[signature ^ const1], target_qubit)
+            new_state = operation(new_state)
+            continue
             
         signature_to_qubits[signature] = qubit_index
         

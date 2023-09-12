@@ -8,4 +8,4 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-09-08 15:42:19
 """
 
-from .baselines import run_baseline
+from .baselines import run_sparse_state_synthesis

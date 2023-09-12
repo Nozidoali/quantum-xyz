@@ -8,7 +8,11 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-09-10 14:32:59
 """
 
+# pylint: skip-file
+
 from math import ceil
+import subprocess
+import re
 import random
 import numpy as np
 from IPython.display import Markdown, display
@@ -36,8 +40,31 @@ def build_state_dict_fixed(state: np.ndarray):
             state_dict[binary_string] = value
     return state_dict
 
+def run_dd_based_method(state: np.ndarray):
 
-def run_baseline(state: np.ndarray):
+    cx = None
+
+    # get the bit string
+    state_str = "".join(["1" if x > 0 else "0" for x in state])
+    with open("tmp.txt", "w") as f:
+        f.write(state_str)
+    # baseline
+    subprocess.run(
+        "qsp_using_sota tmp.txt > tmp.rpt",
+        shell=True,
+        stdout=subprocess.DEVNULL,
+    )
+
+    # get the number of cnot
+    with open("tmp.rpt", "r") as f:
+        for line in f:
+            if "cnots" in line:
+                cx = int(re.sub("[^0-9]", "", line))
+                break
+            
+    return cx
+
+def run_sparse_state_synthesis(state: np.ndarray):
     """Run the baseline pipeline .
 
     reference:
@@ -57,12 +84,12 @@ def run_baseline(state: np.ndarray):
 
     circuit = QuantumCircuit(n_qubits)
 
-    print(f"state_dict: {state_dict}")
-
     initialize(circuit, state_dict)
 
-    transpiled = transpile(circuit, basis_gates=["u", "cx"], optimization_level=0)
+    # transpiled = transpile(circuit, basis_gates=["u", "cx", "cu"], optimization_level=3)
+    # print(transpiled)
 
+    transpiled = transpile(circuit, basis_gates=["u", "cx"], optimization_level=0)
     qubits = len(transpiled.qubits)
     depth = transpiled.depth()
     cx = transpiled.count_ops().get("cx", 0)
@@ -70,7 +97,8 @@ def run_baseline(state: np.ndarray):
     backend = Aer.get_backend("qasm_simulator")
     transpiled.save_statevector()
     state_vector = backend.run(transpiled).result().get_statevector()
+    
 
-    assert np.allclose(state_vector, state)
+    assert np.allclose(state_vector, state), f"state vector is not correct, {state_vector} != {state}"
 
     return qubits, depth, cx

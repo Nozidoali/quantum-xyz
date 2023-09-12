@@ -8,6 +8,8 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-18 21:09:09
 """
 
+# pylint: skip-file
+
 from ast import In
 import random
 import numpy as np
@@ -18,7 +20,7 @@ from xyz import QState, cnot_synthesis, stopwatch, D_state, quantize_state, get_
 from xyz.utils.colors import print_red, print_yellow
 
 
-def rand_state(num_qubit: int, sparsity: int) -> QState:
+def rand_state(num_qubit: int, sparsity: int, uniform: bool = True) -> QState:
     """Generate a random state .
 
     :param num_qubit: [description]
@@ -27,10 +29,18 @@ def rand_state(num_qubit: int, sparsity: int) -> QState:
     :rtype: QState
     """
 
-    state_array = [0 for i in range((2**num_qubit) - sparsity)] + [
-        random.random() for i in range(sparsity)
-    ]
+    if uniform:
+        state_array = [0 for i in range((2**num_qubit) - sparsity)] + [
+            1 for i in range(sparsity)
+        ]
+    else:
+        state_array = [0 for i in range((2**num_qubit) - sparsity)] + [
+            random.random() for i in range(sparsity)
+        ]
     np.random.shuffle(state_array)
+    
+    # now we need to normalize the state
+    state_array = state_array / np.linalg.norm(state_array)
 
     return state_array
 
@@ -69,16 +79,16 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
 def test_synthesis():
     """Test that the synthesis is correct ."""
 
-    state = D_state(8, 2)
+    state = rand_state(3, 4)
 
     # we first run baseline
-    from baseline import run_baseline
+    from baseline.baselines import run_sparse_state_synthesis, run_dd_based_method
 
-    try:
-        num_qubit, depth, cx = run_baseline(state)
-        print(f"baseline: qubits = {num_qubit}, depth = {depth}, cx = {cx}")
-    except:
-        print_yellow(f"cannot run baseline")
+    num_qubit, depth, cx = run_sparse_state_synthesis(state)
+    print(f"baseline1: cx = {cx}")
+    
+    cx = run_dd_based_method(state)
+    print(f"baseline2: cx = {cx}")
 
     target_state = quantize_state(state)
 
@@ -95,17 +105,17 @@ def test_synthesis():
     transpiled = transpile(circ, basis_gates=["u", "cx"], optimization_level=0)
     cx = transpiled.count_ops().get("cx", 0)
 
-    print(f"{timer.time():0.02f} seconds")
+    # print(f"{timer.time():0.02f} seconds")
 
     map_time = get_time("add_gate_mapped")
-    print(f"time mapping = {map_time}")
+    # print(f"time mapping = {map_time}")
 
     # Run and get counts
     result = simulator.run(transpiled).result()
     counts = result.get_counts(transpiled)
 
     print(counts)
-    print(f"cnot = {cx}")
+    print(f"ours: cx = {cx}")
 
 
 if __name__ == "__main__":

@@ -374,6 +374,20 @@ class QState:
         signatures = self.get_qubit_signatures()
         return hash(tuple(sorted(signatures, key=lambda x: bin(x).count("1"))))
 
+    def to_vector(self) -> np.ndarray:
+        """Return the vector representation of the state .
+
+        :return: [description]
+        :rtype: np.ndarray
+        """
+        vector = np.zeros(2 ** self.num_qubits)
+        for idx, weight in self.index_to_weight.items():
+            vector[idx] = np.sqrt(weight)
+            
+        # normalize the vector
+        vector /= np.linalg.norm(vector)
+        
+        return vector
 
 def quantize_state(state_vector: np.ndarray):
     """Quantize a state to the number of qubits .
