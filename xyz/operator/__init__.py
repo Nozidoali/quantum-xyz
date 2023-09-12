@@ -8,7 +8,6 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-28 11:23:03
 """
 
-from .qstate import *
 from .mcry import *
 from .x import *
 from .cx import *

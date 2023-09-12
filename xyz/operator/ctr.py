@@ -10,7 +10,8 @@ Last Modified time: 2023-08-27 01:10:43
 
 from typing import Any
 
-from .qstate import QState
+from xyz.qstate import QState
+
 from .operator import QOperatorBase, QOperatorType
 from .rotation import QuantizedRotation, QuantizedRotationType
 from .control import ControlledOperator

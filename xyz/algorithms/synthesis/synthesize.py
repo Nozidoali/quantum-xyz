@@ -17,11 +17,11 @@ from xyz.utils.colors import print_green
 from xyz.circuit import QCircuit
 from xyz.qstate import QState
 
-from .exact_cnot_synthesis import exact_cnot_synthesis
-from .qubit_reduction import qubit_reduction
-from .sparse_state_synthesis import density_reduction
-from .ground_state_calibration import ground_state_calibration
-from .support_reduction import support_reduction
+from ._exact_cnot_synthesis import exact_cnot_synthesis
+from ._qubit_reduction import qubit_reduction
+from ._sparse_state_synthesis import density_reduction
+from ._ground_state_calibration import ground_state_calibration
+from ._support_reduction import support_reduction
 
 
 def intialize_logger():

@@ -9,10 +9,11 @@ Last Modified time: 2023-06-28 11:42:30
 """
 
 from typing import Any
+
+from xyz.qstate import QState
+
 from .operator import QOperatorBase, QOperatorType
 from .rotation import QuantizedRotation, QuantizedRotationType
-from .qstate import QState
-
 
 class XOperator(QOperatorBase, QuantizedRotation):
     """Creates an XOperator class with XOperator .

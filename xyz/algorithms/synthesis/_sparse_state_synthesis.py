@@ -18,7 +18,7 @@ from xyz.circuit.basic_gates.mcry import MCRY
 from xyz.circuit.qcircuit import QCircuit
 
 from xyz.qstate import QState
-from .ground_state_calibration import ground_state_calibration
+from ._ground_state_calibration import ground_state_calibration
 
 
 def _maximize_difference_once(state: QState, indices: set, diff_lit: dict):

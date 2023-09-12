@@ -17,7 +17,7 @@ from xyz.circuit import QCircuit, X, MCRY
 import xyz.qstate as qs
 import xyz.operator as op
 
-from .ground_state_calibration import ground_state_calibration
+from ._ground_state_calibration import ground_state_calibration
 
 
 class AStarCost:

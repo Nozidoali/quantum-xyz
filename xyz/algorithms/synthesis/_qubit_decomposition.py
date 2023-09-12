@@ -20,7 +20,7 @@ from xyz.circuit.basic_gates.ry import RY
 
 from xyz.circuit.qcircuit import QCircuit
 from xyz.qstate import QState
-from .exact_cnot_synthesis import exact_cnot_synthesis
+from ._exact_cnot_synthesis import exact_cnot_synthesis
 
 
 def to_controlled_gate(gate: QGate, control_qubit: QBit, control_phase: bool):
