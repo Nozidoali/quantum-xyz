@@ -19,9 +19,7 @@ from .basic_gates import QBit, QGate, QGateType
 from .super_gates import SpecialGates
 
 
-def _to_qiskit(
-    self, with_measurement: bool = True, with_tomography: bool = False
-) -> QuantumCircuit:
+def _to_qiskit(self) -> QuantumCircuit:
     """Convert this circuit to a QuantumCircuit .
 
     :param with_measurement: [description], defaults to True
@@ -34,12 +32,8 @@ def _to_qiskit(
     num_qubits = self.get_num_qubits()
 
     quantum_registers = QuantumRegister(num_qubits)
-    classical_registers = ClassicalRegister(num_qubits)
 
-    if not with_tomography:
-        circuit = QuantumCircuit(quantum_registers, classical_registers)
-    else:
-        circuit = QuantumCircuit(quantum_registers)
+    circuit = QuantumCircuit(quantum_registers)
 
     def _to_register(qubit: QBit | List[QBit]) -> QuantumRegister:
         nonlocal quantum_registers
@@ -51,6 +45,20 @@ def _to_qiskit(
     gate: QGate
     for gate in self.get_gates():
         match gate.get_qgate_type():
+            case QGateType.U:
+                special_gate = SpecialGates.cu(gate)
+                circuit.append(
+                    special_gate,
+                    _to_register([gate.target_qubit]),
+                )
+
+            case QGateType.CU:
+                special_gate = SpecialGates.cu(gate)
+                circuit.append(
+                    special_gate,
+                    _to_register([gate.control_qubit, gate.target_qubit]),
+                )
+
             case QGateType.MCRY:
                 special_gate = SpecialGates.mcry(gate)
                 circuit.append(
@@ -65,14 +73,28 @@ def _to_qiskit(
                     ctrl_state=gate.phase,
                 )
 
+            case QGateType.RX:
+                circuit.rx(gate.theta, _to_register(gate.target_qubit))
+
             case QGateType.RY:
                 circuit.ry(gate.theta, _to_register(gate.target_qubit))
+
+            case QGateType.RZ:
+                circuit.rz(gate.theta, _to_register(gate.target_qubit))
 
             case QGateType.Z:
                 circuit.z(_to_register(gate.target_qubit))
 
             case QGateType.X:
                 circuit.x(_to_register(gate.target_qubit))
+
+            case QGateType.CRX:
+                circuit.crx(
+                    gate.theta,
+                    _to_register(gate.control_qubit),
+                    _to_register(gate.target_qubit),
+                    ctrl_state=gate.phase,
+                )
 
             case QGateType.CRY:
                 circuit.cry(
@@ -82,11 +104,12 @@ def _to_qiskit(
                     ctrl_state=gate.phase,
                 )
 
-    if with_measurement:
-        circuit.measure(quantum_registers, classical_registers)
-        return circuit
-
-    if with_tomography:
-        return circuit
+            case QGateType.CRZ:
+                circuit.crz(
+                    gate.theta,
+                    _to_register(gate.control_qubit),
+                    _to_register(gate.target_qubit),
+                    ctrl_state=gate.phase,
+                )
 
     return circuit

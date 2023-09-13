@@ -15,6 +15,7 @@ from xyz.qstate import QState
 from .operator import QOperatorBase, QOperatorType
 from .rotation import QuantizedRotation, QuantizedRotationType
 
+
 class XOperator(QOperatorBase, QuantizedRotation):
     """Creates an XOperator class with XOperator .
 

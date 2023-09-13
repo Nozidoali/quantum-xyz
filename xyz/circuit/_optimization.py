@@ -10,7 +10,6 @@ Last Modified time: 2023-06-22 23:43:32
 
 from typing import List
 from .basic_gates import QGate, QGateType, X, CX, RY, CRY
-
 from ._mapping import add_gate_mapped
 
 
@@ -21,7 +20,30 @@ def _add_gate_optimized(self, gate: QGate) -> None:
     :type gate: QGate
     """
 
-    match gate.qgate_type:
+    match gate.get_qgate_type():
+        case QGateType.CU:
+            print(
+                f"unitary = {gate.get_unitary()} alpha = {gate.get_alpha()}, beta = {gate.get_beta()}, gamma = {gate.get_gamma()}"
+            )
+            if gate.is_z_trivial():
+                reduced_gate = CRY(
+                    gate.get_beta(),
+                    gate.control_qubit,
+                    gate.get_phase(),
+                    gate.target_qubit,
+                )
+                _add_gate_optimized(self, reduced_gate)
+            elif gate.is_z_trivial_not():
+                reduced_gate = CRY(
+                    -gate.get_beta(),
+                    gate.control_qubit,
+                    gate.get_phase(),
+                    gate.target_qubit,
+                )
+                _add_gate_optimized(self, reduced_gate)
+            else:
+                add_gate_mapped(self, gate)
+
         case QGateType.RY:
             if gate.is_trivial():
                 return
@@ -30,6 +52,19 @@ def _add_gate_optimized(self, gate: QGate) -> None:
                 _add_gate_optimized(self, reduced_gate)
             else:
                 add_gate_mapped(self, gate)
+
+        case QGateType.RZ:
+            # currently we don't support RZ gate
+            return
+
+        case QGateType.RX:
+            # currently we don't support RX gate
+            return
+
+        case QGateType.CRX:
+            # currently we don't support CRX gate
+            return
+
         case QGateType.CRY:
             if gate.is_pi():
                 reduced_gate = CX(gate.control_qubit, gate.phase, gate.target_qubit)

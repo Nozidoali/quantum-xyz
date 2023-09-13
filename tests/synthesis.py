@@ -10,12 +10,12 @@ Last Modified time: 2023-08-18 21:09:09
 
 # pylint: skip-file
 
-from ast import In
 import random
 import numpy as np
 from itertools import combinations
 from qiskit import Aer, transpile
 
+import xyz
 from xyz import QState, cnot_synthesis, stopwatch, D_state, quantize_state, get_time
 from xyz.utils.colors import print_red, print_yellow
 
@@ -79,42 +79,32 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
 def test_synthesis():
     """Test that the synthesis is correct ."""
 
-    state = rand_state(3, 4)
+    state_vector = rand_state(5, 3)
 
     # we first run baseline
     from baseline.baselines import run_sparse_state_synthesis, run_dd_based_method
 
-    num_qubit, depth, cx = run_sparse_state_synthesis(state)
+    num_qubit, depth, cx = run_sparse_state_synthesis(state_vector)
     print(f"baseline1: cx = {cx}")
 
-    cx = run_dd_based_method(state)
+    cx = run_dd_based_method(state_vector)
     print(f"baseline2: cx = {cx}")
 
-    target_state = quantize_state(state)
+    target_state = quantize_state(state_vector)
 
     with stopwatch("synthesis") as timer:
         try:
-            circuit = cnot_synthesis(target_state, optimality_level=3, verbose_level=0)
+            circuit = cnot_synthesis(
+                target_state, optimality_level=3, verbose_level=0, map_gates=False
+            )
         except ValueError:
             print(f"cannot cnot_synthesis state {target_state}")
             exit(1)
 
     circ = circuit.to_qiskit()
     print(circ)
-    simulator = Aer.get_backend("qasm_simulator")
-    transpiled = transpile(circ, basis_gates=["u", "cx"], optimization_level=0)
-    cx = transpiled.count_ops().get("cx", 0)
+    cx = xyz.verify_circuit_and_count_cnot(circuit, state_vector)
 
-    # print(f"{timer.time():0.02f} seconds")
-
-    map_time = get_time("add_gate_mapped")
-    # print(f"time mapping = {map_time}")
-
-    # Run and get counts
-    result = simulator.run(transpiled).result()
-    counts = result.get_counts(transpiled)
-
-    print(counts)
     print(f"ours: cx = {cx}")
 
 

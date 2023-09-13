@@ -14,6 +14,7 @@ from xyz.qstate import QState
 from .operator import QOperatorBase, QOperatorType
 from .rotation import QuantizedRotation, QuantizedRotationType
 
+
 class TROperator(QOperatorBase, QuantizedRotation):
     """Creates an TROperator class with TROperator .
 
@@ -52,7 +53,6 @@ class TROperator(QOperatorBase, QuantizedRotation):
             next_state, theta = qstate.apply_merge1(self.target_qubit_index)
             self.theta = theta
             return next_state
-
 
     def __str__(self) -> str:
         """The repr of the class .

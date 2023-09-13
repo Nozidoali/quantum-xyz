@@ -344,16 +344,16 @@ class QState:
             ]
         )
 
-    def __eq__(self, o: object) -> bool:
-        if not isinstance(o, QState):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, QState):
             return False
-        return self.__hash__() == o.__hash__()
+        return self.__hash__() == other.__hash__()
 
-    def __lt__(self, o: object) -> bool:
+    def __lt__(self, other: object) -> bool:
         if not isinstance(o, QState):
             return False
         sorted_index_set = sorted(self.index_set, reverse=True)
-        sorted_o_index_set = sorted(o.index_set, reverse=True)
+        sorted_o_index_set = sorted(other.index_set, reverse=True)
         for i, index in enumerate(sorted_index_set):
             if i >= len(sorted_o_index_set):
                 return False
@@ -370,6 +370,11 @@ class QState:
         return hash(value)
 
     def repr(self) -> int:
+        """Return a hex representation of the bitmap .
+
+        :return: [description]
+        :rtype: int
+        """
         self.index_set = sorted(self.index_set)
         signatures = self.get_qubit_signatures()
         return hash(tuple(sorted(signatures, key=lambda x: bin(x).count("1"))))
@@ -400,7 +405,7 @@ def quantize_state(state_vector: np.ndarray):
     index_to_weight = {}
     num_qubits = int(np.log2(len(state_vector)))
     for idx, coefficient in enumerate(state_vector):
-        if coefficient != 0:
+        if not np.isclose(coefficient, 0):
             index_to_weight[idx] = coefficient**2
     return QState(index_to_weight, num_qubits)
 
@@ -413,8 +418,8 @@ def load_state(filename: str):
     """
 
     # read the dict from the file
-    with open(filename, "r", encoding="utf-8") as f:
-        state_dict = json.load(f)
+    with open(filename, "r", encoding="utf-8") as file:
+        state_dict = json.load(file)
 
     num_qubits: int = None
     index_to_weight = {}

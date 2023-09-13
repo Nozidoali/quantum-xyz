@@ -117,7 +117,7 @@ class QCircuit:
             cnot_cost += gate.get_cnot_cost()
         return cnot_cost
 
-    def to_qiskit(self, with_measurement: bool = True, with_tomography: bool = False):
+    def to_qiskit(self):
         """Convert the sequence to a Qiskit string .
 
         :param with_measurement: [description], defaults to True
@@ -127,4 +127,4 @@ class QCircuit:
         :return: [description]
         :rtype: [type]
         """
-        return _to_qiskit(self, with_measurement, with_tomography)
+        return _to_qiskit(self)

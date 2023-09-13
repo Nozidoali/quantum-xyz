@@ -16,9 +16,15 @@ from .qubit import QBit
 class QGateType(Enum):
     """This method is used to set the auto - gate type for QGate type .
 
+    When defining a new gate, we need to register here to get the type name of the gate .
+
     :param Enum: [description]
     :type Enum: [type]
     """
+
+    U = auto()
+    CU = auto()
+    MCU = auto()
 
     X = auto()
     Y = auto()
@@ -28,13 +34,15 @@ class QGateType(Enum):
     CZ = auto()
     CX = auto()
 
+    # single qubit rotation gates
     RX = auto()
     RY = auto()
     RZ = auto()
 
+    # controlled rotation gates
+    CRX = auto()
     CRY = auto()
     CRZ = auto()
-    CRX = auto()
 
     MCRY = auto()
 

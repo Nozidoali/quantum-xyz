@@ -8,8 +8,9 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-22 23:25:35
 """
 
-import numpy as np
 from typing import List
+
+import numpy as np
 
 
 class RotationGate:

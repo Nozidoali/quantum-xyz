@@ -8,4 +8,4 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-22 14:14:28
 """
 
-from .mcry import *
+from .special_gates import *

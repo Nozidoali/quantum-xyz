@@ -10,15 +10,15 @@ Last Modified time: 2023-08-11 23:56:48
 
 from qiskit import QuantumCircuit, transpile
 
-import numpy as np
-
 import xyz
 
 state_vector = xyz.D_state(4, 2)
 
 circuit_qiskit = QuantumCircuit(4)
 circuit_qiskit.initialize(state_vector, [0, 1, 2, 3])
-circuit_qiskit_transpiled = transpile(circuit_qiskit, basis_gates=["cx", "ry", "u"], optimization_level=3)
+circuit_qiskit_transpiled = transpile(
+    circuit_qiskit, basis_gates=["cx", "ry", "u"], optimization_level=3
+)
 
 print(circuit_qiskit_transpiled)
 print(circuit_qiskit_transpiled.count_ops())

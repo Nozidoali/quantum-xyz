@@ -12,3 +12,4 @@ from .basic_gates import *
 from .super_gates import *
 from .qcircuit import *
 from .decomposition import *
+from .verify_circuit import *

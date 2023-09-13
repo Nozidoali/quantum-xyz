@@ -12,3 +12,4 @@ from .control import *
 from .rotation import *
 from .qubit import *
 from .gate import *
+from .unitary import *

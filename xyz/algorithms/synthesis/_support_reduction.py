@@ -14,6 +14,7 @@ from xyz.circuit.qcircuit import QCircuit
 from xyz.qstate import QState
 from xyz.operator import CXOperator, XOperator
 
+
 def support_reduction(circuit: QCircuit, state: QState):
     """Apply the reduction to the circuit .
 

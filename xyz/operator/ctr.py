@@ -71,7 +71,6 @@ class CTROperator(QOperatorBase, QuantizedRotation, ControlledOperator):
             self.theta = theta
             return next_state
 
-
     def __str__(self) -> str:
         """The repr of the class .
 
