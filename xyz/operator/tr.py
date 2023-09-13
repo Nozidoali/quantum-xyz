@@ -44,17 +44,15 @@ class TROperator(QOperatorBase, QuantizedRotation):
         @param qstate - The input quantum state.
         @return The modified quantum state after applying the gate operation.
         """
-        try:
-            if self.operator_type == QOperatorType.T0:
-                next_state, theta = qstate.apply_merge0(self.target_qubit_index)
-                self.theta = theta
-                return next_state
-            if self.operator_type == QOperatorType.T1:
-                next_state, theta = qstate.apply_merge1(self.target_qubit_index)
-                self.theta = theta
-                return next_state
-        except ValueError:
-            raise ValueError("The target qubit is not in the state.")
+        if self.operator_type == QOperatorType.T0:
+            next_state, theta = qstate.apply_merge0(self.target_qubit_index)
+            self.theta = theta
+            return next_state
+        if self.operator_type == QOperatorType.T1:
+            next_state, theta = qstate.apply_merge1(self.target_qubit_index)
+            self.theta = theta
+            return next_state
+
 
     def __str__(self) -> str:
         """The repr of the class .

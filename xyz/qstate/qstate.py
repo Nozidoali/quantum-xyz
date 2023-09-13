@@ -8,11 +8,11 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-19 13:40:18
 """
 
+import copy
+import json
 
 from typing import List, Tuple
 import numpy as np
-import copy
-import json
 
 
 class QState:
@@ -413,7 +413,7 @@ def load_state(filename: str):
     """
 
     # read the dict from the file
-    with open(filename, "r") as f:
+    with open(filename, "r", encoding="utf-8") as f:
         state_dict = json.load(f)
 
     num_qubits: int = None
@@ -422,11 +422,7 @@ def load_state(filename: str):
         if num_qubits is None:
             num_qubits = len(index_str)
 
-        try:
-            index = int(index_str, 2)
-        except ValueError:
-            print(f"Cannot parse index {index_str}")
-            raise ValueError(f"Cannot parse index {index_str}")
+        index = int(index_str, 2)
         index_to_weight[index] = weight
 
     # convert the dict to a QState

@@ -270,9 +270,11 @@ class Network:
         return sorted(self.__nodes)
 
     # sort __signals in a topological order
-    # TODO: support runtime modification and maintain the topogical order
     def traverse(self):
-        """Traverse the CIS ."""
+        """
+        Traverse the CIS .
+            TODO: support runtime modification and maintain the topogical order
+        """
         self.__signals = []
         for signal in self.cis():
             assert signal not in self.__signals
@@ -287,11 +289,11 @@ class Network:
         # prepare fanouts: this should be recomputed after each network modification
         for signal in self.__signals:
             if signal in self.__node_fanins:
-                for f in self.fanins(signal):
-                    self.__node_fanouts[f].add(signal)
+                for fanin_signal in self.fanins(signal):
+                    self.__node_fanouts[fanin_signal].add(signal)
 
     # topological traversal, used to sort the __signals in a topological order
-    def trav_rec(self, signal: str, pending_signals: set = set()):
+    def trav_rec(self, signal: str, pending_signals: set = None):
         """recursive recursion recursively
 
         :param signal: [description]

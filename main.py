@@ -8,85 +8,27 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-11 23:56:48
 """
 
-from xyz import synthesize_srg, convert_srg_to_circuit, stopwatch, D_state, QState
+from qiskit import QuantumCircuit, transpile
 
-num_qubits = 2
+import numpy as np
 
-state_array = D_state(num_qubits, 1)
-print("".join(["1" if x > 0 else "0" for x in state_array]))
+import xyz
 
-# state_array = GHZ_state(num_qubits)
+state_vector = xyz.D_state(4, 2)
 
-state = QState(state_array, num_qubits)
+circuit_qiskit = QuantumCircuit(4)
+circuit_qiskit.initialize(state_vector, [0, 1, 2, 3])
+circuit_qiskit_transpiled = transpile(circuit_qiskit, basis_gates=["cx", "ry", "u"], optimization_level=3)
 
-with stopwatch("SparseStateSynthesis"):
-    srg = synthesize_srg(state, verbose=True)
-
-stg = srg_to_srg(srg)
-
-with stopwatch("transitions"):
-    circuit = convert_srg_to_circuit(transitions, state_array)
-
-circ = circuit.to_qiskit(with_measurement=False, with_tomography=True)
-
-print(circ)
-exit(0)
-
-# print(f"cnot = {circuit.num_gates(QGateType.CX)}")
-
-from qiskit_ibm_provider import IBMProvider
-from qiskit.providers.ibmq import least_busy
-
-provider = IBMProvider()
-
-small_devices = provider.backends(
-    filters=lambda x: x.configuration().n_qubits == 5
-    and not x.configuration().simulator
-)
-backend = least_busy(small_devices)
+print(circuit_qiskit_transpiled)
+print(circuit_qiskit_transpiled.count_ops())
 
 
-# backend = provider.get_backend('ibmq_quito')
+quantized_state = xyz.quantize_state(state_vector)
+circuit = xyz.cnot_synthesis(quantized_state)
 
-print(f"running on {backend.name}")
-# print(f"queue position: {backend.status().queue_position}")
-# print(f"pending jobs: {backend.status().pending_jobs}")
+circuit = circuit.to_qiskit()
+circuit = transpile(circuit, basis_gates=["cx", "ry", "u"], optimization_level=0)
 
-# QST Experiment
-qstexp1 = StateTomography(circ)
-qstdata1 = qstexp1.run(backend, shots=5000).block_for_results()
-
-from time import sleep
-
-while True:
-    print(f"running on {backend.name}")
-    print(f"queue position: {backend.status().queue_position}")
-    print(f"pending jobs: {backend.status().pending_jobs}")
-
-    sleep(1)
-
-# Print results
-for result in qstdata1.analysis_results():
-    print(result)
-
-exit(0)
-
-from qiskit.tools.monitor import job_monitor
-
-
-from qiskit import IBMQ
-import qiskit
-
-IBMQ.load_account()
-
-provider = IBMQ.load_account()
-backend = provider.get_backend("ibmq_quito")
-job = qiskit.execute(circ, backend=backend, shots=1024)
-job_monitor(job)
-
-result = job.result()
-counts = result.get_counts(circuit)
-
-print(counts)
-
-plot_histogram([counts])
+print(circuit)
+print(circuit.count_ops())

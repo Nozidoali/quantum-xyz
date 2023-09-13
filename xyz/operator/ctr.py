@@ -46,31 +46,31 @@ class CTROperator(QOperatorBase, QuantizedRotation, ControlledOperator):
         self.theta = None
 
     def __call__(self, qstate: QState) -> Any:
-        """
-        This method is used to apply a quantum gate operation to a quantum state.
-        @param qstate - The input quantum state.
-        @return The modified quantum state after applying the gate operation.
-        """
-        try:
-            if self.operator_type == QOperatorType.CT0:
-                next_state, theta = qstate.apply_controlled_merge0(
-                    self.control_qubit_index,
-                    self.control_qubit_phase,
-                    self.target_qubit_index,
-                )
-                self.theta = theta
-                return next_state
+        """Apply the gate to the gate .
 
-            if self.operator_type == QOperatorType.CT1:
-                next_state, theta = qstate.apply_controlled_merge1(
-                    self.control_qubit_index,
-                    self.control_qubit_phase,
-                    self.target_qubit_index,
-                )
-                self.theta = theta
-                return next_state
-        except ValueError:
-            raise ValueError("The target qubit is not in the state.")
+        :param qstate: [description]
+        :type qstate: QState
+        :return: [description]
+        :rtype: Any
+        """
+        if self.operator_type == QOperatorType.CT0:
+            next_state, theta = qstate.apply_controlled_merge0(
+                self.control_qubit_index,
+                self.control_qubit_phase,
+                self.target_qubit_index,
+            )
+            self.theta = theta
+            return next_state
+
+        if self.operator_type == QOperatorType.CT1:
+            next_state, theta = qstate.apply_controlled_merge1(
+                self.control_qubit_index,
+                self.control_qubit_phase,
+                self.target_qubit_index,
+            )
+            self.theta = theta
+            return next_state
+
 
     def __str__(self) -> str:
         """The repr of the class .
