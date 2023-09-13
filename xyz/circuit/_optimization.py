@@ -9,6 +9,8 @@ Last Modified time: 2023-06-22 23:43:32
 """
 
 from typing import List
+
+from tenacity import retry
 from .basic_gates import QGate, QGateType, X, CX, RY, CRY
 from ._mapping import add_gate_mapped
 
@@ -22,9 +24,6 @@ def _add_gate_optimized(self, gate: QGate) -> None:
 
     match gate.get_qgate_type():
         case QGateType.CU:
-            print(
-                f"unitary = {gate.get_unitary()} alpha = {gate.get_alpha()}, beta = {gate.get_beta()}, gamma = {gate.get_gamma()}"
-            )
             if gate.is_z_trivial():
                 reduced_gate = CRY(
                     gate.get_beta(),
@@ -52,18 +51,6 @@ def _add_gate_optimized(self, gate: QGate) -> None:
                 _add_gate_optimized(self, reduced_gate)
             else:
                 add_gate_mapped(self, gate)
-
-        case QGateType.RZ:
-            # currently we don't support RZ gate
-            return
-
-        case QGateType.RX:
-            # currently we don't support RX gate
-            return
-
-        case QGateType.CRX:
-            # currently we don't support CRX gate
-            return
 
         case QGateType.CRY:
             if gate.is_pi():

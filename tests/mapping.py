@@ -15,13 +15,18 @@ import xyz
 
 def test_mapping():
     """Test that tests the mapping of the QCircuit ."""
-    circuit = xyz.QCircuit(3, map_gates=True)
+    circuit = xyz.QCircuit(5, map_gates=True)
 
     circuit.add_gate(
         xyz.MCRY(
             np.pi / 2,
-            [circuit.qubit_at(1), circuit.qubit_at(2)],
-            [0, 0],
+            [
+                circuit.qubit_at(1),
+                circuit.qubit_at(2),
+                circuit.qubit_at(3),
+                circuit.qubit_at(4),
+            ],
+            [1, 1, 1, 0],
             circuit.qubit_at(0),
         )
     )

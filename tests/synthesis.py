@@ -79,7 +79,8 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
 def test_synthesis():
     """Test that the synthesis is correct ."""
 
-    state_vector = rand_state(5, 3)
+    state_vector = D_state(20, 2)
+    # state_vector = rand_state(5, 4)
 
     # we first run baseline
     from baseline.baselines import run_sparse_state_synthesis, run_dd_based_method
@@ -95,14 +96,14 @@ def test_synthesis():
     with stopwatch("synthesis") as timer:
         try:
             circuit = cnot_synthesis(
-                target_state, optimality_level=3, verbose_level=0, map_gates=False
+                target_state, optimality_level=3, verbose_level=0, map_gates=True
             )
         except ValueError:
             print(f"cannot cnot_synthesis state {target_state}")
             exit(1)
 
     circ = circuit.to_qiskit()
-    print(circ)
+    # print(circ)
     cx = xyz.verify_circuit_and_count_cnot(circuit, state_vector)
 
     print(f"ours: cx = {cx}")

@@ -56,7 +56,7 @@ def support_reduction(circuit: QCircuit, state: QState):
             gate = CX(control_qubit, control_phase, target_qubit)
             gates.append(gate)
             operation = CXOperator(
-                qubit_index, signature_to_qubits[signature], target_qubit
+                qubit_index, signature_to_qubits[signature], control_phase
             )
             new_state = operation(new_state)
             continue
@@ -70,7 +70,7 @@ def support_reduction(circuit: QCircuit, state: QState):
             gate = CX(control_qubit, control_phase, target_qubit)
             gates.append(gate)
             operation = CXOperator(
-                qubit_index, signature_to_qubits[signature ^ const1], target_qubit
+                qubit_index, signature_to_qubits[signature ^ const1], control_phase
             )
             new_state = operation(new_state)
             continue

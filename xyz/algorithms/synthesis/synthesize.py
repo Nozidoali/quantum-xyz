@@ -144,13 +144,13 @@ def cnot_synthesis(
         support_reduced_state, support_reduction_gates = support_reduction(
             circuit, new_state
         )
+        curr_state = support_reduced_state
+        num_supports: int = len(curr_state.get_supports())
         if verbose_level >= 2:
-            print_green("done")
+            print_green(f"done, num_supports = {num_supports}")
 
         for gate in support_reduction_gates:
             post_processing_gates.append(gate)
-
-        curr_state = support_reduced_state
 
     # gates = qubit_decomposition(
     #     circuit, state, optimality_level, verbose_level, runtime_limit=runtime_limit

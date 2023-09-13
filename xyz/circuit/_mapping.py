@@ -17,7 +17,7 @@ import numpy as np
 
 from xyz.circuit.basic_gates.ry import RY
 
-from .basic_gates import QGate, QGateType, MULTIPLEXY, CRX, CU, MCRY
+from .basic_gates import QGate, QGateType, MULTIPLEXY, CRX, CU, MCRY, X
 from .decomposition import decompose_mcry, control_sequence_to_gates
 from xyz.utils import call_with_global_timer
 
@@ -90,13 +90,11 @@ def theta_to_unitary(theta: float):
     :type theta: float
     """
     raw_matrix = np.array(
-        [[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]]
+        [
+            [np.cos(theta / 2), -np.sin(theta / 2)],
+            [np.sin(theta / 2), np.cos(theta / 2)],
+        ]
     )
-    for x in np.nditer(raw_matrix, op_flags=["readwrite"]):
-        if np.isclose(x, 0):
-            x[...] = 0
-        elif np.isclose(x, 1):
-            x[...] = 1
     return raw_matrix
 
 
@@ -129,7 +127,7 @@ def unitary_convert(unitary: np.ndarray, coef: float, signal: int):
     return updated_unitary
 
 
-def __map_mcry_linear(gate: MCRY) -> List[QGate]:
+def __map_mcry_linear(mcry_gate: MCRY) -> List[QGate]:
     """Map a gate to the circuit .
 
     :param gate: [description]
@@ -138,23 +136,23 @@ def __map_mcry_linear(gate: MCRY) -> List[QGate]:
     :rtype: List[QGate]
     """
 
-    assert gate.get_qgate_type() == QGateType.MCRY
+    assert mcry_gate.get_qgate_type() == QGateType.MCRY
 
     # we first preprocess the relavant qubits
-    qubit_list = gate.control_qubits + [gate.target_qubit]
+    qubit_list = mcry_gate.control_qubits + [mcry_gate.target_qubit]
     num_qubits = len(qubit_list)
 
     # special case for single qubit
     if num_qubits == 1:
         gates = []
-        gate = RY(gate.theta, qubit_list[0])
+        gate = RY(mcry_gate.theta, qubit_list[0])
         gates.append(gate)
         return gates
 
     # special case for two qubits
-    if num_qubits == 2:
-        gates = __map_mcry(gate)
-        return gates
+    # if num_qubits == 2:
+    #     gates = __map_mcry(mcry_gate)
+    #     return gates
 
     # now we handle the general case
     def convert_rec(
@@ -199,18 +197,12 @@ def __map_mcry_linear(gate: MCRY) -> List[QGate]:
             exponent = pair.target - pair.control
             if pair.control == 0:
                 exponent = exponent - 1
-
-            print(
-                f"exponent: {exponent}, pair.control: {pair.control}, pair.target: {pair.target}"
-            )
-
             param = 2**exponent
             signal = -1 if (pair.control == 0 and not is_first) else 1
             signal = signal * step
 
             if pair.target == num_qubits - 1 and is_first:
                 updated_unitary = unitary_convert(unitary, param, signal)
-                print(f"updated_unitary: {updated_unitary}")
                 gate = CU(
                     updated_unitary,
                     qubit_list[pair.control],
@@ -220,7 +212,7 @@ def __map_mcry_linear(gate: MCRY) -> List[QGate]:
                 gates.append(gate)
             else:
                 gate = CRX(
-                    signal * np.pi,
+                    signal * np.pi / param,
                     qubit_list[pair.control],
                     True,
                     qubit_list[pair.target],
@@ -229,14 +221,20 @@ def __map_mcry_linear(gate: MCRY) -> List[QGate]:
 
         return gates
 
-    unitary = theta_to_unitary(gate.get_theta())
+    unitary = theta_to_unitary(mcry_gate.get_theta())
+
+    gates = []
+    # frist we consider the control phases
+    for phase, control_qubit in zip(mcry_gate.get_phases(), mcry_gate.control_qubits):
+        if phase == 0:
+            gate = X(control_qubit)
+            gates.append(gate)
 
     gates_c1 = convert_rec(unitary, num_qubits)
     gates_c2 = convert_rec(unitary, num_qubits, step=-1)
     gates_c3 = convert_rec(unitary, num_qubits - 1, is_first=False)
     gates_c4 = convert_rec(unitary, num_qubits - 1, is_first=False, step=-1)
 
-    gates = []
     for gate in gates_c1:
         gates.append(gate)
     for gate in gates_c2:
@@ -245,6 +243,12 @@ def __map_mcry_linear(gate: MCRY) -> List[QGate]:
         gates.append(gate)
     for gate in gates_c4:
         gates.append(gate)
+
+    # frist we consider the control phases
+    for phase, control_qubit in zip(mcry_gate.get_phases(), mcry_gate.control_qubits):
+        if phase == 0:
+            gate = X(control_qubit)
+            gates.append(gate)
 
     return gates
 
@@ -266,7 +270,10 @@ def add_gate_mapped(self, gate: QGate) -> None:
             self.append_gates(gates)
 
         case QGateType.MCRY:
-            gates = __map_mcry_linear(gate)
+            if len(gate.get_control_qubits()) >= 4:
+                gates = __map_mcry_linear(gate)
+            else:
+                gates = __map_mcry(gate)
 
             # this may cause problem if the gates returned are still MCRYs
             self.add_gates(gates)
