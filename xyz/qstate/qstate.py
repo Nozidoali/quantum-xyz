@@ -350,7 +350,7 @@ class QState:
         return self.__hash__() == other.__hash__()
 
     def __lt__(self, other: object) -> bool:
-        if not isinstance(o, QState):
+        if not isinstance(other, QState):
             return False
         sorted_index_set = sorted(self.index_set, reverse=True)
         sorted_o_index_set = sorted(other.index_set, reverse=True)

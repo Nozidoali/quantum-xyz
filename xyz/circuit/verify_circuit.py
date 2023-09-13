@@ -9,7 +9,7 @@ Last Modified time: 2023-09-13 12:04:42
 """
 
 import numpy as np
-from qiskit import Aer, transpile, execute
+from qiskit import Aer, transpile
 
 from xyz.qstate import quantize_state
 

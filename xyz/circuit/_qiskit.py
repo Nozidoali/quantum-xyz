@@ -12,7 +12,7 @@ Last Modified time: 2023-06-22 23:39:10
 from typing import List
 
 # third party library
-from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
+from qiskit import QuantumCircuit, QuantumRegister
 
 # my own library
 from .basic_gates import QBit, QGate, QGateType

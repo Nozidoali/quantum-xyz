@@ -44,7 +44,6 @@ def unitary_zyz_decomposition(matrix: np.ndarray):
     theta0 = (theta0_plus_theta2 + theta0_sub_theta2) / 2
     theta2 = (theta0_plus_theta2 - theta0_sub_theta2) / 2
     # this is very important, otherwise the result will be wrong
-    # TODO: find a better value of atol
     if np.isclose(theta1, 0.0, atol=1e-6):
         theta2 = theta0 + theta2
         theta1 = 0.0
