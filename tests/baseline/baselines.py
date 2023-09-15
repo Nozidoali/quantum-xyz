@@ -41,7 +41,7 @@ def build_state_dict_fixed(state: np.ndarray):
     return state_dict
 
 
-def run_dd_based_method(state: np.ndarray):
+def run_sota_based_method(state: np.ndarray):
     cx = None
 
     # get the bit string
@@ -51,6 +51,30 @@ def run_dd_based_method(state: np.ndarray):
     # baseline
     subprocess.run(
         "qsp_using_sota tmp.txt > tmp.rpt",
+        shell=True,
+        stdout=subprocess.DEVNULL,
+    )
+
+    # get the number of cnot
+    with open("tmp.rpt", "r") as f:
+        for line in f:
+            if "cnots" in line:
+                cx = int(re.sub("[^0-9]", "", line))
+                break
+
+    return cx
+
+
+def run_dd_based_method(state: np.ndarray):
+    cx = None
+
+    # get the bit string
+    state_str = "".join(["1" if x > 0 else "0" for x in state])
+    with open("tmp.txt", "w") as f:
+        f.write(state_str)
+    # baseline
+    subprocess.run(
+        "qsp_using_bdd tmp.txt > tmp.rpt",
         shell=True,
         stdout=subprocess.DEVNULL,
     )
@@ -94,9 +118,8 @@ def run_sparse_state_synthesis(state: np.ndarray, skip_verify=False):
     qubits = len(transpiled.qubits)
     depth = transpiled.depth()
     cx = transpiled.count_ops().get("cx", 0)
-    
-    if not skip_verify:
 
+    if not skip_verify:
         backend = Aer.get_backend("qasm_simulator")
         transpiled.save_statevector()
         state_vector = backend.run(transpiled).result().get_statevector()

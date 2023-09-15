@@ -48,6 +48,8 @@ def decompose_mcry(rotation_table: list):
     """
     num_controls = int(np.log2(len(rotation_table)))
 
+    assert num_controls > 0, "The number of controls must be greater than 0"
+
     alphas = rotation_table[:]
     thetas = find_thetas(alphas)
 
@@ -55,6 +57,8 @@ def decompose_mcry(rotation_table: list):
     control_sequence: list = []
 
     prev_gray_code = 0
+
+    # print(f"num_controls: {num_controls}, thetas: {thetas}")
 
     for i, theta in enumerate(thetas):
         # get the bit that changed in the i of gray code

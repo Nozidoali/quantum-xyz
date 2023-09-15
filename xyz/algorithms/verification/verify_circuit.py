@@ -9,15 +9,21 @@ Last Modified time: 2023-09-13 12:04:42
 """
 
 import numpy as np
+from panel import state
 from qiskit import Aer, transpile
 
 from xyz.qstate import quantize_state
-from xyz.utils.colors import print_yellow
+from xyz.qstate.index_to_weight import index_to_str
+from xyz.utils.colors import print_green, print_yellow, print_red
 
-from .qcircuit import QCircuit
+from xyz.circuit.qcircuit import QCircuit
+
+from .diff_states import get_difference
 
 
-def verify_circuit_and_count_cnot(circuit: QCircuit, state_vector_expect: np.ndarray, skip_verify: bool = False):
+def verify_circuit_and_count_cnot(
+    circuit: QCircuit, state_vector_expect: np.ndarray, skip_verify: bool = False
+):
     """Verify that the given circuit is correct .
 
     :param circuit: [description]
@@ -43,9 +49,17 @@ def verify_circuit_and_count_cnot(circuit: QCircuit, state_vector_expect: np.nda
         state_vector_actual = abs(state_vector_actual.data)
         state_vector_expect = abs(state_vector_expect)
 
-        if not np.allclose(state_vector_actual, state_vector_expect, atol=1e-2):
-            print_yellow(
-                f"state vector is not correct, expect {quantize_state(state_vector_expect)}, actual {quantize_state(state_vector_actual)}"
+        if not np.allclose(state_vector_actual, state_vector_expect, atol=0.1):
+            state_actual = quantize_state(state_vector_actual)
+            state_expect = quantize_state(state_vector_expect)
+
+            diff_index_1, diff_index_2, diff_weights = get_difference(
+                state_actual, state_expect
             )
 
-    return cx
+            print_red(index_to_str(diff_index_1, state_actual.num_qubits))
+            print_green(index_to_str(diff_index_2, state_actual.num_qubits))
+            print_yellow(index_to_str(diff_weights, state_actual.num_qubits))
+            return cx, False
+
+    return cx, True

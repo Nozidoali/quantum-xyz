@@ -10,6 +10,7 @@ Last Modified time: 2023-09-01 12:56:17
 
 import time
 from queue import PriorityQueue
+from turtle import back
 from xyz.circuit.basic_gates.base.gate import QGate
 from xyz.circuit.basic_gates.cx import CX
 from xyz.circuit import QCircuit, X, MCRY
@@ -51,7 +52,7 @@ def exact_cnot_synthesis(
     target_state: qs.QState,
     optimality_level: int = 3,
     verbose_level: int = 0,
-    runtime_limit: int = None,
+    cnot_limit: int = None,
 ):
     """This function finds the exact cnot_cnot_synthesis of a circuit .
 
@@ -157,15 +158,12 @@ def exact_cnot_synthesis(
     sparsity = target_state.get_sparsity()
     best_supports = target_state.get_supports()
 
-    start_time = time.time()
-
     # This function is called by the search loop.
     while not state_queue.empty():
         curr_cost, curr_state = state_queue.get()
 
-        now_time = time.time()
-        seconds_ellapsed = now_time - start_time
-        if runtime_limit is not None and seconds_ellapsed > runtime_limit:
+        if cnot_limit is not None and curr_cost.cnot_cost > cnot_limit:
+            # this will then raise an ValueError
             break
 
         if curr_state == initial_state:
@@ -359,7 +357,11 @@ def exact_cnot_synthesis(
     x_gates = ground_state_calibration(circuit, final_state)
 
     gates = x_gates[:]
+    backtraced_states: set = set()
     while curr_state in record:
+        if curr_state in backtraced_states:
+            raise ValueError("Loop found")
+        backtraced_states.add(curr_state)
         prev_state, gate = record[curr_state]
         gates.append(gate)
         curr_state = prev_state

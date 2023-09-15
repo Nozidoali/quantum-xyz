@@ -9,18 +9,19 @@ Last Modified time: 2023-09-01 13:05:14
 """
 
 import threading
-import random
-import numpy as np
-
 from typing import List
+import numpy as np
+from collections import namedtuple
 
 from xyz.circuit import QGate, QGateType, QBit, CX, CRY
 from xyz.circuit.basic_gates.mcry import MCRY
 from xyz.circuit.basic_gates.ry import RY
+from xyz.circuit.decomposition import decompose_mcry, control_sequence_to_gates
 
 from xyz.circuit.qcircuit import QCircuit
-from xyz.qstate import QState
+from xyz.qstate import QState, index_to_weight
 from ._exact_cnot_synthesis import exact_cnot_synthesis
+from ._support_reduction import support_reduction
 
 
 def to_controlled_gate(gate: QGate, control_qubit: QBit, control_phase: bool):
@@ -63,6 +64,88 @@ def to_controlled_gate(gate: QGate, control_qubit: QBit, control_phase: bool):
             )
 
 
+def select_pivot_qubit(state: QState, supports: set):
+    """Selects the pivot of the given state .
+
+    :param state: [description]
+    :type state: QState
+    :param supports: [description]
+    :type supports: set
+    :return: [description]
+    :rtype: [type]
+    """
+    max_difference: int = -1
+    best_qubit = None
+
+    indices = state.index_set
+
+    assert (
+        len(indices) >= 2
+    ), f"state = {state}, len(indices) = {len(indices)}, supports = {supports}"
+    length = len(indices)
+
+    for qubit in supports:
+        # we cannot be better than this
+        if max_difference == length - 1:
+            break
+
+        index_set_0 = set()
+
+        for index in indices:
+            if index & (1 << qubit) == 0:
+                index_set_0.add(index)
+
+        length0 = len(index_set_0)
+        difference = abs(length - (length0 << 1))
+
+        # we update the best difference
+        if difference > max_difference:
+            max_difference = difference
+            best_qubit = qubit
+
+    assert best_qubit is not None
+    return best_qubit
+
+
+def select_informative_qubit(state: QState, supports: set):
+    """Selects the smallest qubit in the given state .
+
+    :param state: [description]
+    :type state: QState
+    :param supports: [description]
+    :type supports: set
+    :return: [description]
+    :rtype: [type]
+    """
+    best_qubit = None
+
+    indices = state.index_set
+
+    assert (
+        len(indices) >= 2
+    ), f"state = {state}, len(indices) = {len(indices)}, supports = {supports}"
+    length = len(indices)
+    min_difference: int = length + 1
+
+    for qubit in supports:
+        index_set_0 = set()
+
+        for index in indices:
+            if index & (1 << qubit) == 0:
+                index_set_0.add(index)
+
+        length0 = len(index_set_0)
+        difference = abs(length - (length0 << 1))
+
+        # we update the best difference
+        if difference < min_difference:
+            min_difference = difference
+            best_qubit = qubit
+
+    assert best_qubit is not None
+    return best_qubit
+
+
 def _qubit_decomposition_impl(
     circuit: QCircuit,
     gates: List[QGate],
@@ -70,9 +153,12 @@ def _qubit_decomposition_impl(
     optimality_level: int = 3,
     multi_thread: bool = False,
     verbose_level: int = 0,
-    runtime_limit: int = None,
+    cnot_limit: int = None,
 ):
     assert len(gates) == 0
+
+    # we first run qubit reduction
+    state, support_gates = support_reduction(circuit, state)
 
     supports = state.get_supports()
     num_supports = len(supports)
@@ -84,14 +170,17 @@ def _qubit_decomposition_impl(
             state,
             optimality_level=3,
             verbose_level=verbose_level,
-            runtime_limit=runtime_limit,
+            cnot_limit=cnot_limit,
         )
         for gate in exact_gates:
             gates.append(gate)
+
+        for gate in support_gates:
+            gates.append(gate)
         return
 
-    # randomly choose a qubit to split
-    pivot = random.choice(supports)
+    # we select the qubits that maximize the entropy
+    pivot = select_pivot_qubit(state, supports)
     pivot_qubit = circuit.qubit_at(pivot)
 
     neg_state, pos_state, weights0, weights1 = state.cofactors(pivot)
@@ -116,7 +205,7 @@ def _qubit_decomposition_impl(
                 optimality_level,
                 multi_thread,
                 verbose_level,
-                runtime_limit,
+                cnot_limit,
             ),
         )
         thread_neg = threading.Thread(
@@ -128,7 +217,7 @@ def _qubit_decomposition_impl(
                 optimality_level,
                 multi_thread,
                 verbose_level,
-                runtime_limit,
+                cnot_limit,
             ),
         )
 
@@ -146,7 +235,7 @@ def _qubit_decomposition_impl(
             optimality_level,
             multi_thread,
             verbose_level,
-            runtime_limit,
+            cnot_limit,
         )
         _qubit_decomposition_impl(
             circuit,
@@ -155,7 +244,7 @@ def _qubit_decomposition_impl(
             optimality_level,
             multi_thread,
             verbose_level,
-            runtime_limit,
+            cnot_limit,
         )
 
     for gate in pos_gates:
@@ -166,13 +255,16 @@ def _qubit_decomposition_impl(
         controlled_gate = to_controlled_gate(gate, pivot_qubit, False)
         gates.append(controlled_gate)
 
+    for gate in support_gates:
+        gates.append(gate)
+
 
 def qubit_decomposition(
     circuit: QCircuit,
     target_state: QState,
     optimality_level: int,
     verbose_level: int,
-    runtime_limit: int = None,
+    cnot_limit: int = None,
 ):
     """Decompose a circuit into a sequence of single qubit gates and CNOT gates .
 
@@ -195,7 +287,83 @@ def qubit_decomposition(
         optimality_level,
         True,
         verbose_level,
-        runtime_limit=runtime_limit,
+        cnot_limit=cnot_limit,
     )
 
     return gates
+
+
+def qubit_decomposition_opt(
+    circuit: QCircuit,
+    state: QState,
+    supports: set,
+):
+    """Composes a circuit decomposition for a circuit .
+
+    :param circuit: [description]
+    :type circuit: QCircuit
+    :param state: [description]
+    :type state: QState
+    :param supports: [description]
+    :type supports: set
+    :return: [description]
+    :rtype: [type]
+    """
+    # we randomly select a pivot qubit
+    pivot = select_informative_qubit(state, supports)
+
+    # we first prepare the rotation table
+    support_list = list(set(supports) - {pivot})
+
+    rotation_table = [[0, 0] for _ in range(1 << len(support_list))]
+
+    for index, weight in state.index_to_weight.items():
+        rotation_index: int = 0
+        for i, support in enumerate(support_list):
+            if index & (1 << support) != 0:
+                rotation_index |= 1 << i
+
+        if index & (1 << pivot) != 0:
+            rotation_table[rotation_index][1] = weight
+        else:
+            rotation_table[rotation_index][0] = weight
+
+    rotation_angles = [0 for _ in range(1 << len(support_list))]
+
+    for i, rotation in enumerate(rotation_table):
+        if rotation[0] == 0:
+            rotation_angles[i] = np.pi
+        elif rotation[1] == 0:
+            rotation_angles[i] = 0
+        else:
+            rotation_angles[i] = 2 * np.arccos(
+                np.sqrt(rotation[0] / (rotation[0] + rotation[1]))
+            )
+
+    if len(rotation_angles) == 1:
+        ry_gate = RY(rotation_angles[0], circuit.qubit_at(pivot))
+        gates = [ry_gate]
+
+    else:
+        # print(f"rotation_table: {rotation_table}, rotation_angle = {rotation_angles} state= {state}")
+        control_sequence = decompose_mcry(rotation_table=rotation_angles)
+
+        gates = control_sequence_to_gates(
+            control_sequence,
+            [circuit.qubit_at(support) for support in support_list],
+            circuit.qubit_at(pivot),
+        )
+
+    # we update the state
+    index_to_weight = {index: 0 for index in state.index_set}
+    for index, weight in state.index_to_weight.items():
+        if index & (1 << pivot) == 0:
+            index_to_weight[index] += weight
+        else:
+            index_to_weight[index ^ (1 << pivot)] = weight + state.index_to_weight.get(
+                index ^ (1 << pivot), 0
+            )
+
+    new_state = QState(index_to_weight, state.num_qubits)
+
+    return gates, new_state

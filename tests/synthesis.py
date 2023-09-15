@@ -16,7 +16,14 @@ from itertools import combinations
 from qiskit import Aer, transpile
 
 import xyz
-from xyz import QState, cnot_synthesis, stopwatch, D_state, quantize_state, get_time
+from xyz import (
+    QState,
+    hybrid_cnot_synthesis,
+    stopwatch,
+    D_state,
+    quantize_state,
+    get_time,
+)
 from xyz.utils.colors import print_red, print_yellow
 
 
@@ -80,59 +87,60 @@ def test_synthesis(state_vector: np.ndarray, map_gates: bool = False):
     """Test that the synthesis is correct ."""
 
     data = {}
-    
+
     # we first run baseline
     from baseline.baselines import run_sparse_state_synthesis, run_dd_based_method
 
-    num_qubit, depth, cx = run_sparse_state_synthesis(state_vector, skip_verify=True)
-    data["baseline1"] = cx
+    num_qubit, depth, cx = run_sparse_state_synthesis(state_vector, skip_verify=False)
+    data["baseline_density"] = cx
 
     cx = run_dd_based_method(state_vector)
-    data["baseline2"] = cx
+    data["baseline_qubit"] = cx
 
     target_state = quantize_state(state_vector)
 
     with stopwatch("synthesis") as timer:
-        try:
-            circuit = cnot_synthesis(
-                target_state, optimality_level=2, verbose_level=3, map_gates=map_gates, runtime_limit=None, reduction_method = "qubit"
-            )
-        except ValueError:
-            print(f"cannot cnot_synthesis state {target_state}")
-            exit(1)
+        circuit = hybrid_cnot_synthesis(target_state, map_gates=map_gates)
 
     circ = circuit.to_qiskit()
     # print(circ)
-    cx = xyz.verify_circuit_and_count_cnot(circuit, state_vector, skip_verify=True)
+    cx, equivalent = xyz.verify_circuit_and_count_cnot(
+        circuit, state_vector, skip_verify=False
+    )
+
+    if not equivalent:
+        from debug import save_buggy_state
+
+        save_buggy_state(quantize_state(state_vector))
+
     data["ours"] = cx
 
     return data
+
 
 import pandas as pd
 
 
 if __name__ == "__main__":
-    
     datas = []
-    
-    for num_qubits in range(6, 20):
-        
-        for sparsity in range(2, 3):
-            
-            if num_qubits ** sparsity >= 2 ** num_qubits:
-                continue
-            
-            for repeat in range(5):
-                state_vector = rand_state(num_qubits, num_qubits ** sparsity, uniform=True)
-                data = test_synthesis(state_vector, map_gates=False)
+
+    for repeat in range(10):
+        for num_qubits in range(3, 20):
+            for sparsity in range(1, 2):
+                num_ones: int = int(
+                    (num_qubits**sparsity) / np.math.factorial(sparsity)
+                )
+
+                if num_ones >= 2**num_qubits:
+                    continue
+
+                state_vector = rand_state(num_qubits, num_ones, uniform=True)
+                data = test_synthesis(state_vector, map_gates=True)
 
                 data["num_qubits"] = num_qubits
                 data["sparsity"] = sparsity
-                
+
                 datas.append(data)
-                
+
                 df = pd.DataFrame(datas)
                 df.to_csv("data.csv", index=False)
-    
-    
-    

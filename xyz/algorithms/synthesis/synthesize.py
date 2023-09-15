@@ -10,7 +10,6 @@ Last Modified time: 2023-06-28 11:02:26
 
 
 import logging
-import re
 from sys import stdout
 
 from xyz.utils.colors import print_green
@@ -24,6 +23,8 @@ from ._sparse_state_synthesis import density_reduction
 from ._ground_state_calibration import ground_state_calibration
 from ._support_reduction import support_reduction
 from ._qubit_decomposition import qubit_decomposition
+
+from .hybird_synthesis import hybrid_cnot_synthesis
 
 
 def intialize_logger():
@@ -61,7 +62,7 @@ def cnot_synthesis(
     optimality_level: int = 3,
     map_gates: bool = False,
     verbose_level: int = 0,
-    runtime_limit: int = None,
+    cnot_limit: int = None,
     reduction_method: str = "qubit",
 ):
     """
@@ -73,10 +74,10 @@ def cnot_synthesis(
 
     # initialize the circuit
     circuit = QCircuit(num_qubits, map_gates=map_gates)
-    
+
     if reduction_method == "qubit":
         gates = qubit_decomposition(
-            circuit, state, optimality_level, verbose_level, runtime_limit=runtime_limit
+            circuit, state, optimality_level, verbose_level, cnot_limit=cnot_limit
         )
         circuit.add_gates(gates)
         return circuit
@@ -125,7 +126,7 @@ def cnot_synthesis(
                     curr_state,
                     optimality_level=optimality_level,
                     verbose_level=verbose_level,
-                    runtime_limit=runtime_limit,
+                    cnot_limit=cnot_limit,
                 )
                 if verbose_level >= 2:
                     print_green("done")

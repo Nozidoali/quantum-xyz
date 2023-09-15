@@ -195,7 +195,7 @@ def density_reduction(circuit: QCircuit, state: QState, verbose_level: int = 0):
     # Update the state
     new_state = QState(index_to_weight, state.num_qubits)
 
-    return new_state, gates
+    return new_state, gates[::-1]
 
 
 def sparse_state_synthesis(circuit, state: QState, verbose_level: int = 0):

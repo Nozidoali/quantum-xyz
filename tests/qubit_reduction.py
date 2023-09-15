@@ -9,9 +9,9 @@ Last Modified time: 2023-08-31 13:33:37
 """
 
 from xyz import qubit_reduction
-from xyz.circuit.qcircuit import QCircuit
-from xyz.srgraph.operators.qstate.common.dicke_state import D_state
-from xyz.srgraph.operators.qstate.qstate import quantize_state
+from xyz import QCircuit
+from xyz import D_state
+from xyz import quantize_state
 
 
 def test_qubit_reduction():

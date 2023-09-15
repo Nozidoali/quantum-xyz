@@ -44,7 +44,7 @@ class MultiControlledGate:
 
     def __init__(self, control_qubits: List[QBit], phases: List[int]) -> None:
         self.control_qubits = control_qubits
-        self.phases = phases
+        self.phases = list(phases)
 
     def has_zero_controls(self) -> bool:
         """Returns True if any control qubits are zero .

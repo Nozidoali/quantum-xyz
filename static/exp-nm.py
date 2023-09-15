@@ -136,7 +136,7 @@ def test_synthesis():
             with stopwatch("synthesis") as timer:
                 try:
                     circuit = cnot_synthesis(
-                        state, optimality_level=3, verbose_level=0, runtime_limit=10
+                        state, optimality_level=3, verbose_level=0, cnot_limit=10
                     )
                 except ValueError:
                     print(f"cannot cnot_synthesis state {state}")

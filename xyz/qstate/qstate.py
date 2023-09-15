@@ -14,6 +14,8 @@ import json
 from typing import List, Tuple
 import numpy as np
 
+MERGE_UNCERTAINTY = 1e0
+
 
 class QState:
     """Class method for QState"""
@@ -21,9 +23,13 @@ class QState:
     def __init__(self, index_to_weight: dict, num_qubit: int) -> None:
         self.num_qubits = num_qubit
 
+        self.index_to_weight = {}
+        for index, weight in index_to_weight.items():
+            if not np.isclose(weight, 0):
+                self.index_to_weight[index] = weight
+        self.index_set = self.index_to_weight.keys()
+
         self.sparsity: int = len(index_to_weight)
-        self.index_set = index_to_weight.keys()
-        self.index_to_weight = copy.deepcopy(index_to_weight)
 
     def get_supports(self) -> List[int]:
         """Return the support of the state .
@@ -116,7 +122,7 @@ class QState:
             )
             if theta is None:
                 theta = _theta
-            elif not np.isclose(theta, _theta):
+            elif not np.isclose(theta, _theta, atol=MERGE_UNCERTAINTY):
                 raise ValueError("The state is not a valid state.")
 
             # finally we update the weight
@@ -151,7 +157,7 @@ class QState:
             )
             if theta is None:
                 theta = _theta
-            elif not np.isclose(theta, _theta):
+            elif not np.isclose(theta, _theta, atol=MERGE_UNCERTAINTY):
                 raise ValueError("The state is not a valid state.")
 
             # finally we update the weight
@@ -210,7 +216,7 @@ class QState:
             )
             if theta is None:
                 theta = _theta
-            elif not np.isclose(theta, _theta):
+            elif not np.isclose(theta, _theta, atol=MERGE_UNCERTAINTY):
                 raise ValueError("The state is not a valid state.")
 
             # finally we update the weight
@@ -252,7 +258,7 @@ class QState:
             )
             if theta is None:
                 theta = _theta
-            elif not np.isclose(theta, _theta):
+            elif not np.isclose(theta, _theta, atol=MERGE_UNCERTAINTY):
                 raise ValueError("The state is not a valid state.")
 
             # finally we update the weight
@@ -393,6 +399,24 @@ class QState:
         vector /= np.linalg.norm(vector)
 
         return vector
+
+    def to_file(self, filename: str):
+        """Writes the benchmark to a file .
+
+        :param filename: [description]
+        :type filename: str
+        """
+
+        # we format the index as a string
+        index_to_weight = {
+            f"{index:0{self.num_qubits}b}": weight
+            for index, weight in self.index_to_weight.items()
+        }
+        benchmark_str = json.dumps(index_to_weight)
+        # lets be safe here
+
+        with open(filename, "w", encoding="utf-8") as file:
+            file.write(benchmark_str)
 
 
 def quantize_state(state_vector: np.ndarray):
