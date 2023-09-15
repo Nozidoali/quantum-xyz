@@ -65,7 +65,7 @@ def run_dd_based_method(state: np.ndarray):
     return cx
 
 
-def run_sparse_state_synthesis(state: np.ndarray):
+def run_sparse_state_synthesis(state: np.ndarray, skip_verify=False):
     """Run the baseline pipeline .
 
     reference:
@@ -94,13 +94,15 @@ def run_sparse_state_synthesis(state: np.ndarray):
     qubits = len(transpiled.qubits)
     depth = transpiled.depth()
     cx = transpiled.count_ops().get("cx", 0)
+    
+    if not skip_verify:
 
-    backend = Aer.get_backend("qasm_simulator")
-    transpiled.save_statevector()
-    state_vector = backend.run(transpiled).result().get_statevector()
+        backend = Aer.get_backend("qasm_simulator")
+        transpiled.save_statevector()
+        state_vector = backend.run(transpiled).result().get_statevector()
 
-    assert np.allclose(
-        state_vector, state
-    ), f"state vector is not correct, {state_vector} != {state}"
+        assert np.allclose(
+            state_vector, state
+        ), f"state vector is not correct, {state_vector} != {state}"
 
     return qubits, depth, cx

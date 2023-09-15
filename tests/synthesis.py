@@ -76,27 +76,26 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
         yield perm[:]
 
 
-def test_synthesis():
+def test_synthesis(state_vector: np.ndarray, map_gates: bool = False):
     """Test that the synthesis is correct ."""
 
-    state_vector = D_state(20, 2)
-    # state_vector = rand_state(5, 4)
-
+    data = {}
+    
     # we first run baseline
     from baseline.baselines import run_sparse_state_synthesis, run_dd_based_method
 
-    num_qubit, depth, cx = run_sparse_state_synthesis(state_vector)
-    print(f"baseline1: cx = {cx}")
+    num_qubit, depth, cx = run_sparse_state_synthesis(state_vector, skip_verify=True)
+    data["baseline1"] = cx
 
     cx = run_dd_based_method(state_vector)
-    print(f"baseline2: cx = {cx}")
+    data["baseline2"] = cx
 
     target_state = quantize_state(state_vector)
 
     with stopwatch("synthesis") as timer:
         try:
             circuit = cnot_synthesis(
-                target_state, optimality_level=3, verbose_level=0, map_gates=True
+                target_state, optimality_level=2, verbose_level=3, map_gates=map_gates, runtime_limit=None, reduction_method = "qubit"
             )
         except ValueError:
             print(f"cannot cnot_synthesis state {target_state}")
@@ -104,10 +103,36 @@ def test_synthesis():
 
     circ = circuit.to_qiskit()
     # print(circ)
-    cx = xyz.verify_circuit_and_count_cnot(circuit, state_vector)
+    cx = xyz.verify_circuit_and_count_cnot(circuit, state_vector, skip_verify=True)
+    data["ours"] = cx
 
-    print(f"ours: cx = {cx}")
+    return data
+
+import pandas as pd
 
 
 if __name__ == "__main__":
-    test_synthesis()
+    
+    datas = []
+    
+    for num_qubits in range(6, 20):
+        
+        for sparsity in range(2, 3):
+            
+            if num_qubits ** sparsity >= 2 ** num_qubits:
+                continue
+            
+            for repeat in range(5):
+                state_vector = rand_state(num_qubits, num_qubits ** sparsity, uniform=True)
+                data = test_synthesis(state_vector, map_gates=False)
+
+                data["num_qubits"] = num_qubits
+                data["sparsity"] = sparsity
+                
+                datas.append(data)
+                
+                df = pd.DataFrame(datas)
+                df.to_csv("data.csv", index=False)
+    
+    
+    

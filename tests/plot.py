@@ -41,35 +41,26 @@ def analyze_data(filename: str):
     plt.rcParams["figure.subplot.right"] = 0.92
 
     df = pd.read_csv(filename)
+    df = df[df["sparsity"] == 3]
 
     # we only keep the num_qubit every 3
     df = df[df["num_qubit"] % 3 == 2]
 
     # aggregate based on num_qubit
     df_agg = df.groupby(["num_qubit"]).agg(
-        {"baseline": "mean", "ours": "mean", "time": "mean"}
+        {"baseline1": "mean", "baseline2": "mean", "ours": "mean", "time": "mean"}
     )
     # calculate the standard deviation
-    df_agg["num_cnot_baseline_std"] = df.groupby(["num_qubit"]).agg(
-        {"baseline": "std"}
-    )["baseline"]
+    df_agg["num_cnot_baseline1_std"] = df.groupby(["num_qubit"]).agg(
+        {"baseline1": "std"}
+    )["baseline1"]
+    df_agg["num_cnot_baseline2_std"] = df.groupby(["num_qubit"]).agg(
+        {"baseline2": "std"}
+    )["baseline2"]
     df_agg["num_cnot_std"] = df.groupby(["num_qubit"]).agg({"ours": "std"})["ours"]
 
     # plot the bar plot, with the error bar
-    df_agg.plot.bar(y=["baseline", "ours"], rot=0)
-
-    # data points
-    if False:
-        plt.scatter(
-            df["num_qubit"] - 2 - 0.13,
-            df["baseline"],
-            marker="x",
-            color="black",
-            alpha=0.2,
-        )
-        plt.scatter(
-            df["num_qubit"] - 2 + 0.13, df["ours"], marker="x", color="black", alpha=0.2
-        )
+    df_agg.plot.bar(y=["baseline1", "baseline2", "ours"], rot=0)
 
     min_qubit = df_agg.index.min()
     max_qubit = df_agg.index.max()
@@ -82,8 +73,15 @@ def analyze_data(filename: str):
     for index, row in df_agg.iterrows():
         plt.text(
             num_bars * (index - min_qubit) / (max_qubit - min_qubit) - 0.6,
-            row["baseline"],
-            f"{row['baseline']:.{precision}f}",
+            row["baseline1"],
+            f"{row['baseline1']:.{precision}f}",
+            color="black",
+            fontsize=data_label_font_size,
+        )
+        plt.text(
+            num_bars * (index - min_qubit) / (max_qubit - min_qubit) - 0.6,
+            row["baseline2"],
+            f"{row['baseline2']:.{precision}f}",
             color="black",
             fontsize=data_label_font_size,
         )
@@ -198,7 +196,8 @@ if __name__ == "__main__":
             "sparsity": sparsity,
             "time": result["cpu_time"],
             "ours": result["num_cnots"],
-            "baseline": result["num_cnots_sparse_uniform"],
+            "baseline1": result["num_cnots_sparse_uniform"],
+            "baseline2": result["num_cnots_merge"],
         }
 
         datas.append(data)
@@ -207,5 +206,5 @@ if __name__ == "__main__":
 
     df.to_csv("data.csv", index=False)
 
-    # analyze_data("data.csv")
-    analyze_runtime("data.csv")
+    analyze_data("data.csv")
+    # analyze_runtime("data.csv")

@@ -90,35 +90,6 @@ def _qubit_decomposition_impl(
             gates.append(gate)
         return
 
-    complexity_estimation = (1 << num_supports) * state.get_sparsity()
-    OPTIZATION_COMPLEXITY2 = 1 << 8
-    OPTIZATION_COMPLEXITY1 = 1 << 10
-    if complexity_estimation <= OPTIZATION_COMPLEXITY2:
-        # we can use optimality_level=2
-        exact_gates = exact_cnot_synthesis(
-            circuit,
-            state,
-            optimality_level=2,
-            verbose_level=verbose_level,
-            runtime_limit=runtime_limit,
-        )
-        for gate in exact_gates:
-            gates.append(gate)
-        return
-
-    if complexity_estimation <= OPTIZATION_COMPLEXITY1:
-        # we can use optimality_level=1
-        exact_gates = exact_cnot_synthesis(
-            circuit,
-            state,
-            optimality_level=1,
-            verbose_level=verbose_level,
-            runtime_limit=runtime_limit,
-        )
-        for gate in exact_gates:
-            gates.append(gate)
-        return
-
     # randomly choose a qubit to split
     pivot = random.choice(supports)
     pivot_qubit = circuit.qubit_at(pivot)

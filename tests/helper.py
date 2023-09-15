@@ -18,6 +18,7 @@ from tempfile import TemporaryFile
 from qiskit import Aer, transpile
 
 from xyz import QState, cnot_synthesis, stopwatch, load_state, QGateType
+from xyz.circuit.verify_circuit import verify_circuit_and_count_cnot
 from xyz.utils.colors import print_yellow
 
 EXAMPLE_FOLDER = os.path.join(os.path.dirname(__file__), "examples")
@@ -91,8 +92,7 @@ def run_experiment(
         # generate a qasm string
         qasm_str = circ.qasm()
 
-        transpiled = transpile(circ, basis_gates=["u", "cx"], optimization_level=0)
-        num_cnots_qiskit = transpiled.count_ops().get("cx", 0)
+        num_cnots_qiskit = verify_circuit_and_count_cnot(circuit, state.to_vector())
 
         # TODO: verify the gate count is correct
 
