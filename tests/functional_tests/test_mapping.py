@@ -8,6 +8,8 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-09-13 10:11:20
 """
 
+# pylint: skip-file
+
 import numpy as np
 from qiskit import Aer, transpile
 import xyz

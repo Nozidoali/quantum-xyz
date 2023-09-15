@@ -10,7 +10,7 @@ Last Modified time: 2023-09-12 02:33:15
 
 # pylint: skip-file
 
-from helper import *
+from tests.experimental_tests.helper import *
 
 if __name__ == "__main__":
     # remove all the previous results

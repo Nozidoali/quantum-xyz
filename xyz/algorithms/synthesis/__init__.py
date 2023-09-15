@@ -9,4 +9,4 @@ Last Modified time: 2023-06-25 12:59:39
 """
 
 from .synthesize import *
-from .hybird_synthesis import *
+from .hybrid_synthesis import *

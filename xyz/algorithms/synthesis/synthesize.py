@@ -24,7 +24,7 @@ from ._ground_state_calibration import ground_state_calibration
 from ._support_reduction import support_reduction
 from ._qubit_decomposition import qubit_decomposition
 
-from .hybird_synthesis import hybrid_cnot_synthesis
+from .hybrid_synthesis import hybrid_cnot_synthesis
 
 
 def intialize_logger():

@@ -150,7 +150,7 @@ tmp.*
 docs/_build
 
 # json files
-tests/regression_test/*.json
+tests/regression_testcases/*.json
 
 # data files
 tests/*.csv

@@ -11,7 +11,6 @@ Last Modified time: 2023-09-01 13:05:14
 import threading
 from typing import List
 import numpy as np
-from collections import namedtuple
 
 from xyz.circuit import QGate, QGateType, QBit, CX, CRY
 from xyz.circuit.basic_gates.mcry import MCRY
@@ -19,7 +18,7 @@ from xyz.circuit.basic_gates.ry import RY
 from xyz.circuit.decomposition import decompose_mcry, control_sequence_to_gates
 
 from xyz.circuit.qcircuit import QCircuit
-from xyz.qstate import QState, index_to_weight
+from xyz.qstate import QState
 from ._exact_cnot_synthesis import exact_cnot_synthesis
 from ._support_reduction import support_reduction
 

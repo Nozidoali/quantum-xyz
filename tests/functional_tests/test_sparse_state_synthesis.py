@@ -8,14 +8,16 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-18 21:09:09
 """
 
+# pylint: skip-file
+
 import random
 import numpy as np
 from itertools import combinations
 from qiskit import Aer, transpile
 
 from xyz import QState, stopwatch, D_state, quantize_state, get_time
-from xyz.algorithms.synthesis import sparse_state_synthesis
-from xyz.circuit.qcircuit import QCircuit
+from xyz import sparse_state_synthesis
+from xyz import QCircuit
 
 
 def rand_state(num_qubit: int, sparsity: int) -> QState:

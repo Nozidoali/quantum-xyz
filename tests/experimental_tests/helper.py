@@ -18,8 +18,8 @@ from tempfile import TemporaryFile
 from qiskit import Aer, transpile
 
 from xyz import QState, cnot_synthesis, stopwatch, load_state, QGateType
-from xyz.algorithms.verification.verify_circuit import verify_circuit_and_count_cnot
-from xyz.utils.colors import print_yellow
+from xyz import verify_circuit_and_count_cnot
+from xyz import print_yellow
 
 EXAMPLE_FOLDER = os.path.join(os.path.dirname(__file__), "examples")
 BEST_CNOT_RESULT_FILE = os.path.join(

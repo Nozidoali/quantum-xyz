@@ -155,7 +155,7 @@ def _hybrid_cnot_synthesis_impl(
     if ENABLE_DECOMPOSITION:
         candidates.append(qubit_decomposition_gates)
 
-    best_gates = min(candidates, key=lambda gates: len(gates))
+    best_gates = min(candidates)
 
     return best_gates
 

@@ -8,7 +8,6 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-19 13:40:18
 """
 
-import copy
 import json
 
 from typing import List, Tuple

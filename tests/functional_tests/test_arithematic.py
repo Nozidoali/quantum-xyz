@@ -8,11 +8,12 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-27 01:11:04
 """
 
+# pylint: skip-file
 
 from xyz import D_state
 from xyz import quantize_state, MCRYOperator, QuantizedRotationType
-from xyz.srgraph.operators.ctr import CTROperator
-from xyz.srgraph.operators.tr import TROperator
+from xyz import CTROperator
+from xyz import TROperator
 
 
 def test_operators():

@@ -8,9 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-09-01 12:56:17
 """
 
-import time
 from queue import PriorityQueue
-from turtle import back
 from xyz.circuit.basic_gates.base.gate import QGate
 from xyz.circuit.basic_gates.cx import CX
 from xyz.circuit import QCircuit, X, MCRY

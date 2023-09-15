@@ -109,7 +109,7 @@ def test_synthesis(state_vector: np.ndarray, map_gates: bool = False):
     )
 
     if not equivalent:
-        from debug import save_buggy_state
+        from tests.regression_tests import save_buggy_state
 
         save_buggy_state(quantize_state(state_vector))
 

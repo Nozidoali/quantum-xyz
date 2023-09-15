@@ -9,11 +9,10 @@ Last Modified time: 2023-09-15 14:54:51
 """
 
 import os
-from xyz import hybird_synthesis
 from xyz import load_state
-from xyz.algorithms.synthesis.hybird_synthesis import hybrid_cnot_synthesis
+from xyz import hybrid_cnot_synthesis
 
-REGRESSION_TEST_DIR = os.path.join(os.path.dirname(__file__), "regression_test")
+REGRESSION_TEST_DIR = os.path.join(os.path.dirname(__file__), "regression_testcases")
 
 
 def save_buggy_state(state):

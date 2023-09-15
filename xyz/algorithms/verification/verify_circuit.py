@@ -9,14 +9,12 @@ Last Modified time: 2023-09-13 12:04:42
 """
 
 import numpy as np
-from panel import state
 from qiskit import Aer, transpile
 
 from xyz.qstate import quantize_state
-from xyz.qstate.index_to_weight import index_to_str
-from xyz.utils.colors import print_green, print_yellow, print_red
-
-from xyz.circuit.qcircuit import QCircuit
+from xyz.qstate import index_to_str
+from xyz.utils import print_green, print_yellow, print_red
+from xyz.circuit import QCircuit
 
 from .diff_states import get_difference
 

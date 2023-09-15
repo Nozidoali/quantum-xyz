@@ -8,6 +8,9 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-31 13:33:37
 """
 
+# pylint: skip-file
+
+
 from xyz import qubit_reduction
 from xyz import QCircuit
 from xyz import D_state

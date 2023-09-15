@@ -13,7 +13,7 @@ import numpy as np
 from xyz.circuit import CX
 from xyz.circuit import X, RY
 from xyz.circuit.qcircuit import QCircuit
-from xyz.qstate import QState, index_to_weight
+from xyz.qstate import QState
 from xyz.operator import CXOperator, XOperator
 
 ENABLE_Y_REDUCTION = True
@@ -89,7 +89,7 @@ def support_reduction(circuit: QCircuit, state: QState, enable_cnot: bool = True
             theta: float = None
             is_separable: bool = True
             index_to_weight = {index: 0 for index in new_state.index_set}
-            for index, weight in new_state.index_to_weight.items():
+            for index, _ in new_state.index_to_weight.items():
                 reversed_index = index ^ (1 << qubit_index)
                 if reversed_index not in new_state.index_to_weight:
                     is_separable = False
