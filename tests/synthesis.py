@@ -24,6 +24,7 @@ from xyz import (
     quantize_state,
     get_time,
 )
+from xyz import HybridCnotSynthesisStatistics
 from xyz.utils.colors import print_red, print_yellow
 
 
@@ -100,7 +101,9 @@ def test_synthesis(state_vector: np.ndarray, map_gates: bool = False):
     target_state = quantize_state(state_vector)
 
     with stopwatch("synthesis") as timer:
-        circuit = hybrid_cnot_synthesis(target_state, map_gates=map_gates)
+        stats = HybridCnotSynthesisStatistics()
+        circuit = hybrid_cnot_synthesis(target_state, map_gates=map_gates, stats=stats)
+        stats.report()
 
     circ = circuit.to_qiskit()
     # print(circ)
@@ -108,13 +111,7 @@ def test_synthesis(state_vector: np.ndarray, map_gates: bool = False):
         circuit, state_vector, skip_verify=False
     )
 
-    if not equivalent:
-        from tests.regression_tests import save_buggy_state
-
-        save_buggy_state(quantize_state(state_vector))
-
     data["ours"] = cx
-
     return data
 
 

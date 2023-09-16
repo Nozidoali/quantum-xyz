@@ -13,6 +13,8 @@ import json
 from typing import List, Tuple
 import numpy as np
 
+# the merge uncertainty, if the difference between the two angles is less than
+# this value, we consider them to be the same
 MERGE_UNCERTAINTY = 1e0
 
 
