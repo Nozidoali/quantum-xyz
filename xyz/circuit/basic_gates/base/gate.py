@@ -48,6 +48,8 @@ class QGateType(Enum):
 
     MULTIPLEX_Y = auto()
 
+    MCMY = auto()
+
     NONE = auto()
 
 

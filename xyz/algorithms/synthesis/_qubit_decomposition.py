@@ -13,6 +13,7 @@ from typing import List
 import numpy as np
 
 from xyz.circuit import QGate, QGateType, QBit, CX, CRY
+from xyz.circuit.basic_gates.mcmy import MCMY
 from xyz.circuit.basic_gates.mcry import MCRY
 from xyz.circuit.basic_gates.ry import RY
 from xyz.circuit.decomposition import decompose_mcry, control_sequence_to_gates
@@ -299,6 +300,11 @@ def qubit_decomposition_opt(
 ):
     """Composes a circuit decomposition for a circuit .
 
+    the main difference is that, in this implementation:
+        1. we do not synthesize the truth table
+
+    to further improve, maybe we can check the actual supports
+
     :param circuit: [description]
     :type circuit: QCircuit
     :param state: [description]
@@ -312,13 +318,15 @@ def qubit_decomposition_opt(
     pivot = select_informative_qubit(state, supports)
 
     # we first prepare the rotation table
-    support_list = list(set(supports) - {pivot})
+    # the pivot is the target qubit,
+    # and the other qubits are the control qubits
+    control_indices = list(set(supports) - {pivot})
 
-    rotation_table = [[0, 0] for _ in range(1 << len(support_list))]
+    rotation_table = [[0, 0] for _ in range(1 << len(control_indices))]
 
     for index, weight in state.index_to_weight.items():
         rotation_index: int = 0
-        for i, support in enumerate(support_list):
+        for i, support in enumerate(control_indices):
             if index & (1 << support) != 0:
                 rotation_index |= 1 << i
 
@@ -327,7 +335,7 @@ def qubit_decomposition_opt(
         else:
             rotation_table[rotation_index][0] = weight
 
-    rotation_angles = [0 for _ in range(1 << len(support_list))]
+    rotation_angles = [0 for _ in range(1 << len(control_indices))]
 
     for i, rotation in enumerate(rotation_table):
         if rotation[0] == 0:
@@ -344,14 +352,12 @@ def qubit_decomposition_opt(
         gates = [ry_gate]
 
     else:
-        # print(f"rotation_table: {rotation_table}, rotation_angle = {rotation_angles} state= {state}")
-        control_sequence = decompose_mcry(rotation_table=rotation_angles)
+        
+        gate = MCMY(rotation_angles, [circuit.qubit_at(support) for support in control_indices], circuit.qubit_at(pivot))
+        
+        gates = [gate]
+        
 
-        gates = control_sequence_to_gates(
-            control_sequence,
-            [circuit.qubit_at(support) for support in support_list],
-            circuit.qubit_at(pivot),
-        )
 
     # we update the state
     index_to_weight = {index: 0 for index in state.index_set}

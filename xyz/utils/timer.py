@@ -63,7 +63,7 @@ class stopwatch:
         return float(time.perf_counter() - self.tic)
 
 
-global_stopwatches = {}
+GLOBAL_STOPWATCHES = {}
 
 
 class GlobalStopwatch:
@@ -99,9 +99,9 @@ class GlobalStopwatch:
         @param exc_tb The traceback of the exception that was raised
         """
         self.toc = time.perf_counter()
-        if self.name not in global_stopwatches:
-            global_stopwatches[self.name] = 0
-        global_stopwatches[self.name] += self.toc - self.tic
+        if self.name not in GLOBAL_STOPWATCHES:
+            GLOBAL_STOPWATCHES[self.name] = 0
+        GLOBAL_STOPWATCHES[self.name] += self.toc - self.tic
         # print_green("{:<25}: {:>8.02f} sec".format(self.name, self.toc - self.tic))
 
     def time(self):
@@ -109,7 +109,7 @@ class GlobalStopwatch:
         @brief Time since last call to start (). This is useful for measuring how long we've been in the middle of a test to run.
         @return The number of seconds since the start () call that took place in the test's run () method
         """
-        return global_stopwatches[self.name]
+        return GLOBAL_STOPWATCHES[self.name]
 
 
 def call_with_global_timer(func):
@@ -134,6 +134,11 @@ def get_time(name: str):
     :return: [description]
     :rtype: [type]
     """
-    if name not in global_stopwatches:
+    if name not in GLOBAL_STOPWATCHES:
         return 0
-    return global_stopwatches[name]
+    return GLOBAL_STOPWATCHES[name]
+
+def global_stopwatch_report():
+    """Report the global stopwatch ."""
+    for name, time in GLOBAL_STOPWATCHES.items():
+        print_green(f"{name:<25}: {time:>8.02f} sec")

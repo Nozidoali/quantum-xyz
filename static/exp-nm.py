@@ -26,8 +26,8 @@ import seaborn as sns
 from tomlkit import date
 
 from xyz import QState, cnot_synthesis, stopwatch, quantize_state
-from xyz.srgraph.operators.qstate.common.dicke_state import D_state
-from xyz.srgraph.operators.qstate.common.w_state import W_state
+from xyz import D_state
+from xyz import W_state
 
 
 def rand_state(
@@ -330,6 +330,6 @@ def analyze_data(filename: str):
 
 
 if __name__ == "__main__":
-    test_synthesis()
+    # test_synthesis()
     # analyze_data("nm.csv")
-    # analyze_runtime("nm2.csv")
+    analyze_runtime("exp-nm-runtime.csv")

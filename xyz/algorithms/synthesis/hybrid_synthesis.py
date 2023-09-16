@@ -8,11 +8,15 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-09-15 14:32:11
 """
 
+from collections import namedtuple
+from typing import List
 import numpy as np
 
-from xyz.circuit import QCircuit, RY
+
+from xyz.circuit import QCircuit, RY, QGate
 from xyz.qstate import QState
 from xyz.utils import stopwatch
+from xyz.utils import global_stopwatch_report
 
 from ._exact_cnot_synthesis import exact_cnot_synthesis
 from ._sparse_state_synthesis import density_reduction
@@ -24,14 +28,24 @@ from ._qubit_decomposition import (
     qubit_decomposition_opt,
 )
 
-ENABLE_QUBIT_REDUCTION = True
-ENABLE_DENSITY_REDUCTION = True
+EXACT_SYNTHESIS_QUBIT_THRESHOLD = 6
+EXACT_SYNTHESIS_DENSITY_THRESHOLD = 16
+
+EXACT_SYNTHESIS_CNOT_LIMIT = 10
+
 ENABLE_EXACT_SYNTHESIS = True
+
+ENABLE_QUBIT_REDUCTION = True
+ENABLE_DENSITY_REDUCTION = False
+
 ENABLE_DECOMPOSITION = False
 
+ENABLE_REINDEX = True
+
+
 class HybridCnotSynthesisStatistics:
-    """Classes the hybridCnothesisStatistics class .
-    """
+    """Classes the hybridCnothesisStatistics class ."""
+
     def __init__(self) -> None:
         self.time_total: float = 0
         self.num_runs_support_reduction: int = 0
@@ -39,10 +53,13 @@ class HybridCnotSynthesisStatistics:
         self.time_exact_cnot_synthesis: float = 0
         self.time_density_reduction: float = 0
         self.time_qubit_decomposition: float = 0
+        self.num_reduced_supports: int = 0
+        self.num_reduced_density: int = 0
+        self.num_saved_gates_decision: int = 0
+        self.num_methods: dict = {}
 
     def report(self):
-        """Report the number of runs supported by the benchmark .
-        """
+        """Report the number of runs supported by the benchmark ."""
         print("-" * 80)
         print(f"time_total: {self.time_total}")
         print("-" * 80)
@@ -51,27 +68,68 @@ class HybridCnotSynthesisStatistics:
         print(f"time_exact_cnot_synthesis: {self.time_exact_cnot_synthesis}")
         print(f"time_density_reduction: {self.time_density_reduction}")
         print(f"time_qubit_decomposition: {self.time_qubit_decomposition}")
+        print(f"num_reduced_supports: {self.num_reduced_supports}")
+        print(f"num_reduced_density: {self.num_reduced_density}")
+        print(f"num_saved_gates_decision: {self.num_saved_gates_decision}")
         print("-" * 80)
-        
+        for method, num in self.num_methods.items():
+            print(f"{method}: {num}")
+        print("-" * 80)
+
 
 def _hybrid_cnot_synthesis_impl(
     circuit: QCircuit,
     state: QState,
     stats: HybridCnotSynthesisStatistics = None,
 ):
+    prev_supports = state.get_supports()
+    prev_num_supports = len(prev_supports)
+    prev_density = state.get_sparsity()
+
     # first, run support reduction
     with stopwatch("support_reduction") as timer:
-        state, support_reducing_gates = support_reduction(circuit, state, enable_cnot=True)
-    
-    if stats is not None:
-        stats.num_runs_support_reduction += 1
-        stats.time_support_reduction += timer.time()
+        state, support_reducing_gates = support_reduction(
+            circuit, state, enable_cnot=True
+        )
 
+    num_cx_support_reduction = sum(
+        [gate.get_cnot_cost() for gate in support_reducing_gates]
+    )
+
+    if ENABLE_REINDEX:
+        # compact the state
+        # now we get the sub state and sub circuit:
+        sub_index_to_weight = {}
+        old_to_new_qubit_mapping = {}
+
+        supports = state.get_supports()
+        num_supports = len(supports)
+        for new_index, old_index in enumerate(supports):
+            old_to_new_qubit_mapping[old_index] = new_index
+        for index, weight in state.index_to_weight.items():
+            new_index: int = 0
+            for i, support in enumerate(supports):
+                if index & (1 << support) != 0:
+                    new_index |= 1 << i
+            sub_index_to_weight[new_index] = weight
+        state = QState(sub_index_to_weight, num_supports)
+        circuit = circuit.sub_circuit(supports)
+
+        # then we updates the supports to the new index
+        supports = list(range(num_supports))
 
     # get the states
     supports = state.get_supports()
     num_supports = len(supports)
     density = state.get_sparsity()
+
+    support_reduced: bool = (prev_num_supports - num_supports) > 0
+
+    if stats is not None:
+        stats.num_runs_support_reduction += 1
+        stats.time_support_reduction += timer.time()
+        stats.num_reduced_supports += prev_num_supports - num_supports
+        stats.num_reduced_density += prev_density - density
 
     # check for the trivial case
     if density == 1:
@@ -83,10 +141,16 @@ def _hybrid_cnot_synthesis_impl(
         for gate in support_reducing_gates:
             gates.append(gate)
 
-        return gates
+        # ground state calibration has 0 CNOT
+        return gates, num_cx_support_reduction
 
     # exact synthesis
-    if ENABLE_EXACT_SYNTHESIS and num_supports <= 4:
+    if (
+        ENABLE_EXACT_SYNTHESIS
+        and num_supports <= EXACT_SYNTHESIS_QUBIT_THRESHOLD
+        and density <= EXACT_SYNTHESIS_DENSITY_THRESHOLD
+    ):
+        # print_green(f"exact synthesis, state = {state}")
         try:
             with stopwatch("exact_cnot_synthesis") as timer:
                 exact_gates = exact_cnot_synthesis(
@@ -94,31 +158,39 @@ def _hybrid_cnot_synthesis_impl(
                     state,
                     optimality_level=3,
                     verbose_level=0,
-                    cnot_limit=7,
+                    cnot_limit=EXACT_SYNTHESIS_CNOT_LIMIT,
                 )
             if stats is not None:
                 stats.time_exact_cnot_synthesis += timer.time()
-                
+
             gates = []
             for gate in exact_gates:
                 gates.append(gate)
             for gate in support_reducing_gates:
                 gates.append(gate)
 
-            return gates
+            num_cx_exact = sum([gate.get_cnot_cost() for gate in exact_gates])
+
+            return gates, num_cx_exact
         except ValueError:
             pass
 
     # sparse state synthesis
+    sparse_qsp_gates: List[QGate] = None
+    num_sparse_qsp_cx: int = 0
     if ENABLE_DENSITY_REDUCTION:
         with stopwatch("density_reduction") as timer:
             new_state, density_reduction_gates = density_reduction(
                 circuit, state, verbose_level=0
             )
+        num_density_reduction_cx = sum(
+            [gate.get_cnot_cost() for gate in density_reduction_gates]
+        )
+
         if stats is not None:
             stats.time_density_reduction += timer.time()
-            
-        rec_gates = _hybrid_cnot_synthesis_impl(
+
+        rec_gates, rec_cx = _hybrid_cnot_synthesis_impl(
             circuit,
             new_state,
             stats=stats,
@@ -132,16 +204,24 @@ def _hybrid_cnot_synthesis_impl(
         for gate in support_reducing_gates:
             sparse_qsp_gates.append(gate)
 
+        num_sparse_qsp_cx = rec_cx + num_density_reduction_cx + num_cx_support_reduction
+
     # qubit decomposition
+    qubit_reduction_gates: List[QGate] = None
+    num_qubit_reduction_cx: int = 0
     if ENABLE_QUBIT_REDUCTION:
         with stopwatch("qubit_decomposition") as timer:
             qubit_decomposition_gates, new_state = qubit_decomposition_opt(
                 circuit, state, supports
             )
+        num_qubit_reduction_cx = sum(
+            [gate.get_cnot_cost() for gate in qubit_decomposition_gates]
+        )
+
         if stats is not None:
             stats.time_qubit_decomposition += timer.time()
 
-        rec_gates = _hybrid_cnot_synthesis_impl(
+        rec_gates, rec_cx = _hybrid_cnot_synthesis_impl(
             circuit,
             new_state,
             stats=stats,
@@ -155,6 +235,10 @@ def _hybrid_cnot_synthesis_impl(
         for gate in support_reducing_gates:
             qubit_reduction_gates.append(gate)
 
+        num_qubit_reduction_cx += rec_cx + num_cx_support_reduction
+
+    qubit_decomposition_gates: List[QGate] = None
+    num_qubit_decomposition_cx: int = 0  # not implemented yet
     if ENABLE_DECOMPOSITION:
         pivot = select_pivot_qubit(state, supports)
         pivot_qubit = circuit.qubit_at(pivot)
@@ -191,19 +275,41 @@ def _hybrid_cnot_synthesis_impl(
             qubit_decomposition_gates.append(gate)
 
     # we choose the best one
+    # based on the number of CNOT gates
+    Method = namedtuple("method", ["name", "gates", "num_gates"])
+
     candidates = []
 
-    if ENABLE_DENSITY_REDUCTION:
-        candidates.append(sparse_qsp_gates)
-    if ENABLE_QUBIT_REDUCTION:
-        candidates.append(qubit_reduction_gates)
-    if ENABLE_DECOMPOSITION:
-        candidates.append(qubit_decomposition_gates)
+    if sparse_qsp_gates is not None:
+        candidates.append(Method("sparse_qsp", sparse_qsp_gates, num_sparse_qsp_cx))
+    if qubit_reduction_gates is not None:
+        candidates.append(
+            Method("qubit_reduction", qubit_reduction_gates, num_qubit_reduction_cx)
+        )
+    if qubit_decomposition_gates is not None:
+        candidates.append(
+            Method(
+                "qubit_decomposition",
+                qubit_decomposition_gates,
+                num_qubit_decomposition_cx,
+            )
+        )
 
     # pylint: disable=unnecessary-lambda
-    best_gates = min(candidates, key=lambda gates: len(gates))
+    best_candidate = min(candidates, key=lambda x: x.num_gates)
+    worst_candidate = max(candidates, key=lambda x: x.num_gates)
 
-    return best_gates
+    best_gates = best_candidate.gates
+    best_method = best_candidate.name
+
+    worst_num_gates = worst_candidate.num_gates
+    best_num_gates = best_candidate.num_gates
+
+    if stats is not None:
+        stats.num_saved_gates_decision += worst_num_gates - best_num_gates
+        stats.num_methods[best_method] = stats.num_methods.get(best_method, 0) + 1
+
+    return best_gates, best_num_gates
 
 
 def hybrid_cnot_synthesis(
@@ -221,15 +327,16 @@ def hybrid_cnot_synthesis(
     :rtype: [type]
     """
     circuit = QCircuit(state.num_qubits, map_gates=map_gates)
-    
+
     with stopwatch("hybrid_cnot_synthesis") as timer:
-        gates = _hybrid_cnot_synthesis_impl(
+        gates, _ = _hybrid_cnot_synthesis_impl(
             circuit,
             state,
             stats=stats,
         )
-    
+
     stats.time_total = timer.time()
-    
     circuit.add_gates(gates)
+    
+    global_stopwatch_report()
     return circuit

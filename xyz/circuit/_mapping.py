@@ -14,10 +14,10 @@ from typing import List
 import numpy as np
 
 from xyz.circuit.basic_gates.ry import RY
-
-from .basic_gates import QGate, QGateType, MULTIPLEXY, CRX, CU, MCRY, X
-from .decomposition import decompose_mcry, control_sequence_to_gates
 from xyz.utils import call_with_global_timer
+
+from .basic_gates import QGate, QGateType, MULTIPLEXY, CRX, CU, MCRY, X, MCMY
+from .decomposition import decompose_mcry, control_sequence_to_gates
 
 
 def __map_muxy(gate: MULTIPLEXY) -> List[QGate]:
@@ -80,6 +80,26 @@ def __map_mcry(gate: QGate) -> List[QGate]:
 
     return gates
 
+def __map_mcmy(gate: MCMY) -> List[QGate]:
+    """Convert a MCMY gate into a list of gates .
+
+    :param gate: [description]
+    :type gate: MCMY
+    :return: [description]
+    :rtype: List[QGate]
+    """
+    
+    rotation_table = gate.rotation_table
+
+    control_sequence = decompose_mcry(rotation_table=rotation_table)
+
+    gates = control_sequence_to_gates(
+        control_sequence,
+        gate.control_qubits,
+        gate.target_qubit,
+    )
+    
+    return gates
 
 def theta_to_unitary(theta: float):
     """Converts theta to a unitary unitary gate .
@@ -274,6 +294,11 @@ def add_gate_mapped(self, gate: QGate) -> None:
                 gates = __map_mcry(gate)
 
             # this may cause problem if the gates returned are still MCRYs
+            self.add_gates(gates)
+            
+        case QGateType.MCMY:
+            gates = __map_mcmy(gate)
+            
             self.add_gates(gates)
 
         case QGateType.CRY:

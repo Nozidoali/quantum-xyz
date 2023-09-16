@@ -90,7 +90,11 @@ def test_synthesis(state_vector: np.ndarray, map_gates: bool = False):
     data = {}
 
     # we first run baseline
-    from baseline.baselines import run_sparse_state_synthesis, run_dd_based_method
+    from baseline.baselines import (
+        run_sparse_state_synthesis,
+        run_dd_based_method,
+        run_sota_based_method,
+    )
 
     num_qubit, depth, cx = run_sparse_state_synthesis(state_vector, skip_verify=False)
     data["baseline_density"] = cx
@@ -98,18 +102,22 @@ def test_synthesis(state_vector: np.ndarray, map_gates: bool = False):
     cx = run_dd_based_method(state_vector)
     data["baseline_qubit"] = cx
 
+    cx = run_sota_based_method(state_vector)
+    data["baseline_sota"] = cx
+
     target_state = quantize_state(state_vector)
 
     with stopwatch("synthesis") as timer:
         stats = HybridCnotSynthesisStatistics()
         circuit = hybrid_cnot_synthesis(target_state, map_gates=map_gates, stats=stats)
         stats.report()
+        cx = circuit.get_cnot_cost()
 
-    circ = circuit.to_qiskit()
+    # circ = circuit.to_qiskit()
     # print(circ)
-    cx, equivalent = xyz.verify_circuit_and_count_cnot(
-        circuit, state_vector, skip_verify=False
-    )
+    # cx, equivalent = xyz.verify_circuit_and_count_cnot(
+    #     circuit, state_vector, skip_verify=False
+    # )
 
     data["ours"] = cx
     return data
@@ -121,9 +129,9 @@ import pandas as pd
 if __name__ == "__main__":
     datas = []
 
-    for repeat in range(10):
-        for num_qubits in range(3, 20):
-            for sparsity in range(1, 2):
+    for repeat in range(1):
+        for num_qubits in range(12, 13):
+            for sparsity in range(3, 4):
                 num_ones: int = int(
                     (num_qubits**sparsity) / np.math.factorial(sparsity)
                 )
@@ -132,7 +140,7 @@ if __name__ == "__main__":
                     continue
 
                 state_vector = rand_state(num_qubits, num_ones, uniform=True)
-                data = test_synthesis(state_vector, map_gates=True)
+                data = test_synthesis(state_vector, map_gates=False)
 
                 data["num_qubits"] = num_qubits
                 data["sparsity"] = sparsity

@@ -23,18 +23,36 @@ from ._qiskit import _to_qiskit
 class QCircuit:
     """the class of quantum circuit"""
 
-    def __init__(self, num_qubits: int, map_gates: bool = False) -> None:
+    def __init__(
+        self, num_qubits: int, map_gates: bool = False, qubits: list = None
+    ) -> None:
         """Initialize the gate .
 
         :param num_qubits: [description]
         :type num_qubits: int
         """
         self.__gates: List[QGate] = []
-        self.__qubits: List[QBit] = []
-        self.init_qubits(num_qubits)
+
+        if qubits is not None:
+            self.__qubits: List[QBit] = qubits[:]
+        else:
+            self.__qubits: List[QBit] = []
+            self.init_qubits(num_qubits)
 
         # configures
         self.map_gates = map_gates
+
+    def sub_circuit(self, supports: list) -> "QCircuit":
+        """Get the sub-circuit of the current circuit .
+
+        :param qubit_mapping: [description]
+        :type qubit_mapping: [type]
+        :return: [description]
+        :rtype: [type]
+        """
+        qubits = [self.qubit_at(i) for i in supports]
+        sub_circuit = QCircuit(len(qubits), map_gates=self.map_gates, qubits=qubits)
+        return sub_circuit
 
     def get_num_qubits(self) -> int:
         """
@@ -46,6 +64,9 @@ class QCircuit:
         """
         Get the qubit at the specified index
         """
+        assert (
+            index < self.get_num_qubits()
+        ), f"index = {index} >= num_qubits = {self.get_num_qubits()}"
         return self.__qubits[index]
 
     def get_gates(self) -> List[QGate]:
@@ -128,3 +149,13 @@ class QCircuit:
         :rtype: [type]
         """
         return _to_qiskit(self)
+
+    def __str__(self) -> str:
+        """Convert the sequence to a string .
+
+        :return: [description]
+        :rtype: str
+        """
+        qubit_index_list = [qubit.index for qubit in self.__qubits]
+        qubit_index_list_str = ",".join([str(i) for i in qubit_index_list])
+        return f"Circuit({qubit_index_list_str})"

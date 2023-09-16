@@ -12,9 +12,11 @@ from typing import List
 import numpy as np
 
 from scipy.linalg import solve
+
+from xyz.utils import call_with_global_timer
 from ..basic_gates import QGate, RY, CX, QBit
 
-
+@call_with_global_timer
 def find_thetas(alphas):
     """Find theta matrix for the given alphas .
 
@@ -37,7 +39,7 @@ def find_thetas(alphas):
 
     return thetas
 
-
+@call_with_global_timer
 def decompose_mcry(rotation_table: list):
     """Synthesize multiple controlled rotations .
 
@@ -80,6 +82,7 @@ def decompose_mcry(rotation_table: list):
     return control_sequence
 
 
+@call_with_global_timer
 def control_sequence_to_gates(
     control_sequence: list, control_qubits: List[QBit], target_qubit: QBit
 ) -> List[QGate]:

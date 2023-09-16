@@ -17,3 +17,8 @@ class QBit:
 
     def __str__(self) -> str:
         return f"q{self.index}"
+
+    def __eq__(self, __value: object) -> bool:
+        if isinstance(__value, QBit):
+            return self.index == __value.index
+        return False

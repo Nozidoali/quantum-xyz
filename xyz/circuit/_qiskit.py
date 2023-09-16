@@ -36,6 +36,13 @@ def _to_qiskit(self) -> QuantumCircuit:
     circuit = QuantumCircuit(quantum_registers)
 
     def _to_register(qubit: QBit | List[QBit]) -> QuantumRegister:
+        """Converts a single bit value to a register .
+
+        :param qubit: [description]
+        :type qubit: QBit
+        :return: [description]
+        :rtype: QuantumRegister
+        """
         nonlocal quantum_registers
         if isinstance(qubit, QBit):
             return quantum_registers[qubit.index]
@@ -110,6 +117,11 @@ def _to_qiskit(self) -> QuantumCircuit:
                     _to_register(gate.control_qubit),
                     _to_register(gate.target_qubit),
                     ctrl_state=gate.phase,
+                )
+
+            case _:
+                raise NotImplementedError(
+                    f"Gate type {gate.get_qgate_type()} is not supported yet\n Consider toggle map_gates to True"
                 )
 
     return circuit
