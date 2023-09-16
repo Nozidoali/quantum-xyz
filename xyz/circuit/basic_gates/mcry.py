@@ -13,6 +13,39 @@ from typing import List
 from .base import BasicGate, MultiControlledGate, QBit, QGateType, RotationGate
 
 
+MCRY_CNOT_COST = {
+    "0": 0,
+    "1": 2,
+    "2": 4,
+    "3": 8,
+    "4": 16,
+    "5": 32,
+    "6": 64,
+    "7": 128,
+    "8": 226,
+    "9": 290,
+    "10": 362,
+    "11": 442,
+    "12": 530,
+    "13": 626,
+    "14": 730,
+    "15": 842,
+    "16": 962,
+    "17": 1090,
+    "18": 1226,
+    "19": 1370,
+    "20": 1522,
+    "21": 1682,
+    "22": 1850,
+    "23": 2026,
+    "24": 2210,
+    "25": 2402,
+    "26": 2602,
+    "27": 2810,
+    "28": 3026,
+}
+
+
 class MCRY(RotationGate, BasicGate, MultiControlledGate):
     """Classmethod to create a multi-controlled  gate .
 
@@ -50,4 +83,10 @@ class MCRY(RotationGate, BasicGate, MultiControlledGate):
         :return: [description]
         :rtype: int
         """
-        return 1 << len(self.control_qubits)
+
+        index_str = str(len(self.control_qubits))
+        if index_str not in MCRY_CNOT_COST:
+            raise ValueError(
+                f"len(self.control_qubits) = {len(self.control_qubits)} is not supported"
+            )
+        return MCRY_CNOT_COST[index_str]

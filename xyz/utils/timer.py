@@ -138,6 +138,7 @@ def get_time(name: str):
         return 0
     return GLOBAL_STOPWATCHES[name]
 
+
 def global_stopwatch_report():
     """Report the global stopwatch ."""
     for name, time in GLOBAL_STOPWATCHES.items():

@@ -352,12 +352,13 @@ def qubit_decomposition_opt(
         gates = [ry_gate]
 
     else:
-        
-        gate = MCMY(rotation_angles, [circuit.qubit_at(support) for support in control_indices], circuit.qubit_at(pivot))
-        
-        gates = [gate]
-        
+        gate = MCMY(
+            rotation_angles,
+            [circuit.qubit_at(support) for support in control_indices],
+            circuit.qubit_at(pivot),
+        )
 
+        gates = [gate]
 
     # we update the state
     index_to_weight = {index: 0 for index in state.index_set}

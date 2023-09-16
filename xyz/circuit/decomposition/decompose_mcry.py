@@ -16,6 +16,7 @@ from scipy.linalg import solve
 from xyz.utils import call_with_global_timer
 from ..basic_gates import QGate, RY, CX, QBit
 
+
 @call_with_global_timer
 def find_thetas(alphas):
     """Find theta matrix for the given alphas .
@@ -38,6 +39,7 @@ def find_thetas(alphas):
     thetas = solve(gray_code_coefficient_matrix, alphas)
 
     return thetas
+
 
 @call_with_global_timer
 def decompose_mcry(rotation_table: list):

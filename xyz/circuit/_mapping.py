@@ -80,6 +80,7 @@ def __map_mcry(gate: QGate) -> List[QGate]:
 
     return gates
 
+
 def __map_mcmy(gate: MCMY) -> List[QGate]:
     """Convert a MCMY gate into a list of gates .
 
@@ -88,7 +89,7 @@ def __map_mcmy(gate: MCMY) -> List[QGate]:
     :return: [description]
     :rtype: List[QGate]
     """
-    
+
     rotation_table = gate.rotation_table
 
     control_sequence = decompose_mcry(rotation_table=rotation_table)
@@ -98,8 +99,9 @@ def __map_mcmy(gate: MCMY) -> List[QGate]:
         gate.control_qubits,
         gate.target_qubit,
     )
-    
+
     return gates
+
 
 def theta_to_unitary(theta: float):
     """Converts theta to a unitary unitary gate .
@@ -288,17 +290,17 @@ def add_gate_mapped(self, gate: QGate) -> None:
             self.append_gates(gates)
 
         case QGateType.MCRY:
-            if len(gate.get_control_qubits()) >= 4:
+            if len(gate.get_control_qubits()) >= 8:
                 gates = __map_mcry_linear(gate)
             else:
                 gates = __map_mcry(gate)
 
             # this may cause problem if the gates returned are still MCRYs
             self.add_gates(gates)
-            
+
         case QGateType.MCMY:
             gates = __map_mcmy(gate)
-            
+
             self.add_gates(gates)
 
         case QGateType.CRY:

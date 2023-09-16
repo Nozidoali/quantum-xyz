@@ -337,6 +337,6 @@ def hybrid_cnot_synthesis(
 
     stats.time_total = timer.time()
     circuit.add_gates(gates)
-    
+
     global_stopwatch_report()
     return circuit
