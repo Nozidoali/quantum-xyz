@@ -17,6 +17,7 @@ from xyz.circuit import QCircuit, RY, QGate
 from xyz.qstate import QState
 from xyz.utils import stopwatch
 from xyz.utils import global_stopwatch_report
+from xyz.utils.colors import print_yellow
 
 from ._exact_cnot_synthesis import exact_cnot_synthesis
 from ._sparse_state_synthesis import density_reduction
@@ -28,8 +29,8 @@ from ._qubit_decomposition import (
     qubit_decomposition_opt,
 )
 
-EXACT_SYNTHESIS_QUBIT_THRESHOLD = 6
-EXACT_SYNTHESIS_DENSITY_THRESHOLD = 16
+EXACT_SYNTHESIS_QUBIT_THRESHOLD = 4
+EXACT_SYNTHESIS_DENSITY_THRESHOLD = 10
 
 EXACT_SYNTHESIS_CNOT_LIMIT = 10
 
@@ -41,6 +42,8 @@ ENABLE_DENSITY_REDUCTION = False
 ENABLE_DECOMPOSITION = False
 
 ENABLE_REINDEX = True
+
+ENABLE_PROGESS_BAR = True
 
 
 class HybridCnotSynthesisStatistics:
@@ -122,8 +125,9 @@ def _hybrid_cnot_synthesis_impl(
     supports = state.get_supports()
     num_supports = len(supports)
     density = state.get_sparsity()
-
-    support_reduced: bool = (prev_num_supports - num_supports) > 0
+    
+    if ENABLE_PROGESS_BAR:
+        print(f"num_supports: {num_supports:5d}, density: {density:5d}", end="\r")
 
     if stats is not None:
         stats.num_runs_support_reduction += 1
@@ -150,7 +154,6 @@ def _hybrid_cnot_synthesis_impl(
         and num_supports <= EXACT_SYNTHESIS_QUBIT_THRESHOLD
         and density <= EXACT_SYNTHESIS_DENSITY_THRESHOLD
     ):
-        # print_green(f"exact synthesis, state = {state}")
         try:
             with stopwatch("exact_cnot_synthesis") as timer:
                 exact_gates = exact_cnot_synthesis(
@@ -326,6 +329,26 @@ def hybrid_cnot_synthesis(
     :return: [description]
     :rtype: [type]
     """
+    
+    # check the initial state
+    num_qubits = state.num_qubits
+    density = state.get_sparsity()
+    
+    # 0.6 is a magic number, 
+    density_reduction_cnot_estimation = int(density * num_qubits)
+    qubit_reduction_cnot_estimation = 1 << num_qubits
+    
+    global ENABLE_QUBIT_REDUCTION
+    global ENABLE_DENSITY_REDUCTION
+    if density_reduction_cnot_estimation < qubit_reduction_cnot_estimation:
+        print_yellow("ENABLE_DENSITY_REDUCTION")
+        ENABLE_QUBIT_REDUCTION = False
+        ENABLE_DENSITY_REDUCTION = True
+    else:
+        print_yellow("ENABLE_QUBIT_REDUCTION")
+        ENABLE_QUBIT_REDUCTION = True
+        ENABLE_DENSITY_REDUCTION = False
+    
     circuit = QCircuit(state.num_qubits, map_gates=map_gates)
 
     with stopwatch("hybrid_cnot_synthesis") as timer:

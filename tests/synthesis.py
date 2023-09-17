@@ -10,6 +10,7 @@ Last Modified time: 2023-08-18 21:09:09
 
 # pylint: skip-file
 
+from math import floor
 import random
 import numpy as np
 from itertools import combinations
@@ -25,6 +26,7 @@ from xyz import (
     get_time,
 )
 from xyz import HybridCnotSynthesisStatistics
+from xyz.qstate.common import dicke_state
 from xyz.utils.colors import print_red, print_yellow
 
 
@@ -84,7 +86,7 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
         yield perm[:]
 
 
-def test_synthesis(state_vector: np.ndarray, map_gates: bool = False):
+def test_synthesis(state_vector: np.ndarray, method: str = None, map_gates: bool = False):
     """Test that the synthesis is correct ."""
 
     data = {}
@@ -96,54 +98,84 @@ def test_synthesis(state_vector: np.ndarray, map_gates: bool = False):
         run_sota_based_method,
     )
 
-    num_qubit, depth, cx = run_sparse_state_synthesis(state_vector, skip_verify=False)
-    data["baseline_density"] = cx
+    if method == "m-flow":
+        with stopwatch("baseline") as timer:
+            num_qubit, depth, cx = run_sparse_state_synthesis(state_vector, skip_verify=True)
+            data["cx"] = cx
+            data["time"] = timer.time()
 
-    cx = run_dd_based_method(state_vector)
-    data["baseline_qubit"] = cx
+    elif method == "n-flow":
+        with stopwatch("baseline") as timer:
+            cx = run_dd_based_method(state_vector)
+            data["cx"] = cx
+            data["time"] = timer.time()
 
-    cx = run_sota_based_method(state_vector)
-    data["baseline_sota"] = cx
+    # cx = run_sota_based_method(state_vector)
+    # data["baseline_sota"] = cx
 
-    target_state = quantize_state(state_vector)
-
-    with stopwatch("synthesis") as timer:
-        stats = HybridCnotSynthesisStatistics()
-        circuit = hybrid_cnot_synthesis(target_state, map_gates=map_gates, stats=stats)
+    elif method == "ours":
+    
+        target_state = quantize_state(state_vector)
+        with stopwatch("synthesis") as timer:
+            stats = HybridCnotSynthesisStatistics()
+            circuit = hybrid_cnot_synthesis(target_state, map_gates=map_gates, stats=stats)
         stats.report()
         cx = circuit.get_cnot_cost()
 
-    # circ = circuit.to_qiskit()
-    # print(circ)
-    # cx, equivalent = xyz.verify_circuit_and_count_cnot(
-    #     circuit, state_vector, skip_verify=False
-    # )
+        # circ = circuit.to_qiskit()
+        # print(circ)
+        # cx, equivalent = xyz.verify_circuit_and_count_cnot(
+        #     circuit, state_vector, skip_verify=False
+        # )
 
-    data["ours"] = cx
+        data["cx"] = cx
+        data["time"] = timer.time()
     return data
 
 
 import pandas as pd
 
+SPARSE = False
 
 if __name__ == "__main__":
     datas = []
 
-    for repeat in range(1):
-        for num_qubits in range(12, 13):
-            for sparsity in range(3, 4):
-                num_ones: int = int(
-                    (num_qubits**sparsity) / np.math.factorial(sparsity)
-                )
+    for repeat in range(10):
+        for num_qubits in range(21,24):
+            
+            if SPARSE:
+                num_ones = num_qubits
+            else:
+                num_ones = (1<<num_qubits) // 2
 
-                if num_ones >= 2**num_qubits:
-                    continue
+            if num_ones >= 2**num_qubits:
+                continue
+            
+            # max_k = floor(num_qubits / 2)
+            # for k in range(1, max_k + 1):
 
-                state_vector = rand_state(num_qubits, num_ones, uniform=True)
-                data = test_synthesis(state_vector, map_gates=False)
+            state_vector = rand_state(num_qubits, num_ones, uniform=True)
+            # state_vector = D_state(num_qubits, k)
+            
+            list_of_method: list = None
+            
+            if SPARSE:
+                list_of_method = ["n-flow", "m-flow", "ours"]
+            else:
+                list_of_method = ["n-flow", "ours"]
+            
+            for method in list_of_method:
+                data = test_synthesis(state_vector, method=method, map_gates=False)
 
                 data["num_qubits"] = num_qubits
-                data["sparsity"] = sparsity
+                
+                if SPARSE:
+                    data["cardinality"] = r"$m = n$"
+                else:
+                    data["cardinality"] = r"$m = 2^{n-1}$"
+                data["method"] = method
+                
+                # we insert three pieces of data
 
                 datas.append(data)
 
