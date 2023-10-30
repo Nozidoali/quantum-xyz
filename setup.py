@@ -9,7 +9,6 @@ setup(
                             llist==0.7.1
                             matplotlib==3.7.1
                             numpy==1.23.5
-                            pygraphviz==1.9
                             qiskit==0.43.1
                             qiskit_ibmq_provider==0.20.2
                             qiskit_terra==0.24.1

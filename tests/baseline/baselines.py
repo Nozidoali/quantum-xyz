@@ -15,7 +15,6 @@ import subprocess
 import re
 import random
 import numpy as np
-from IPython.display import Markdown, display
 from qiskit import QuantumCircuit, QuantumRegister, transpile, Aer
 from qclib.state_preparation import (
     MergeInitialize,

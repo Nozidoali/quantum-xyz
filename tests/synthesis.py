@@ -141,7 +141,7 @@ if __name__ == "__main__":
     datas = []
 
     for repeat in range(10):
-        for num_qubits in range(21,24):
+        for num_qubits in range(4, 8):
             
             if SPARSE:
                 num_ones = num_qubits
