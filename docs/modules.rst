@@ -1,7 +1,7 @@
-QuantumXYZ
-==========
+xyz
+===
 
 .. toctree::
    :maxdepth: 4
 
-   QuantumXYZ
+   xyz

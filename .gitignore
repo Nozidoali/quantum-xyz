@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# QASM files
+*.qasm
+
 # C extensions
 *.so
 
@@ -135,8 +138,8 @@ dmypy.json
 tmp.*
 
 # Visualizations
-# *.dot
-# *.png
+*.dot
+*.png
 *.pdf
 *.svg
 *.log
@@ -145,3 +148,9 @@ tmp.*
 
 # Sphinx documentation
 docs/_build
+
+# json files
+tests/regression_testcases/*.json
+
+# data files
+tests/*.csv
