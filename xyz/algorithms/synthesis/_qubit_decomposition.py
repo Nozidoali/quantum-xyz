@@ -8,7 +8,6 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-09-01 13:05:14
 """
 
-from math import isclose
 import threading
 from typing import List
 import numpy as np
@@ -17,10 +16,8 @@ from xyz.circuit import QGate, QGateType, QBit, CX, CRY
 from xyz.circuit.basic_gates.mcmy import MCMY
 from xyz.circuit.basic_gates.mcry import MCRY
 from xyz.circuit.basic_gates.ry import RY
-from xyz.circuit.decomposition import decompose_mcry, control_sequence_to_gates
 
 from xyz.circuit.qcircuit import QCircuit
-from xyz.operator import rotation
 from xyz.qstate import QState
 from ._exact_cnot_synthesis import exact_cnot_synthesis
 from ._support_reduction import support_reduction
@@ -187,7 +184,7 @@ def _qubit_decomposition_impl(
 
     neg_state, pos_state, weights0, weights1 = state.cofactors(pivot)
 
-    # we first add a rotation gate to the pivot qubit
+    # we first add a rotation_entry gate to the pivot qubit
     theta = 2 * np.arccos(np.sqrt(weights0 / (weights0 + weights1)))
     gate = RY(theta, pivot_qubit)
     gates.append(gate)
@@ -319,11 +316,11 @@ def _rotation_angles_optimization(
         # no optimization is needed
         return rotation_angles, control_indices
             
-    # now we reindex the rotation angles
+    # now we reindex the rotation_entry angles
     # print(f"rotation_angles = {rotation_angles}")
     # print(f"reduced {len(dont_cares)} don't cares, dont_cares = {dont_cares}")
     
-    # prepare the new rotation control indices
+    # prepare the new rotation_entry control indices
     new_control_indices = []
     old_indices = []
     for old_index, control_index in enumerate(control_indices):
@@ -331,7 +328,7 @@ def _rotation_angles_optimization(
             new_control_indices.append(control_index)
             old_indices.append(old_index)
 
-    # prepare the new rotation angles
+    # prepare the new rotation_entry angles
     new_rotation_angles = []
     for new_index in range(1<<len(new_control_indices)):
         old_index = 0
@@ -365,7 +362,7 @@ def qubit_decomposition_opt(
     # we randomly select a pivot qubit
     pivot = select_informative_qubit(state, supports)
 
-    # we first prepare the rotation table
+    # we first prepare the rotation_entry table
     # the pivot is the target qubit,
     # and the other qubits are the control qubits
     control_indices = list(set(supports) - {pivot})
@@ -385,14 +382,14 @@ def qubit_decomposition_opt(
 
     rotation_angles = [0 for _ in range(1 << len(control_indices))]
 
-    for i, rotation in enumerate(rotation_table):
-        if rotation[0] == 0:
+    for i, rotation_entry in enumerate(rotation_table):
+        if rotation_entry[0] == 0:
             rotation_angles[i] = np.pi
-        elif rotation[1] == 0:
+        elif rotation_entry[1] == 0:
             rotation_angles[i] = 0
         else:
             rotation_angles[i] = 2 * np.arccos(
-                np.sqrt(rotation[0] / (rotation[0] + rotation[1]))
+                np.sqrt(rotation_entry[0] / (rotation_entry[0] + rotation_entry[1]))
             )
 
     rotation_angles, control_indices = _rotation_angles_optimization(

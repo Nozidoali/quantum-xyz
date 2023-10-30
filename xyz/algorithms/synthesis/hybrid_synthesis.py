@@ -338,6 +338,8 @@ def hybrid_cnot_synthesis(
     density_reduction_cnot_estimation = int(density * num_qubits)
     qubit_reduction_cnot_estimation = 1 << num_qubits
     
+    # pylint: disable=W0603
+    
     global ENABLE_QUBIT_REDUCTION
     global ENABLE_DENSITY_REDUCTION
     if density_reduction_cnot_estimation < qubit_reduction_cnot_estimation:

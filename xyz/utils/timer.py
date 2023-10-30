@@ -141,5 +141,5 @@ def get_time(name: str):
 
 def global_stopwatch_report():
     """Report the global stopwatch ."""
-    for name, time in GLOBAL_STOPWATCHES.items():
-        print_green(f"{name:<25}: {time:>8.02f} sec")
+    for name, current_time in GLOBAL_STOPWATCHES.items():
+        print_green(f"{name:<25}: {current_time:>8.02f} sec")

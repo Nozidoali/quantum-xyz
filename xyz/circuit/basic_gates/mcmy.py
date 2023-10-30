@@ -10,8 +10,6 @@ Last Modified time: 2023-09-16 15:04:34
 
 from typing import List
 
-from xyz.operator import control
-
 from .base import AdvancedGate, QBit, QGateType
 
 
