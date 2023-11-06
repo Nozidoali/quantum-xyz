@@ -110,8 +110,11 @@ def test_synthesis(state_vector: np.ndarray, method: str = None, map_gates: bool
             data["cx"] = cx
             data["time"] = timer.time()
 
-    # cx = run_sota_based_method(state_vector)
-    # data["baseline_sota"] = cx
+    elif method == "sota":
+        with stopwatch("baseline") as timer:
+            cx = run_sota_based_method(state_vector)
+            data["cx"] = cx
+            data["time"] = timer.time()
 
     elif method == "ours":
     
@@ -135,49 +138,74 @@ def test_synthesis(state_vector: np.ndarray, method: str = None, map_gates: bool
 
 import pandas as pd
 
-SPARSE = False
+SPARSE = True
+DICKE = False
 
 if __name__ == "__main__":
     datas = []
 
-    for repeat in range(10):
-        for num_qubits in range(4, 8):
+    num_repeats: int = 100
+    if DICKE:
+        num_repeats = 1 # no need to repeat for dicke states
+
+    for repeat in range(num_repeats):
+        for num_qubits in range(3,21):
             
-            if SPARSE:
-                num_ones = num_qubits
+
+            if DICKE:            
+                max_k = floor(num_qubits / 2)
+                
+                method = "sota"
+                
+                for k in range(1, max_k + 1):
+                    state_vector = D_state(num_qubits, k)
+                    data = test_synthesis(state_vector, method=method, map_gates=False)
+
+                    data["num_qubits"] = num_qubits
+                    data["k"] = k
+                    data["method"] = method
+
+                    datas.append(data)
+
+                    df = pd.DataFrame(datas)
+                    df.to_csv("data.csv", index=False)
+
             else:
-                num_ones = (1<<num_qubits) // 2
 
-            if num_ones >= 2**num_qubits:
-                continue
-            
-            # max_k = floor(num_qubits / 2)
-            # for k in range(1, max_k + 1):
+                if SPARSE:
+                    num_ones = num_qubits
+                else:
+                    num_ones = (1<<num_qubits) // 2
 
-            state_vector = rand_state(num_qubits, num_ones, uniform=True)
-            # state_vector = D_state(num_qubits, k)
-            
-            list_of_method: list = None
-            
-            if SPARSE:
-                list_of_method = ["n-flow", "m-flow", "ours"]
-            else:
-                list_of_method = ["n-flow", "ours"]
-            
-            for method in list_of_method:
-                data = test_synthesis(state_vector, method=method, map_gates=False)
+                if num_ones >= 2**num_qubits:
+                    continue
 
-                data["num_qubits"] = num_qubits
+                state_vector = rand_state(num_qubits, num_ones, uniform=True)
+                # state_vector = D_state(num_qubits, k)
+                
+                list_of_method: list = None
                 
                 if SPARSE:
-                    data["cardinality"] = r"$m = n$"
+                    # list_of_method = ["n-flow", "m-flow", "ours"]
+                    list_of_method = ["sota", "ours", "m-flow"]
                 else:
-                    data["cardinality"] = r"$m = 2^{n-1}$"
-                data["method"] = method
+                    # list_of_method = ["n-flow", "m-flow", "ours"]
+                    list_of_method = ["sota"]
                 
-                # we insert three pieces of data
+                for method in list_of_method:
+                    data = test_synthesis(state_vector, method=method, map_gates=False)
 
-                datas.append(data)
+                    data["num_qubits"] = num_qubits
+                    
+                    if SPARSE:
+                        data["cardinality"] = r"$m = n$"
+                    else:
+                        data["cardinality"] = r"$m = 2^{n-1}$"
+                    data["method"] = method
+                    
+                    # we insert three pieces of data
 
-                df = pd.DataFrame(datas)
-                df.to_csv("data.csv", index=False)
+                    datas.append(data)
+
+                    df = pd.DataFrame(datas)
+                    df.to_csv("data.csv", index=False)
