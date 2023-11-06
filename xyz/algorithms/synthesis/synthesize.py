@@ -62,7 +62,7 @@ def cnot_synthesis(
     verbose_level: int = 0,
     cnot_limit: int = None,
     reduction_method: str = "qubit",
-):
+) -> QCircuit:
     """
     @brief Runs the search based state synthesis
     @param verbose_level Whether to print out the state of the search

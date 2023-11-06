@@ -8,15 +8,13 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-18 21:09:09
 """
 
-# pylint: skip-file
-
 import random
 import numpy as np
 from itertools import combinations
 from qiskit import Aer, transpile
 
 from xyz import QState, stopwatch, D_state, quantize_state, get_time
-from xyz import sparse_state_synthesis
+from xyz import cnot_synthesis
 from xyz import QCircuit
 
 
@@ -75,31 +73,12 @@ def test_synthesis():
     target_state = quantize_state(state)
 
     with stopwatch("synthesis") as timer:
-        circuit = QCircuit(target_state.num_qubits)
-
-        gates = sparse_state_synthesis(circuit, target_state, verbose_level=3)
-
-        for gate in gates:
-            circuit.add_gate(gate)
-
+        circuit = cnot_synthesis(target_state)
         circ = circuit.to_qiskit()
-        print(circ)
         simulator = Aer.get_backend("aer_simulator")
         circ = transpile(circ, simulator)
 
-        print(f"{timer.time():0.02f} seconds")
-
-        map_time = get_time("add_gate_mapped")
-        print(f"time mapping = {map_time}")
-
-    # Run and get counts
-    result = simulator.run(circ).result()
-    counts = result.get_counts(circ)
-
-    print(counts)
-    num_cnot = circ.count_ops()["cx"] if "cx" in circ.count_ops() else 0
-    print(f"cnot = {num_cnot}")
-
-
+    print(f"Time taken: {timer.time()}")
+    
 if __name__ == "__main__":
     test_synthesis()
