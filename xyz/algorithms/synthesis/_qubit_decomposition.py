@@ -291,35 +291,44 @@ def qubit_decomposition(
 
     return gates
 
+
 MIN_ROTATION_ANGLE_SEPARATION = 1e0
+
+
 def _rotation_angles_optimization(
     rotation_angles: List[float], control_indices: List[int]
 ):
-    
-    assert len(rotation_angles) == 1<<len(control_indices), f"len(rotation_angles) = {len(rotation_angles)}, len(control_indices) = {len(control_indices)}"
-    
+
+    assert len(rotation_angles) == 1 << len(
+        control_indices
+    ), f"len(rotation_angles) = {len(rotation_angles)}, len(control_indices) = {len(control_indices)}"
+
     dont_cares = set()
-    
+
     # get all the don't cares
     for index in range(len(control_indices)):
         # check if it is a don't care
         index_is_dont_care = True
         for rotation_index, rotation_angle in enumerate(rotation_angles):
             reversed_index = rotation_index ^ (1 << index)
-            if not np.isclose(rotation_angles[reversed_index], rotation_angle, atol=MIN_ROTATION_ANGLE_SEPARATION):
+            if not np.isclose(
+                rotation_angles[reversed_index],
+                rotation_angle,
+                atol=MIN_ROTATION_ANGLE_SEPARATION,
+            ):
                 index_is_dont_care = False
                 break
         if index_is_dont_care:
             dont_cares.add(index)
- 
+
     if len(dont_cares) == 0:
         # no optimization is needed
         return rotation_angles, control_indices
-            
+
     # now we reindex the rotation_entry angles
     # print(f"rotation_angles = {rotation_angles}")
     # print(f"reduced {len(dont_cares)} don't cares, dont_cares = {dont_cares}")
-    
+
     # prepare the new rotation_entry control indices
     new_control_indices = []
     old_indices = []
@@ -330,13 +339,14 @@ def _rotation_angles_optimization(
 
     # prepare the new rotation_entry angles
     new_rotation_angles = []
-    for new_index in range(1<<len(new_control_indices)):
+    for new_index in range(1 << len(new_control_indices)):
         old_index = 0
         for i in range(len(new_control_indices)):
             old_index |= ((new_index >> i) & 1) << old_indices[i]
         new_rotation_angles.append(rotation_angles[old_index])
-    
+
     return new_rotation_angles, new_control_indices
+
 
 def qubit_decomposition_opt(
     circuit: QCircuit,

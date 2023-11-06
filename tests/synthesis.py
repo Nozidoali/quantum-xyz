@@ -86,7 +86,9 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
         yield perm[:]
 
 
-def test_synthesis(state_vector: np.ndarray, method: str = None, map_gates: bool = False):
+def test_synthesis(
+    state_vector: np.ndarray, method: str = None, map_gates: bool = False
+):
     """Test that the synthesis is correct ."""
 
     data = {}
@@ -100,7 +102,9 @@ def test_synthesis(state_vector: np.ndarray, method: str = None, map_gates: bool
 
     if method == "m-flow":
         with stopwatch("baseline") as timer:
-            num_qubit, depth, cx = run_sparse_state_synthesis(state_vector, skip_verify=True)
+            num_qubit, depth, cx = run_sparse_state_synthesis(
+                state_vector, skip_verify=True
+            )
             data["cx"] = cx
             data["time"] = timer.time()
 
@@ -117,11 +121,13 @@ def test_synthesis(state_vector: np.ndarray, method: str = None, map_gates: bool
             data["time"] = timer.time()
 
     elif method == "ours":
-    
+
         target_state = quantize_state(state_vector)
         with stopwatch("synthesis") as timer:
             stats = HybridCnotSynthesisStatistics()
-            circuit = hybrid_cnot_synthesis(target_state, map_gates=map_gates, stats=stats)
+            circuit = hybrid_cnot_synthesis(
+                target_state, map_gates=map_gates, stats=stats
+            )
         stats.report()
         cx = circuit.get_cnot_cost()
 
@@ -146,17 +152,16 @@ if __name__ == "__main__":
 
     num_repeats: int = 100
     if DICKE:
-        num_repeats = 1 # no need to repeat for dicke states
+        num_repeats = 1  # no need to repeat for dicke states
 
     for repeat in range(num_repeats):
-        for num_qubits in range(3,21):
-            
+        for num_qubits in range(3, 21):
 
-            if DICKE:            
+            if DICKE:
                 max_k = floor(num_qubits / 2)
-                
+
                 method = "sota"
-                
+
                 for k in range(1, max_k + 1):
                     state_vector = D_state(num_qubits, k)
                     data = test_synthesis(state_vector, method=method, map_gates=False)
@@ -175,34 +180,34 @@ if __name__ == "__main__":
                 if SPARSE:
                     num_ones = num_qubits
                 else:
-                    num_ones = (1<<num_qubits) // 2
+                    num_ones = (1 << num_qubits) // 2
 
                 if num_ones >= 2**num_qubits:
                     continue
 
                 state_vector = rand_state(num_qubits, num_ones, uniform=True)
                 # state_vector = D_state(num_qubits, k)
-                
+
                 list_of_method: list = None
-                
+
                 if SPARSE:
                     # list_of_method = ["n-flow", "m-flow", "ours"]
                     list_of_method = ["sota", "ours", "m-flow"]
                 else:
                     # list_of_method = ["n-flow", "m-flow", "ours"]
                     list_of_method = ["sota"]
-                
+
                 for method in list_of_method:
                     data = test_synthesis(state_vector, method=method, map_gates=False)
 
                     data["num_qubits"] = num_qubits
-                    
+
                     if SPARSE:
                         data["cardinality"] = r"$m = n$"
                     else:
                         data["cardinality"] = r"$m = 2^{n-1}$"
                     data["method"] = method
-                    
+
                     # we insert three pieces of data
 
                     datas.append(data)

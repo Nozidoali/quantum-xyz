@@ -125,7 +125,7 @@ def _hybrid_cnot_synthesis_impl(
     supports = state.get_supports()
     num_supports = len(supports)
     density = state.get_sparsity()
-    
+
     if ENABLE_PROGESS_BAR:
         print(f"num_supports: {num_supports:5d}, density: {density:5d}", end="\r")
 
@@ -329,17 +329,17 @@ def hybrid_cnot_synthesis(
     :return: [description]
     :rtype: [type]
     """
-    
+
     # check the initial state
     num_qubits = state.num_qubits
     density = state.get_sparsity()
-    
-    # 0.6 is a magic number, 
+
+    # 0.6 is a magic number,
     density_reduction_cnot_estimation = int(density * num_qubits)
     qubit_reduction_cnot_estimation = 1 << num_qubits
-    
+
     # pylint: disable=W0603
-    
+
     global ENABLE_QUBIT_REDUCTION
     global ENABLE_DENSITY_REDUCTION
     if density_reduction_cnot_estimation < qubit_reduction_cnot_estimation:
@@ -350,7 +350,7 @@ def hybrid_cnot_synthesis(
         print_yellow("ENABLE_QUBIT_REDUCTION")
         ENABLE_QUBIT_REDUCTION = True
         ENABLE_DENSITY_REDUCTION = False
-    
+
     circuit = QCircuit(state.num_qubits, map_gates=map_gates)
 
     with stopwatch("hybrid_cnot_synthesis") as timer:

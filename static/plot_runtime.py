@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
 
-'''
+"""
 Author: Hanyu Wang
 Created time: 2023-09-17 15:49:02
 Last Modified by: Hanyu Wang
 Last Modified time: 2023-09-17 17:33:45
-'''
+"""
 
 # pylint: skip-file
 
@@ -18,20 +18,20 @@ import seaborn as sns
 
 DENSE: bool = False
 
-df = pd.read_csv('runtime_bak.csv')
+df = pd.read_csv("runtime_bak.csv")
 
 # we aggregate the data by the number of qubits
 # we slice the data, only consider the case where n > 5
-df = df[df['num_qubits'] > 5]
+df = df[df["num_qubits"] > 5]
 
-df_dense = df[df['cardinality'] == r"$m = 2^{n-1}$"]
-df_sparse = df[df['cardinality'] == r"$m = n$"]
+df_dense = df[df["cardinality"] == r"$m = 2^{n-1}$"]
+df_sparse = df[df["cardinality"] == r"$m = n$"]
 
-df_dense_state_agg = df_dense.groupby(['num_qubits', 'method']).mean()
-df_sparse_state_agg = df_sparse.groupby(['num_qubits', 'method']).mean()
+df_dense_state_agg = df_dense.groupby(["num_qubits", "method"]).mean()
+df_sparse_state_agg = df_sparse.groupby(["num_qubits", "method"]).mean()
 
-df_sparse_uncertainty = df_sparse.groupby(['num_qubits', 'method']).std()
-df_dense_uncertainty = df_dense.groupby(['num_qubits', 'method']).std()
+df_sparse_uncertainty = df_sparse.groupby(["num_qubits", "method"]).std()
+df_dense_uncertainty = df_dense.groupby(["num_qubits", "method"]).std()
 
 # plot the lineplot
 sns.set_theme(style="darkgrid")
@@ -54,11 +54,7 @@ plt.xlabel("Number of qubits", fontsize=font_size)
 # set the color palette
 sns.set_palette("muted")
 
-hue_order = [
-    "n-flow",
-    "m-flow",
-    "ours"
-]
+hue_order = ["n-flow", "m-flow", "ours"]
 
 # plot the sparse data
 ax = sns.lineplot(
@@ -120,10 +116,10 @@ customize_legend_names = {
 
 if DENSE:
     # plot a red line at y = 3600
-    ax.axhline(y=3600, color='r', linestyle='-')
+    ax.axhline(y=3600, color="r", linestyle="-")
 
     # add the text "Time limit = 1 hour"
-    ax.text(6.5, 3600*1.1, "Time limit = 1 hour", fontsize=font_size, color='r')
+    ax.text(6.5, 3600 * 1.1, "Time limit = 1 hour", fontsize=font_size, color="r")
 
 # get the handles and labels
 handles, labels = ax.get_legend_handles_labels()
@@ -139,8 +135,8 @@ ax.set_yscale("log")
 
 # save the figure
 if DENSE:
-    plt.savefig("runtime_dense_state.pdf", bbox_inches='tight')
+    plt.savefig("runtime_dense_state.pdf", bbox_inches="tight")
 else:
-    plt.savefig("runtime_sparse_state.pdf", bbox_inches='tight')
+    plt.savefig("runtime_sparse_state.pdf", bbox_inches="tight")
 
 plt.show()
