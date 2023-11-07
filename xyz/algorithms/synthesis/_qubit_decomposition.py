@@ -298,7 +298,6 @@ MIN_ROTATION_ANGLE_SEPARATION = 1e0
 def _rotation_angles_optimization(
     rotation_angles: List[float], control_indices: List[int]
 ):
-
     assert len(rotation_angles) == 1 << len(
         control_indices
     ), f"len(rotation_angles) = {len(rotation_angles)}, len(control_indices) = {len(control_indices)}"

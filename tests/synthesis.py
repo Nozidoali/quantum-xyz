@@ -121,7 +121,6 @@ def test_synthesis(
             data["time"] = timer.time()
 
     elif method == "ours":
-
         target_state = quantize_state(state_vector)
         with stopwatch("synthesis") as timer:
             stats = HybridCnotSynthesisStatistics()
@@ -156,7 +155,6 @@ if __name__ == "__main__":
 
     for repeat in range(num_repeats):
         for num_qubits in range(3, 21):
-
             if DICKE:
                 max_k = floor(num_qubits / 2)
 
@@ -176,7 +174,6 @@ if __name__ == "__main__":
                     df.to_csv("data.csv", index=False)
 
             else:
-
                 if SPARSE:
                     num_ones = num_qubits
                 else:

@@ -19,6 +19,26 @@ from xyz.circuit import QCircuit
 from .diff_states import get_difference
 
 
+def simulate_circuit(circuit: QCircuit):
+    """Simulate a circuit .
+
+    :param circuit: [description]
+    :type circuit: QCircuit
+    """
+    qiskit_circuit = circuit.to_qiskit()
+
+    transpiled = transpile(
+        qiskit_circuit, basis_gates=["u", "cx"], optimization_level=0
+    )
+
+    backend = Aer.get_backend("qasm_simulator")
+    transpiled.save_statevector()
+    state_vector_actual = backend.run(transpiled).result().get_statevector()
+    state_vector_actual = state_vector_actual / np.linalg.norm(state_vector_actual)
+
+    return state_vector_actual
+
+
 def verify_circuit_and_count_cnot(
     circuit: QCircuit, state_vector_expect: np.ndarray, skip_verify: bool = False
 ):
