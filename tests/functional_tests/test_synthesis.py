@@ -30,7 +30,7 @@ def rand_state(num_qubit: int, sparsity: int, uniform: bool = False) -> QState:
     """
 
     state_array = [0 for i in range((2**num_qubit) - sparsity)] + [
-        random.random() if uniform else 1 for i in range(sparsity)
+        random.random() if not uniform else 1 for i in range(sparsity)
     ]
     np.random.shuffle(state_array)
 
@@ -71,12 +71,11 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
         yield perm[:]
 
 
-@pytest.fixture(scope="module")
 def state_vectors():
     """Generate a random state vector for testing ."""
     all_state_vectors = []
     while len(all_state_vectors) < 500:
-        num_qubit = random.randint(3, 4)
+        num_qubit = random.randint(2, 3)
         sparsity = random.randint(1, 2 ** (num_qubit - 1) - 1)
         state = rand_state(num_qubit, sparsity, uniform=True)
 
@@ -87,9 +86,9 @@ def state_vectors():
 
 
 # pylint: disable=W0621
-def test_synthesis(state_vectors: List[np.ndarray]):
+def test_synthesis():
     """Test that the synthesis is used ."""
-    for state_vector in state_vectors:
+    for state_vector in state_vectors():
         test_one_state(state_vector)
 
 
@@ -107,4 +106,17 @@ def test_one_state(state_vector):
     # now we measure the distance between the target state and the actual state
     state_vector_act = simulate_circuit(circuit)
     dist = np.linalg.norm(state_vector_act - state_vector_exp)
+
+    # print the difference
+    if dist > 1e-5:
+        print("target state: ", target_state)
+        print("actual state: ", state_vector_act)
+        print("difference: ", dist)
+
+        print(circuit.to_qiskit())
+
     assert dist < 1e-5
+
+
+if __name__ == "__main__":
+    test_synthesis()

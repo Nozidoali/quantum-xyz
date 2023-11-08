@@ -257,6 +257,7 @@ def exact_cnot_synthesis(
 
                             search_done = True
                             break
+
                         elif signature1 ^ signature2 ^ const1 in signature_to_qubits:
                             quantum_operator = op.CXOperator(
                                 qubit_index1,
@@ -305,7 +306,8 @@ def exact_cnot_synthesis(
                     for phase in [True, False]:
                         if search_done:
                             break
-                        for target_phase in [True, False]:
+                        # for target_phase in [True, False]:
+                        for target_phase in [False]:
                             quantum_operator = op.CTROperator(
                                 target_qubit, target_phase, control_qubit, phase
                             )

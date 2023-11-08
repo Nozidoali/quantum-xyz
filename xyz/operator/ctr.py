@@ -68,7 +68,9 @@ class CTROperator(QOperatorBase, QuantizedRotation, ControlledOperator):
                 self.control_qubit_phase,
                 self.target_qubit_index,
             )
-            self.theta = theta
+
+            # this is an interesting case
+            self.theta = -theta
             return next_state
 
     def __str__(self) -> str:
