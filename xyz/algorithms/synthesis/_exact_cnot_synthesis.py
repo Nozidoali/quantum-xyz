@@ -85,6 +85,8 @@ def exact_cnot_synthesis(
         nonlocal visited_states, state_queue, enquened_states, record
         try:
             next_state = quantum_operator(curr_state)
+            if verbose_level >= 3:
+                print(f"next_state: {next_state}, curr_state = {curr_state} gate = {quantum_operator}")
         except ValueError:
             return None
 
@@ -112,18 +114,18 @@ def exact_cnot_synthesis(
         enquened_states[next_state_repr] = next_cost
 
         # we record the gate
-        gate: QGate = None
+        gate_to_record: QGate = None
         match quantum_operator.operator_type:
             case op.QOperatorType.X:
-                gate = X(map_qubit(quantum_operator.target_qubit_index))
+                gate_to_record = X(map_qubit(quantum_operator.target_qubit_index))
             case op.QOperatorType.CX:
-                gate = CX(
+                gate_to_record = CX(
                     map_qubit(quantum_operator.control_qubit_index),
                     quantum_operator.control_qubit_phase,
                     map_qubit(quantum_operator.target_qubit_index),
                 )
             case op.QOperatorType.T0 | op.QOperatorType.T1:
-                gate = MCRY(
+                gate_to_record = MCRY(
                     quantum_operator.theta,
                     [],
                     [],
@@ -131,7 +133,7 @@ def exact_cnot_synthesis(
                 )
 
             case op.QOperatorType.CT0 | op.QOperatorType.CT1:
-                gate = MCRY(
+                gate_to_record = MCRY(
                     quantum_operator.theta,
                     [map_qubit(quantum_operator.control_qubit_index)],
                     [quantum_operator.control_qubit_phase],
@@ -139,7 +141,9 @@ def exact_cnot_synthesis(
                 )
 
         # and record the quantum_operator
-        record[next_state] = curr_state, gate
+        if verbose_level >= 3:
+            print(f"recording [{hash(next_state)}] <- {hash(curr_state)}, gate: {gate_to_record}")
+        record[hash(next_state)] = hash(curr_state), gate_to_record
 
         return next_state
 
@@ -159,6 +163,9 @@ def exact_cnot_synthesis(
     # This function is called by the search loop.
     while not state_queue.empty():
         curr_cost, curr_state = state_queue.get()
+
+        if verbose_level >= 2:
+            print(f"\n\ncurr_state: {curr_state}, cost: {curr_cost}")
 
         if cnot_limit is not None and curr_cost.cnot_cost > cnot_limit:
             # this will then raise an ValueError
@@ -288,55 +295,32 @@ def exact_cnot_synthesis(
                 quantum_operator = op.TROperator(target_qubit, True)
                 explore_state(curr_state, quantum_operator, curr_cost)
                 quantum_operator = op.TROperator(target_qubit, False)
-                next_state = explore_state(curr_state, quantum_operator, curr_cost)
-                if _optimality_level <= 3 and next_state is not None:
-                    search_done = True
-                    break
+                explore_state(curr_state, quantum_operator, curr_cost)
 
         # apply cmerge
         if not search_done:
             for target_qubit in supports:
-                if search_done:
-                    break
                 for control_qubit in supports:
                     if control_qubit == target_qubit:
                         continue
-                    if search_done:
-                        break
                     for phase in [True, False]:
-                        if search_done:
-                            break
-                        # for target_phase in [True, False]:
-                        for target_phase in [False]:
+                        for target_phase in [True, False]:
                             quantum_operator = op.CTROperator(
                                 target_qubit, target_phase, control_qubit, phase
                             )
-                            next_state = explore_state(
-                                curr_state, quantum_operator, curr_cost
-                            )
-                            if _optimality_level <= 1 and next_state is not None:
-                                if (
-                                    next_state.get_sparsity()
-                                    <= curr_state.get_sparsity() - 1
-                                ):
-                                    search_done = True
-                                    break
+                            explore_state(curr_state, quantum_operator, curr_cost)
 
         # CNOT
         if not search_done:
             for target_qubit in supports:
-                if search_done:
-                    break
                 for control_qubit in supports:
                     if control_qubit == target_qubit:
                         continue
-                    if search_done:
-                        break
                     for phase in [True, False]:
                         quantum_operator = op.CXOperator(
                             target_qubit, control_qubit, phase
                         )
-                        next_state = explore_state(
+                        explore_state(
                             curr_state, quantum_operator, curr_cost
                         )
 
@@ -356,16 +340,24 @@ def exact_cnot_synthesis(
 
     x_gates = ground_state_calibration(circuit, final_state)
 
+    print("\n\n")
+
+    for record_key, record_value in record.items():
+        prev_state, gate = record_value
+        if verbose_level >= 2:
+            print(f"record_key: {record_key}\n\t prev_state: {prev_state}\n\t gate: {gate}")
+
     gates = x_gates[:]
     backtraced_states: set = set()
-    while curr_state in record:
-        if curr_state in backtraced_states:
+    curr_hash = hash(curr_state)
+    while curr_hash in record:
+        if curr_hash in backtraced_states:
             raise ValueError("Loop found")
-        backtraced_states.add(curr_state)
-        prev_state, gate = record[curr_state]
+        backtraced_states.add(curr_hash)
+        prev_hash, gate = record[curr_hash]
         gates.append(gate)
-        curr_state = prev_state
+        curr_hash = prev_hash
         if verbose_level >= 1:
-            print(f"curr_state: {curr_state}")
+            print(f"curr_hash: {curr_hash}, gate: {gate}")
 
     return gates

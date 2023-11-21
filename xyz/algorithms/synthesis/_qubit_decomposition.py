@@ -185,7 +185,7 @@ def _qubit_decomposition_impl(
     neg_state, pos_state, weights0, weights1 = state.cofactors(pivot)
 
     # we first add a rotation_entry gate to the pivot qubit
-    theta = 2 * np.arccos(np.sqrt(weights0 / (weights0 + weights1)))
+    theta = 2 * np.arccos(weights0 / np.sqrt((weights0**2) + (weights1**2)))
     gate = RY(theta, pivot_qubit)
     gates.append(gate)
 

@@ -31,7 +31,7 @@ def simulate_circuit(circuit: QCircuit):
         qiskit_circuit, basis_gates=["u", "cx"], optimization_level=0
     )
 
-    backend = Aer.get_backend("qasm_simulator")
+    backend = Aer.get_backend("qasm_simulator", precision="double")
     transpiled.save_statevector()
     state_vector_actual = backend.run(transpiled).result().get_statevector()
     state_vector_actual = state_vector_actual / np.linalg.norm(state_vector_actual)

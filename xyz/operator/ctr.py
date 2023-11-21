@@ -70,7 +70,7 @@ class CTROperator(QOperatorBase, QuantizedRotation, ControlledOperator):
             )
 
             # this is an interesting case
-            self.theta = -theta
+            self.theta = theta
             return next_state
 
     def __str__(self) -> str:
