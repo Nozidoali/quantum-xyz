@@ -13,7 +13,6 @@ import json
 from typing import List, Tuple
 import numpy as np
 
-
 # the merge uncertainty, if the difference between the two angles is less than
 # this value, we consider them to be the same
 MERGE_UNCERTAINTY = 1e-3
@@ -22,184 +21,28 @@ MERGE_UNCERTAINTY = 1e-3
 class QState:
     """Class method for QState"""
 
+    from ._rotation_angles import (
+        get_cry_angles,
+        get_ry_angles,
+        get_most_frequent_theta,
+        get_rotation_table,
+    )
+
     def __init__(self, index_to_weight: dict, num_qubit: int) -> None:
         self.num_qubits = num_qubit
 
         self.index_to_weight = {}
         for index, weight in index_to_weight.items():
-            if not np.isclose(weight, 0):
+            if not np.isclose(weight, 0, atol=1e-3):
                 self.index_to_weight[index] = weight
         self.index_set = self.index_to_weight.keys()
 
         self.sparsity: int = len(index_to_weight)
-        
+
     def __deepcopy__(self, memo):
         return QState(self.index_to_weight, self.num_qubits)
-    
-    def get_ry_angles(self, qubit_index: int) -> List[float]:
-        """Return the projection of the state .
 
-        :param qubit_index: [description]
-        :type qubit_index: int
-        :return: [description]
-        :rtype: List[float]
-        """
-        thetas = []
-        for idx in self.index_set:
-
-            idx0 = idx & ~(1 << qubit_index)
-            idx1 = idx0 ^ (1 << qubit_index)
-
-            # check if the qubit is 1
-            if idx == idx1:
-                if idx0 not in self.index_set:
-                    thetas.append(np.pi)
-                continue
-
-            if idx1 not in self.index_set:
-                thetas.append(0)
-                continue
-
-            # now we check the rotation angle
-            weight_from = self.index_to_weight[idx0]
-            weight_total = np.sqrt(
-                (self.index_to_weight[idx1] ** 2) + (self.index_to_weight[idx0] ** 2)
-            )
-            
-            if self.index_to_weight[idx1] > 0:
-                _theta = 2 * np.arccos(weight_from / weight_total)
-            else:
-                _theta = - 2 * np.arccos(weight_from / weight_total)
-
-            thetas.append(_theta)
-            
-        return thetas
-    
-    def get_most_frequent_theta(self, qubit_index: int) -> float:
-        """Return the projection of the state .
-        
-        :param qubit_index: [description]
-        :type qubit_index: int
-        :return: [description]
-        :rtype: List[float]
-        """
-        thetas = self.get_ry_angles(qubit_index)
-        
-        best_theta = None
-        best_theta_count = 0
-        
-        curr_theta = None
-        curr_theta_count = 0
-        for theta in sorted(thetas):
-            if curr_theta is None:
-                curr_theta = theta
-                curr_theta_count = 1
-                
-                best_theta = curr_theta
-                best_theta_count = curr_theta_count
-            elif np.isclose(theta, curr_theta):
-                curr_theta_count += 1
-            else:
-                if curr_theta_count > best_theta_count:
-                    best_theta = curr_theta
-                    best_theta_count = curr_theta_count
-                curr_theta = theta
-                curr_theta_count = 1
-                
-        return best_theta
-    
-    def get_cry_angles(self, control_qubit_index: int, target_qubit_index: int) -> List[float]:
-        """Return the projection of the state .
-
-        :param qubit_index: [description]
-        :type qubit_index: int
-        :return: [description]
-        :rtype: List[float]
-        """
-        thetas = {}
-        for idx in self.index_set:
-
-            idx0 = idx & ~(1 << target_qubit_index)
-            idx1 = idx0 ^ (1 << target_qubit_index)
-
-            # check if the qubit is 1
-            if idx == idx1:
-                if idx0 not in self.index_set:
-                    thetas[idx0] = np.pi
-                continue
-
-            if idx1 not in self.index_set:
-                thetas[idx0] = 0
-                continue
-
-            # now we check the rotation angle
-            weight_from = self.index_to_weight[idx0]
-            weight_total = np.sqrt(
-                (self.index_to_weight[idx1] ** 2) + (self.index_to_weight[idx0] ** 2)
-            )
-            _theta = 2 * np.arccos(weight_from / weight_total)
-
-            thetas[idx0] = _theta
-            
-        cry_thetas = []
-        for idx, theta in thetas.items():
-            rdx = idx ^ (1 << control_qubit_index)
-            
-            if (idx >> control_qubit_index) & 1 == 1:
-                continue
-            
-            if rdx not in thetas:
-                continue
-            
-            if np.isclose(theta, thetas[rdx]):
-                continue
-            
-            # if theta != 0 and thetas[rdx] != 0:
-            #     continue
-            
-            beta = (thetas[rdx] + theta) / 2
-            
-            cry_thetas.append(np.pi/2 - beta)
-            
-        return cry_thetas
-
-    def get_supports(self) -> List[int]:
-        """Return the support of the state .
-
-        :param state: [description]
-        :type state: QState
-        :return: [description]
-        :rtype: List[int]
-        """
-        signatures = self.get_qubit_signatures()
-        qubit_indices = []
-        for qubit, pattern in enumerate(signatures):
-            if pattern != 0:
-                qubit_indices.append(qubit)
-        return qubit_indices
-
-    def get_sparsity(self) -> int:
-        """Return the sparsity of the state .
-
-        :param state: [description]
-        :type state: QState
-        :return: [description]
-        :rtype: int
-        """
-        return len(self.index_set)
-
-    def to_value(self) -> int:
-        """Return the value of the state .
-
-        :return: [description]
-        :rtype: int
-        """
-        value = 0
-        for basis in self.index_set:
-            value |= 1 << basis
-        return value
-
-    def apply_x(self, qubit_index: int) -> None:
+    def apply_x(self, qubit_index: int) -> "QState":
         """Apply X gate to the qubit.
 
         :param qubit_index: [description]
@@ -213,7 +56,7 @@ class QState:
 
     def apply_cx(
         self, control_qubit_index: int, phase: bool, target_qubit_index: int
-    ) -> None:
+    ) -> "QState":
         """Apply CX gate to the qubit.
 
         :param control_qubit_index: [description]
@@ -229,8 +72,8 @@ class QState:
             else:
                 index_to_weight[idx] = weight
         return QState(index_to_weight, self.num_qubits)
-    
-    def apply_ry(self, qubit_index: int, theta: float) -> None:
+
+    def apply_ry(self, qubit_index: int, theta: float) -> "QState":
         """Apply the Y operator to the given qubit .
 
         :param qubit_index: [description]
@@ -241,7 +84,7 @@ class QState:
             rdx = idx ^ (1 << qubit_index)
             if rdx not in self.index_set:
                 index_to_weight[rdx] = 0
-            
+
             if idx >> qubit_index & 1 == 0:
                 index_to_weight[idx] += weight * np.cos(theta / 2)
                 index_to_weight[rdx] += weight * np.sin(theta / 2)
@@ -250,7 +93,7 @@ class QState:
                 index_to_weight[rdx] -= weight * np.sin(theta / 2)
         return QState(index_to_weight, self.num_qubits)
 
-    def apply_merge0(self, qubit_index: int) -> None:
+    def apply_merge0(self, qubit_index: int) -> "QState":
         """Apply the Y operator to the given qubit .
 
         :param qubit_index: [description]
@@ -283,7 +126,7 @@ class QState:
             raise ValueError("The state is not a valid state.")
         return QState(index_to_weight, self.num_qubits), theta
 
-    def apply_merge1(self, qubit_index: int) -> None:
+    def apply_merge1(self, qubit_index: int) -> "QState":
         """Apply the Y operator to the given qubit .
 
         :param qubit_index: [description]
@@ -413,6 +256,42 @@ class QState:
             raise ValueError("The state is not a valid state.")
         return QState(index_to_weight, self.num_qubits), theta
 
+    def get_supports(self) -> List[int]:
+        """Return the support of the state .
+
+        :param state: [description]
+        :type state: QState
+        :return: [description]
+        :rtype: List[int]
+        """
+        signatures = self.get_qubit_signatures()
+        qubit_indices = []
+        for qubit, pattern in enumerate(signatures):
+            if pattern != 0:
+                qubit_indices.append(qubit)
+        return qubit_indices
+
+    def get_sparsity(self) -> int:
+        """Return the sparsity of the state .
+
+        :param state: [description]
+        :type state: QState
+        :return: [description]
+        :rtype: int
+        """
+        return len(self.index_set)
+
+    def to_value(self) -> int:
+        """Return the value of the state .
+
+        :return: [description]
+        :rtype: int
+        """
+        value = 0
+        for basis in self.index_set:
+            value |= 1 << basis
+        return value
+
     def get_qubit_signatures(self) -> List[int]:
         """Transpose the state array ."""
         signatures = [0 for i in range(self.num_qubits)]
@@ -514,8 +393,8 @@ class QState:
         return False
 
     def __hash__(self) -> int:
-        return hash(tuple(sorted(self.index_set)))
-        # return hash(str(self))
+        # return hash(tuple(sorted(self.index_set)))
+        return hash(str(self))
 
     def repr(self) -> int:
         """Return a hex representation of the bitmap .

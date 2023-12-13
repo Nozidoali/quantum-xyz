@@ -86,7 +86,9 @@ def exact_cnot_synthesis(
         try:
             next_state = quantum_operator(curr_state)
             if verbose_level >= 3:
-                print(f"next_state: {next_state}, curr_state = {curr_state} gate = {quantum_operator}")
+                print(
+                    f"next_state: {next_state}, curr_state = {curr_state} gate = {quantum_operator}"
+                )
         except ValueError:
             return None
 
@@ -142,7 +144,9 @@ def exact_cnot_synthesis(
 
         # and record the quantum_operator
         if verbose_level >= 3:
-            print(f"recording [{hash(next_state)}] <- {hash(curr_state)}, gate: {gate_to_record}")
+            print(
+                f"recording [{hash(next_state)}] <- {hash(curr_state)}, gate: {gate_to_record}"
+            )
         record[hash(next_state)] = hash(curr_state), gate_to_record
 
         return next_state
@@ -320,9 +324,7 @@ def exact_cnot_synthesis(
                         quantum_operator = op.CXOperator(
                             target_qubit, control_qubit, phase
                         )
-                        explore_state(
-                            curr_state, quantum_operator, curr_cost
-                        )
+                        explore_state(curr_state, quantum_operator, curr_cost)
 
         # apply x
         if not search_done:
@@ -345,7 +347,9 @@ def exact_cnot_synthesis(
     for record_key, record_value in record.items():
         prev_state, gate = record_value
         if verbose_level >= 2:
-            print(f"record_key: {record_key}\n\t prev_state: {prev_state}\n\t gate: {gate}")
+            print(
+                f"record_key: {record_key}\n\t prev_state: {prev_state}\n\t gate: {gate}"
+            )
 
     gates = x_gates[:]
     backtraced_states: set = set()

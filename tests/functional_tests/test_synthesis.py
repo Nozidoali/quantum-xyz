@@ -71,6 +71,7 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
     for perm in place_ones(2**num_qubit, sparsity):
         yield perm[:]
 
+
 @pytest.fixture
 def state_vectors():
     """Generate a random state vector for testing ."""
@@ -85,15 +86,15 @@ def state_vectors():
 
     return all_state_vectors
 
+
 def test_one_state(state_vectors):
     """Test that a state is a square of a state vector .
 
     :param state_vector: [description]
     :type state_vector: [type]
     """
-    
+
     for state_vector in state_vectors:
-    
         state_vector_exp = state_vector
         target_state = quantize_state(state_vector_exp)
 
