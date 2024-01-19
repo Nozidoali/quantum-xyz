@@ -10,14 +10,12 @@ Last Modified time: 2023-08-18 21:09:09
 
 import random
 from itertools import combinations
-from typing import List
 
 import numpy as np
 import pytest
-from qiskit import QuantumCircuit
 
 from xyz import QState, quantize_state
-from xyz import cnot_synthesis
+from xyz import hybrid_cnot_synthesis
 from xyz import simulate_circuit
 
 
@@ -98,7 +96,7 @@ def test_one_state(state_vectors):
         state_vector_exp = state_vector
         target_state = quantize_state(state_vector_exp)
 
-        circuit = cnot_synthesis(target_state)
+        circuit = hybrid_cnot_synthesis(target_state)
 
         # now we measure the distance between the target state and the actual state
         state_vector_act = simulate_circuit(circuit).data
