@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name="quantum-xyz"
+version="0.1.0"
+dependencies = [
+    """
+        llist==0.7.1
+        matplotlib==3.7.1
+        numpy==1.23.5
+        qiskit==0.43.1
+        qiskit_ibmq_provider==0.20.2
+        qiskit_terra==0.24.1
+        scipy==1.10.1
+    """
+]
+requires-python = "==3.10"
+authors = [
+  {name = "Hanyu Wang"},
+]
+description = "A quantum circuit synthesis library"
+readme = "README.md"
+license = {file = "LICENSE.txt"}
+keywords = ["quantum computing", "eda"]
+classifiers=[
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Documentation = "https://quantum-xyz.readthedocs.io/en/latest/"
+Repository = "https://github.com/Nozidoali/quantum-xyz.git"
