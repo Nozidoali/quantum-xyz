@@ -19,6 +19,7 @@ import xyz.circuit as qc
 
 from ._ground_state_calibration import ground_state_calibration
 
+DEPRECATED: bool = True
 
 def exact_cnot_synthesis_legacy(
     circuit: qc.QCircuit,
@@ -44,9 +45,10 @@ def exact_cnot_synthesis_legacy(
     """
 
     # we should raise an error, since this is the old version
-    raise ValueError(
-        "This is the old version of exact_cnot_synthesis, please use the new version"
-    )
+    if DEPRECATED:
+        raise ValueError(
+            "This is the old version of exact_cnot_synthesis, please use the new version"
+        )
 
     # now we start the search
     visited_states = set()

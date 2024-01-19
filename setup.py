@@ -11,7 +11,7 @@ Last Modified time: 2023-11-06 12:41:58
 from setuptools import setup, find_packages
 
 setup(
-    name="xyz",
+    name="quantum-xyz",
     version="0.1.0",
     author="Hanyu Wang",
     description="A quantum circuit synthesis library",
