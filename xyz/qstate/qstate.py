@@ -404,8 +404,8 @@ class QState:
         return False
 
     def __hash__(self) -> int:
-        # return hash(tuple(sorted(self.index_set)))
-        return hash(str(self))
+        return hash(tuple(sorted(self.index_set)))
+        # return hash(str(self))
 
     def repr(self) -> int:
         """Return a hex representation of the bitmap .
