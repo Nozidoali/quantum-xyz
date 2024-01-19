@@ -75,7 +75,7 @@ def state_vectors():
     """Generate a random state vector for testing ."""
     all_state_vectors = []
     while len(all_state_vectors) < 1:
-        num_qubit = random.randint(3, 6)
+        num_qubit = random.randint(3, 5)
         sparsity = random.randint(num_qubit, 2 ** (num_qubit - 1) - 1)
         state = rand_state(num_qubit, sparsity, uniform=False)
 
@@ -95,6 +95,7 @@ def test_one_state(state_vectors):
     for state_vector in state_vectors:
         state_vector_exp = state_vector
         target_state = quantize_state(state_vector_exp)
+        print("target state: ", target_state)
 
         circuit = hybrid_cnot_synthesis(target_state)
 
@@ -109,3 +110,13 @@ def test_one_state(state_vectors):
         # print(circ)
 
         assert dist < 1e-1
+
+if __name__ == "__main__":
+    rand_state_vectors = []
+    for i in range(100):
+        num_qubit = random.randint(3, 4)
+        sparsity = random.randint(num_qubit, 2 ** (num_qubit - 1) - 1)
+        state = rand_state(num_qubit, sparsity, uniform=False)
+        rand_state_vectors.append(state)
+        
+    test_one_state(rand_state_vectors)

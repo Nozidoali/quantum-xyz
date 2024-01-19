@@ -37,7 +37,7 @@ EXACT_SYNTHESIS_CNOT_LIMIT = 10
 ENABLE_EXACT_SYNTHESIS = True
 
 ENABLE_QUBIT_REDUCTION = True
-ENABLE_DENSITY_REDUCTION = False
+ENABLE_DENSITY_REDUCTION = True
 
 ENABLE_DECOMPOSITION = False
 
@@ -317,7 +317,7 @@ def _hybrid_cnot_synthesis_impl(
 
 def hybrid_cnot_synthesis(
     state: QState,
-    map_gates: bool = True,
+    map_gates: bool = False,
     stats: HybridCnotSynthesisStatistics = None,
 ):
     """A hybrid method combining both qubit- and cardinality- reduction.

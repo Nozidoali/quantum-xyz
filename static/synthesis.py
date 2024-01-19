@@ -122,7 +122,7 @@ def test_synthesis(
         target_state = quantize_state(state_vector)
         with stopwatch("synthesis") as timer:
             stats = HybridCnotSynthesisStatistics()
-            circuit = hybrid_cnot_synthesis(
+        circuit = hybrid_cnot_synthesis(
                 target_state, map_gates=map_gates, stats=stats
             )
         stats.report()
