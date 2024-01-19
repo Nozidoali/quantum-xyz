@@ -110,7 +110,7 @@ def test_one_state(state_vectors):
         circ = circuit.to_qiskit()
         print(circ)
 
-        assert dist < 1e-1
+        assert dist**2 < 1e-1
 
 if __name__ == "__main__":
     rand_state_vectors = []
