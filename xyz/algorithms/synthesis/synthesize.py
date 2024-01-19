@@ -144,7 +144,6 @@ def cnot_synthesis(
         if verbose_level >= 2:
             print_green("done")
 
-        # if verbose_level >= 2:
         for gate in _gates:
             post_processing_gates.append(gate)
 

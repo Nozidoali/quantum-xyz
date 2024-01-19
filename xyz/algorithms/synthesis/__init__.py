@@ -12,4 +12,4 @@ from .synthesize import *
 from .hybrid_synthesis import *
 from ._exact_cnot_synthesis_opt import exact_cnot_synthesis_opt
 from ._heuristic_cnot_opt import heurisitc_cnot_synthesis_opt
-from .cnot_synthesis import cnot_synthesis
+from .library_cnot_synthesis import library_cnot_synthesis

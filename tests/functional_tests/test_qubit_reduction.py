@@ -18,7 +18,7 @@ from xyz import quantize_state
 
 
 def test_qubit_reduction():
-    """Test the qubit reduction of a 3D circuit ."""
+    """Test the qubit reduction of a Dicke-3 state."""
     circuit = QCircuit(3)
     state = quantize_state(D_state(3, 1))
     qubit_reduction(circuit, state)

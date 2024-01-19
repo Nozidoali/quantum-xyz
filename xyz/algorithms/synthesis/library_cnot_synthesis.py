@@ -13,12 +13,12 @@ from xyz.qstate import QState
 from .library import DefaultLibrary, Library
 
 
-def cnot_synthesis(
+def library_cnot_synthesis(
     circuit: QCircuit,
     state: QState,
     library: Library = DefaultLibrary(),
 ):
-    """Computes the scnothesis of a circuit .
+    """Synthesize the quantum circuit .
 
     :param circuit: [description]
     :type circuit: QCircuit

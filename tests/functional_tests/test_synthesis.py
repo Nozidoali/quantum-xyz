@@ -86,7 +86,7 @@ def state_vectors():
 
 
 def test_one_state(state_vectors):
-    """Test that a state is a square of a state vector .
+    """Test one state.
 
     :param state_vector: [description]
     :type state_vector: [type]

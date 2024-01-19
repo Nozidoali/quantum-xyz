@@ -8,9 +8,9 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-09-16 15:27:39
 """
 
+import json
 import numpy as np
 import xyz
-import json
 
 
 def test_mcmy_mapping(num_qubits: int = 3):

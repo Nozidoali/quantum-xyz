@@ -33,9 +33,19 @@ def test_mapping():
         )
     )
 
-    circuit = circuit.to_qiskit()
-    print(circuit)
-    circuit = transpile(circuit, basis_gates=["cx", "u", "cu"], optimization_level=3)
+    for gate in circuit.get_gates():
+        gate: xyz.QGate
+        assert gate.get_qgate_type() in [
+            xyz.QGateType.CX,
+            # xyz.QGateType.U,
+            xyz.QGateType.X,
+            xyz.QGateType.RY
+            # xyz.QGateType.CU,
+        ]
+
+    # circuit = circuit.to_qiskit()
+    # circuit = transpile(circuit, basis_gates=["cx", "u", "cu"], optimization_level=3)
+    # print(circuit)
 
 
 if __name__ == "__main__":
