@@ -34,17 +34,15 @@ def rotation(curr_state_pair: Tuple, circuit: qc.QCircuit):
     curr_cost, curr_state = curr_state_pair
     supports = curr_state.get_supports()
 
-
     for qubit_index in supports:
         thetas = curr_state.get_ry_angles(qubit_index)
         most_frequent_theta, frequency = Counter(thetas).most_common(1)[0]
         if not np.isclose(
             most_frequent_theta, 0, atol=1e-2
         ) and frequency > thetas.count(0):
-
             # then we apply and return
             next_state = curr_state.apply_ry(qubit_index, -most_frequent_theta)
-            
+
             gates = []
             gates.append(qc.RY(most_frequent_theta, circuit.qubit_at(qubit_index)))
             return (curr_cost, next_state), gates[:]
@@ -63,7 +61,7 @@ def reflection(curr_state_pair: Tuple, circuit: qc.QCircuit):
     :rtype: [type]
     """
 
-    curr_cost: int 
+    curr_cost: int
     curr_state: QState
 
     curr_cost, curr_state = curr_state_pair
@@ -72,10 +70,13 @@ def reflection(curr_state_pair: Tuple, circuit: qc.QCircuit):
     for qubit_index in supports:
         thetas = curr_state.get_ry_angles(qubit_index)
         initial_score = len(thetas) - thetas.count(0)
-        
+
         rotation_table = curr_state.get_rotation_table(qubit_index)
         rotation_table_str = "\n".join(
-            [f"{bin(idx)[2:].zfill(curr_state.num_qubits)}: {theta}" for idx, theta in rotation_table.items()]
+            [
+                f"{bin(idx)[2:].zfill(curr_state.num_qubits)}: {theta}"
+                for idx, theta in rotation_table.items()
+            ]
         )
         print(f"rotation table: \n{rotation_table_str}\n\n")
 
@@ -86,7 +87,6 @@ def reflection(curr_state_pair: Tuple, circuit: qc.QCircuit):
             cry_thetas = curr_state.get_cry_angles(control_qubit_index, qubit_index)
 
             for cry_theta in cry_thetas:
-
                 candidate_state: QState = copy.deepcopy(curr_state)
                 candidate_state = candidate_state.apply_ry(qubit_index, cry_theta)
                 candidate_state = candidate_state.apply_cx(
@@ -178,7 +178,6 @@ class DefaultLibrary(Library):
     """
 
     def explore(self):
-
         n_visited: int = 0
 
         while not self.state_queue.empty():

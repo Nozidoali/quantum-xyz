@@ -18,6 +18,9 @@ import numpy as np
 MERGE_UNCERTAINTY = 1e-3
 
 
+N_DIGITS = 2
+
+
 class QState:
     """Class method for QState"""
 
@@ -366,7 +369,7 @@ class QState:
     def __str__(self) -> str:
         return " + ".join(
             [
-                f"{weight.real:0.01f}*|{idx:0{self.num_qubits}b}>".zfill(
+                f"{weight.real:0.0{N_DIGITS}f}*|{idx:0{self.num_qubits}b}>".zfill(
                     self.num_qubits
                 )
                 for idx, weight in self.index_to_weight.items()

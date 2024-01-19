@@ -23,7 +23,6 @@ setup(
             qiskit_ibmq_provider==0.20.2
             qiskit_terra==0.24.1
             scipy==1.10.1
-            setuptools==67.8.0
         """
     ],
 )
