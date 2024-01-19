@@ -39,7 +39,7 @@ class Library:
         :type curr_state: QState
         """
 
-        curr_cost, curr_state = curr_state_pair
+        _, curr_state = curr_state_pair
         next_cost, next_state = next_state_pair
 
         next_state_repr = next_state.repr()

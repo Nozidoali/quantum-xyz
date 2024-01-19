@@ -19,7 +19,6 @@ def heurisitc_cnot_synthesis_opt(
     circuit: qc.QCircuit,
     target_state: qs.QState,
     verbose_level: int = 0,
-    cnot_limit: int = None,
 ):
     """This function finds the exact cnot_cnot_synthesis of a circuit .
 

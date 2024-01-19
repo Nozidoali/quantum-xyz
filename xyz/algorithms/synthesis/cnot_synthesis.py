@@ -17,7 +17,6 @@ def cnot_synthesis(
     circuit: QCircuit,
     state: QState,
     library: Library = DefaultLibrary(),
-    verbose_level: int = 0,
 ):
     """Computes the scnothesis of a circuit .
 

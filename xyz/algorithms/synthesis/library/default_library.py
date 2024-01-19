@@ -95,7 +95,6 @@ def reflection(curr_state_pair: Tuple, circuit: qc.QCircuit):
                 candidate_state = candidate_state.apply_ry(qubit_index, -cry_theta)
 
                 thetas = candidate_state.get_ry_angles(qubit_index)
-                most_frequent_theta, frequency = Counter(thetas).most_common(1)[0]
 
                 # if not np.isclose(
                 #     most_frequent_theta, 0, atol=1e-2

@@ -48,7 +48,6 @@ if __name__ == "__main__":
     circuit = QCircuit(state.num_qubits, map_gates=True)
 
     with stopwatch("exact_cnot_synthesis") as t:
-        # gates = heurisitc_cnot_synthesis_opt(circuit, state, verbose_level=3)
         # gates = cnot_synthesis(circuit, state, verbose_level=3)
         gates = exact_cnot_synthesis(circuit, state, verbose_level=1)
         # gates = exact_cnot_synthesis_opt(circuit, state, verbose_level=1)
