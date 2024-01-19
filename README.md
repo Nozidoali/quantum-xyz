@@ -5,6 +5,14 @@ Quantum XYZ
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/Nozidoali/quantum-xyz.git)
 [![CI](https://github.com/Nozidoali/quantum-xyz/actions/workflows/ci.yml/badge.svg)](https://github.com/Nozidoali/quantum-xyz/actions/workflows/ci.yml)
 
-[Read full documentation](https://quantum-xyz.readthedocs.io/en/latest/)
 
-Quantum circuit synthesis algorithms.
+XYZ is a Python package for quantum compilation. It provides several implementations for quantum circuit optimizations, such as exact CNOT synthesis. [Read full documentation](https://quantum-xyz.readthedocs.io/en/latest/)
+
+## Example
+
+```sh
+pip install quantum-xyz
+cd example
+python synthesize_dicke.py
+```
+
