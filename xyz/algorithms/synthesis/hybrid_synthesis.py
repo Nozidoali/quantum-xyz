@@ -83,6 +83,7 @@ class HybridCnotSynthesisStatistics:
 def _hybrid_cnot_synthesis_impl(
     circuit: QCircuit,
     state: QState,
+    verbose_level: int = 0,
     stats: HybridCnotSynthesisStatistics = None,
 ):
     prev_supports = state.get_supports()
@@ -160,7 +161,7 @@ def _hybrid_cnot_synthesis_impl(
                     circuit,
                     state,
                     optimality_level=3,
-                    verbose_level=0,
+                    verbose_level=verbose_level,
                     cnot_limit=EXACT_SYNTHESIS_CNOT_LIMIT,
                 )
             if stats is not None:
@@ -249,7 +250,7 @@ def _hybrid_cnot_synthesis_impl(
         neg_state, pos_state, weights0, weights1 = state.cofactors(pivot)
 
         # we first add a rotation gate to the pivot qubit
-        theta = 2 * np.arccos(np.sqrt(weights0 / (weights0 + weights1)))
+        theta = 2 * np.arctan(weights1 / weights0)
         ry_gate = RY(theta, pivot_qubit)
 
         pos_gates = _hybrid_cnot_synthesis_impl(
@@ -318,6 +319,7 @@ def _hybrid_cnot_synthesis_impl(
 def hybrid_cnot_synthesis(
     state: QState,
     map_gates: bool = True,
+    verbose_level: int = 0,
     stats: HybridCnotSynthesisStatistics = None,
 ):
     """A hybrid method combining both qubit- and cardinality- reduction.
@@ -358,6 +360,7 @@ def hybrid_cnot_synthesis(
         gates, _ = _hybrid_cnot_synthesis_impl(
             circuit,
             state,
+            verbose_level=verbose_level,
             stats=stats,
         )
 

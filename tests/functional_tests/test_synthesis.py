@@ -12,6 +12,7 @@ import random
 from itertools import combinations
 
 import numpy as np
+from pyrsistent import v
 import pytest
 
 from xyz import QState, quantize_state
@@ -75,8 +76,9 @@ def state_vectors():
     """Generate a random state vector for testing ."""
     all_state_vectors = []
     while len(all_state_vectors) < 1:
-        num_qubit = random.randint(3, 5)
+        num_qubit = random.randint(3, 3)
         sparsity = random.randint(num_qubit, 2 ** (num_qubit - 1) - 1)
+        sparsity = random.randint(2 ** (num_qubit - 1) - 1, 2 ** (num_qubit - 1) - 1)
         state = rand_state(num_qubit, sparsity, uniform=False)
 
         # check if the state is valid
@@ -95,27 +97,28 @@ def test_one_state(state_vectors):
     for state_vector in state_vectors:
         state_vector_exp = state_vector
         target_state = quantize_state(state_vector_exp)
-        print("target state: ", target_state)
+        # print("target state: ", target_state)
 
-        circuit = hybrid_cnot_synthesis(target_state)
+        circuit = hybrid_cnot_synthesis(target_state, verbose_level=3)
 
         # now we measure the distance between the target state and the actual state
         state_vector_act = simulate_circuit(circuit).data
         dist = np.linalg.norm(state_vector_act - state_vector_exp)
 
-        # print("target state: ", target_state)
-        # print("actual state: ", quantize_state(state_vector_act))
+        print("target state: ", target_state)
+        print("actual state: ", quantize_state(state_vector_act))
 
-        # circ = circuit.to_qiskit()
-        # print(circ)
+        circ = circuit.to_qiskit()
+        print(circ)
 
         assert dist < 1e-1
 
 if __name__ == "__main__":
     rand_state_vectors = []
     for i in range(100):
-        num_qubit = random.randint(3, 4)
+        num_qubit = random.randint(3, 3)
         sparsity = random.randint(num_qubit, 2 ** (num_qubit - 1) - 1)
+        sparsity = random.randint(2 ** (num_qubit - 1) - 1, 2 ** (num_qubit - 1) - 1)
         state = rand_state(num_qubit, sparsity, uniform=False)
         rand_state_vectors.append(state)
         

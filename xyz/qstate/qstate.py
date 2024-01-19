@@ -147,13 +147,13 @@ class QState:
             idx1 = idx0 ^ (1 << qubit_index)
 
             # now we check the rotation angle
-            weight_from = self.index_to_weight[idx1]
-            weight_to = self.index_to_weight[idx0]
+            weight0 = self.index_to_weight[idx0]
+            weight1 = self.index_to_weight[idx1]
             weight_total = np.sqrt(
-                (self.index_to_weight[idx1] ** 2) + (self.index_to_weight[idx0] ** 2)
+                (weight0 ** 2) + (weight1 ** 2)
             )
 
-            _theta = 2 * np.arctan(weight_to / weight_from)
+            _theta = 2 * np.arctan(weight0 / weight1)
 
             if theta is None:
                 theta = _theta
@@ -248,13 +248,13 @@ class QState:
             idx1 = idx0 ^ (1 << target_qubit_index)
 
             # now we check the rotation angle
-            weight_from = self.index_to_weight[idx1]
-            weight_to = self.index_to_weight[idx0]
+            weight0 = self.index_to_weight[idx0]
+            weight1 = self.index_to_weight[idx1]
             weight_total = np.sqrt(
-                (self.index_to_weight[idx1] ** 2) + (self.index_to_weight[idx0] ** 2)
+                (weight0 ** 2) + (weight1 ** 2)
             )
 
-            _theta = 2 * np.arctan(weight_to / weight_from)
+            _theta = 2 * np.arctan(weight0 / weight1)
 
             if theta is None:
                 theta = _theta

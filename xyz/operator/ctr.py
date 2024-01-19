@@ -8,6 +8,8 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-27 01:10:43
 """
 
+import numpy as np
+
 from typing import Any
 
 from xyz.qstate import QState
@@ -70,7 +72,7 @@ class CTROperator(QOperatorBase, QuantizedRotation, ControlledOperator):
             )
 
             # this is an interesting case
-            self.theta = theta
+            self.theta = theta - np.pi
             return next_state
 
     def __str__(self) -> str:

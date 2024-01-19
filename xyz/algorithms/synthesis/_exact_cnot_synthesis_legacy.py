@@ -132,7 +132,6 @@ def exact_cnot_synthesis_legacy(
 
     solution_reached: bool = False
 
-    # This function is called by the search loop.
     while not state_queue.empty():
         curr_cost, curr_state = state_queue.get()
 
