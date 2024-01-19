@@ -181,15 +181,14 @@ def cardinality_reduction(circuit: QCircuit, state: QState, verbose_level: int =
         )
     assert reversed_index2 in index_to_weight
 
-    theta = 2 * np.arctan(index_to_weight[reversed_index2]
-            / index_to_weight[index2])
+    theta = 2 * np.arctan(index_to_weight[reversed_index2] / index_to_weight[index2])
 
     gates.append(MCRY(theta, control_qubits, control_phases, target_qubit))
 
     index_to_weight[index2] = np.sqrt(
         index_to_weight[index2] ** 2 + index_to_weight[reversed_index2] ** 2
     )
-    
+
     index_to_weight.pop(reversed_index2)
 
     # Update the state

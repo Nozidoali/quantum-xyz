@@ -154,7 +154,7 @@ class QState:
             )
 
             _theta = 2 * np.arctan(weight_to / weight_from)
-            
+
             if theta is None:
                 theta = _theta
             elif not np.isclose(theta, _theta, atol=MERGE_UNCERTAINTY):
@@ -213,7 +213,7 @@ class QState:
             )
 
             _theta = 2 * np.arctan(weight_to / weight_from)
-            
+
             if theta is None:
                 theta = _theta
             elif not np.isclose(theta, _theta, atol=MERGE_UNCERTAINTY):
@@ -255,7 +255,6 @@ class QState:
             )
 
             _theta = 2 * np.arctan(weight_to / weight_from)
-            
 
             if theta is None:
                 theta = _theta

@@ -15,7 +15,7 @@ from xyz import (
     hybrid_cnot_synthesis,
     stopwatch,
     HybridCnotSynthesisStatistics,
-    simulate_circuit
+    simulate_circuit,
 )
 
 
@@ -27,11 +27,11 @@ if __name__ == "__main__":
         circuit = hybrid_cnot_synthesis(target_state, map_gates=True, stats=stats)
     stats.report()
     cx = circuit.get_cnot_cost()
-    
+
     # now we measure the distance between the target state and the actual state
     state_vector_act = simulate_circuit(circuit).data
     dist = np.linalg.norm(state_vector_act - state_vector)
-    
+
     print(circuit.to_qiskit())
     print("target state: ", quantize_state(state_vector))
     print("actual state: ", quantize_state(state_vector_act))

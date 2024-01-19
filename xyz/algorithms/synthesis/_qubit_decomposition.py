@@ -422,9 +422,9 @@ def qubit_decomposition_opt(
         if index & (1 << pivot) == 0:
             index_to_weight[index] += weight
         else:
-            index_to_weight[index ^ (1 << pivot)] = np.sqrt( weight**2 + state.index_to_weight.get(
-                index ^ (1 << pivot), 0
-            ) ** 2)
+            index_to_weight[index ^ (1 << pivot)] = np.sqrt(
+                weight**2 + state.index_to_weight.get(index ^ (1 << pivot), 0) ** 2
+            )
 
     new_state = QState(index_to_weight, state.num_qubits)
 
