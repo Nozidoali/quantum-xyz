@@ -15,8 +15,8 @@ import numpy as np
 import pytest
 
 from xyz import QState, quantize_state
-from xyz import hybrid_cnot_synthesis
 from xyz import simulate_circuit
+from xyz.algorithms.synthesis.synthesize import cnot_synthesis
 
 
 def rand_state(num_qubit: int, sparsity: int, uniform: bool = False) -> QState:
@@ -75,7 +75,7 @@ def state_vectors():
     """Generate a random state vector for testing ."""
     all_state_vectors = []
     while len(all_state_vectors) < 1:
-        num_qubit = random.randint(3, 3)
+        num_qubit = random.randint(4, 7)
         sparsity = random.randint(num_qubit, 2 ** (num_qubit - 1) - 1)
         state = rand_state(num_qubit, sparsity, uniform=False)
 
@@ -96,7 +96,7 @@ def test_one_state(state_vectors):
         state_vector_exp = state_vector
         target_state = quantize_state(state_vector_exp)
 
-        circuit = hybrid_cnot_synthesis(target_state)
+        circuit = cnot_synthesis(target_state, verbose_level=3, optimality_level=2)
 
         # now we measure the distance between the target state and the actual state
         state_vector_act = simulate_circuit(circuit).data
@@ -105,7 +105,7 @@ def test_one_state(state_vectors):
         # print("target state: ", target_state)
         # print("actual state: ", quantize_state(state_vector_act))
 
-        circ = circuit.to_qiskit()
+        # circ = circuit.to_qiskit()
         # print(circ)
 
         assert dist < 1e-1

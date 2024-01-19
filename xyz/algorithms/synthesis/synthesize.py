@@ -19,7 +19,7 @@ from xyz.qstate import QState
 
 from ._exact_cnot_synthesis import exact_cnot_synthesis
 from ._qubit_reduction import qubit_reduction
-from ._sparse_state_synthesis import density_reduction
+from ._sparse_state_synthesis import cardinality_reduction
 from ._ground_state_calibration import ground_state_calibration
 from ._support_reduction import support_reduction
 from ._qubit_decomposition import qubit_decomposition
@@ -132,13 +132,14 @@ def cnot_synthesis(
                     gates.append(gate)
 
                 break
+            # the solution is not in the induced state transition graph
             except ValueError:
                 skip_exact_cnot_synthesis = True
 
         if verbose_level >= 2:
             print(f"reducing density, current density = {density}", end="...")
         stdout.flush()
-        new_state, _gates = density_reduction(
+        new_state, _gates = cardinality_reduction(
             circuit, curr_state, verbose_level=verbose_level
         )
         if verbose_level >= 2:

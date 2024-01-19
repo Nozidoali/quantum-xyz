@@ -70,7 +70,7 @@ def _maximize_difference_once(state: QState, indices: set, diff_lit: dict):
     return best_index_set, best_qubit, best_value
 
 
-def density_reduction(circuit: QCircuit, state: QState, verbose_level: int = 0):
+def cardinality_reduction(circuit: QCircuit, state: QState, verbose_level: int = 0):
     """Select indices for the QState .
 
     :param state: [description]
@@ -181,16 +181,16 @@ def density_reduction(circuit: QCircuit, state: QState, verbose_level: int = 0):
         )
     assert reversed_index2 in index_to_weight
 
-    theta = 2 * np.arccos(
-        np.sqrt(
-            index_to_weight[index2]
-            / (index_to_weight[index2] + index_to_weight[reversed_index2])
-        )
-    )
+    theta = 2 * np.arctan(index_to_weight[reversed_index2]
+            / index_to_weight[index2])
 
     gates.append(MCRY(theta, control_qubits, control_phases, target_qubit))
 
-    index_to_weight[index2] += index_to_weight.pop(reversed_index2)
+    index_to_weight[index2] = np.sqrt(
+        index_to_weight[index2] ** 2 + index_to_weight[reversed_index2] ** 2
+    )
+    
+    index_to_weight.pop(reversed_index2)
 
     # Update the state
     new_state = QState(index_to_weight, state.num_qubits)
@@ -220,7 +220,7 @@ def sparse_state_synthesis(circuit, state: QState, verbose_level: int = 0):
         if density == 1:
             break
 
-        new_state, _gates = density_reduction(
+        new_state, _gates = cardinality_reduction(
             circuit, curr_state, verbose_level=verbose_level
         )
         for gate in _gates:

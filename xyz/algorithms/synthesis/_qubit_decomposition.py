@@ -185,7 +185,7 @@ def _qubit_decomposition_impl(
     neg_state, pos_state, weights0, weights1 = state.cofactors(pivot)
 
     # we first add a rotation_entry gate to the pivot qubit
-    theta = 2 * np.arccos(weights0 / np.sqrt((weights0**2) + (weights1**2)))
+    theta = 2 * np.arctan(weights1 / weights0)
     gate = RY(theta, pivot_qubit)
     gates.append(gate)
 
@@ -397,9 +397,7 @@ def qubit_decomposition_opt(
         elif rotation_entry[1] == 0:
             rotation_angles[i] = 0
         else:
-            rotation_angles[i] = 2 * np.arccos(
-                np.sqrt(rotation_entry[0] / (rotation_entry[0] + rotation_entry[1]))
-            )
+            rotation_angles[i] = 2 * np.arctan(rotation_entry[1] / rotation_entry[0])
 
     rotation_angles, control_indices = _rotation_angles_optimization(
         rotation_angles, control_indices
@@ -424,9 +422,9 @@ def qubit_decomposition_opt(
         if index & (1 << pivot) == 0:
             index_to_weight[index] += weight
         else:
-            index_to_weight[index ^ (1 << pivot)] = weight + state.index_to_weight.get(
+            index_to_weight[index ^ (1 << pivot)] = np.sqrt( weight**2 + state.index_to_weight.get(
                 index ^ (1 << pivot), 0
-            )
+            ) ** 2)
 
     new_state = QState(index_to_weight, state.num_qubits)
 

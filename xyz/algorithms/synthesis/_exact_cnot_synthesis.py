@@ -329,6 +329,7 @@ def exact_cnot_synthesis(
         # apply x
         if not search_done:
             if _optimality_level <= 3 and curr_state.get_sparsity() != 1:
+                # we can prove that we only need to apply X once, so we skip the rest
                 pass
             else:
                 for target_qubit in supports:
@@ -342,7 +343,8 @@ def exact_cnot_synthesis(
 
     x_gates = ground_state_calibration(circuit, final_state)
 
-    print("\n\n")
+    if verbose_level >= 2:
+        print("\n\n")
 
     for record_key, record_value in record.items():
         prev_state, gate = record_value
@@ -361,7 +363,7 @@ def exact_cnot_synthesis(
         prev_hash, gate = record[curr_hash]
         gates.append(gate)
         curr_hash = prev_hash
-        if verbose_level >= 1:
-            print(f"curr_hash: {curr_hash}, gate: {gate}")
+        if verbose_level >= 2:
+            print(f"curr_hash: {curr_hash:0b}, gate: {gate}")
 
     return gates

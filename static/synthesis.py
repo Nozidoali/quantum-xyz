@@ -26,8 +26,6 @@ from xyz import (
     get_time,
 )
 from xyz import HybridCnotSynthesisStatistics
-from xyz.qstate.common import dicke_state
-from xyz.utils.colors import print_red, print_yellow
 
 
 def rand_state(num_qubit: int, sparsity: int, uniform: bool = True) -> QState:

@@ -113,10 +113,12 @@ class QState:
 
             # now we check the rotation angle
             weight_from = self.index_to_weight[idx0]
+            weight_to = self.index_to_weight[idx1]
             weight_total = np.sqrt(
                 (self.index_to_weight[idx1] ** 2) + (self.index_to_weight[idx0] ** 2)
             )
-            _theta = 2 * np.arccos(weight_from / weight_total)
+
+            _theta = 2 * np.arctan(weight_to / weight_from)
 
             if theta is None:
                 theta = _theta
@@ -146,11 +148,13 @@ class QState:
 
             # now we check the rotation angle
             weight_from = self.index_to_weight[idx1]
+            weight_to = self.index_to_weight[idx0]
             weight_total = np.sqrt(
                 (self.index_to_weight[idx1] ** 2) + (self.index_to_weight[idx0] ** 2)
             )
-            _theta = -2 * np.arccos(weight_from / weight_total)
 
+            _theta = 2 * np.arctan(weight_to / weight_from)
+            
             if theta is None:
                 theta = _theta
             elif not np.isclose(theta, _theta, atol=MERGE_UNCERTAINTY):
@@ -203,11 +207,13 @@ class QState:
 
             # now we check the rotation angle
             weight_from = self.index_to_weight[idx0]
+            weight_to = self.index_to_weight[idx1]
             weight_total = np.sqrt(
                 (self.index_to_weight[idx1] ** 2) + (self.index_to_weight[idx0] ** 2)
             )
-            _theta = 2 * np.arccos(weight_from / weight_total)
 
+            _theta = 2 * np.arctan(weight_to / weight_from)
+            
             if theta is None:
                 theta = _theta
             elif not np.isclose(theta, _theta, atol=MERGE_UNCERTAINTY):
@@ -243,10 +249,13 @@ class QState:
 
             # now we check the rotation angle
             weight_from = self.index_to_weight[idx1]
+            weight_to = self.index_to_weight[idx0]
             weight_total = np.sqrt(
                 (self.index_to_weight[idx1] ** 2) + (self.index_to_weight[idx0] ** 2)
             )
-            _theta = -2 * np.arccos(weight_from / weight_total)
+
+            _theta = 2 * np.arctan(weight_to / weight_from)
+            
 
             if theta is None:
                 theta = _theta

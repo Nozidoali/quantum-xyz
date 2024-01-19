@@ -9,23 +9,22 @@ Last Modified time: 2023-11-17 00:55:53
 """
 
 # pylint: disable=wrong-import-position
+# pylint: skip-file
 
-from tracemalloc import stop
 import numpy as np
 
 from xyz import (
-    exact_cnot_synthesis_opt,
+    exact_cnot_synthesis_legacy,
     exact_cnot_synthesis,
-    heurisitc_cnot_synthesis_opt,
+    heuristic_cnot_synthesis,
+    QCircuit,
+    quantize_state,
+    simulate_circuit,
+    D_state,
+    cnot_synthesis,
+    print_green,
+    stopwatch,
 )
-from xyz import QCircuit
-from xyz import quantize_state
-from xyz import simulate_circuit
-from xyz import D_state
-from xyz.algorithms.synthesis import cnot_synthesis
-from xyz.utils.colors import print_green
-from xyz.utils.timer import stopwatch
-
 
 if __name__ == "__main__":
     # state_vector_exp = np.array([np.sqrt(2), 0, 1, 1])
@@ -48,11 +47,9 @@ if __name__ == "__main__":
     circuit = QCircuit(state.num_qubits, map_gates=True)
 
     with stopwatch("exact_cnot_synthesis") as t:
-        # gates = cnot_synthesis(circuit, state, verbose_level=3)
         gates = exact_cnot_synthesis(circuit, state, verbose_level=1)
-        # gates = exact_cnot_synthesis_opt(circuit, state, verbose_level=1)
 
-    print_green(f"exact_cnot_synthesis_opt: {t.time():0.02f}")
+    print_green(f"synthesis: {t.time():0.02f} seconds")
 
     circuit.add_gates(gates)
 

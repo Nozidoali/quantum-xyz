@@ -102,16 +102,16 @@ def support_reduction(circuit: QCircuit, state: QState, enable_cnot: bool = True
                 weight1 = new_state.index_to_weight[index1]
 
                 assert not np.isclose(
-                    weight0 + weight1, 0
+                    np.sqrt(weight0 ** 2 + weight1 ** 2), 0
                 ), f"weight0 = {weight0}, weight1 = {weight1}, state = {new_state}"
 
-                _theta = 2 * np.arccos(np.sqrt(weight0 / (weight0 + weight1)))
+                _theta = 2 * np.arctan(weight1 / weight0)
 
                 if theta is None:
                     theta = _theta
-                    index_to_weight[index0] = weight0 + weight1
+                    index_to_weight[index0] = np.sqrt(weight0 ** 2 + weight1 ** 2)
                 elif np.isclose(theta, _theta):
-                    index_to_weight[index0] = weight0 + weight1
+                    index_to_weight[index0] = np.sqrt(weight0 ** 2 + weight1 ** 2)
                     continue
                 else:
                     is_separable = False

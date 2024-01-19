@@ -325,7 +325,7 @@ def _qubit_reduction_impl(
 
 
 def qubit_reduction(circuit, target_state: QState, optimality_level: int = 1):
-    """A helper function that computes a circuit reduction on a circuit .
+    """Qubit reduction algorithm based on ESOP decomposition of a qubit.
 
     :param circuit: [description]
     :type circuit: [type]

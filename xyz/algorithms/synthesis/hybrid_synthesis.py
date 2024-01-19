@@ -20,7 +20,7 @@ from xyz.utils import global_stopwatch_report
 from xyz.utils.colors import print_yellow
 
 from ._exact_cnot_synthesis import exact_cnot_synthesis
-from ._sparse_state_synthesis import density_reduction
+from ._sparse_state_synthesis import cardinality_reduction
 from ._ground_state_calibration import ground_state_calibration
 from ._support_reduction import support_reduction
 from ._qubit_decomposition import (
@@ -182,8 +182,8 @@ def _hybrid_cnot_synthesis_impl(
     sparse_qsp_gates: List[QGate] = None
     num_sparse_qsp_cx: int = 0
     if ENABLE_DENSITY_REDUCTION:
-        with stopwatch("density_reduction") as timer:
-            new_state, density_reduction_gates = density_reduction(
+        with stopwatch("cardinality_reduction") as timer:
+            new_state, density_reduction_gates = cardinality_reduction(
                 circuit, state, verbose_level=0
             )
         num_density_reduction_cx = sum(
@@ -320,7 +320,8 @@ def hybrid_cnot_synthesis(
     map_gates: bool = False,
     stats: HybridCnotSynthesisStatistics = None,
 ):
-    """Return a QCircuit that can be used to construct a circuit that can be used to compute the non - linear correlation coefficients .
+    """A hybrid method combining both qubit- and cardinality- reduction.
+    The solver would choose the best method based on a Markov decision process.
 
     :param state: [description]
     :type state: QState

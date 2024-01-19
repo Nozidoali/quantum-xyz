@@ -15,7 +15,7 @@ import xyz.qstate as qs
 import xyz.circuit as qc
 
 
-def heurisitc_cnot_synthesis_opt(
+def heuristic_cnot_synthesis(
     circuit: qc.QCircuit,
     target_state: qs.QState,
     verbose_level: int = 0,
