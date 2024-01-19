@@ -12,7 +12,6 @@ import random
 from itertools import combinations
 
 import numpy as np
-from pyrsistent import v
 import pytest
 
 from xyz import QState, quantize_state
