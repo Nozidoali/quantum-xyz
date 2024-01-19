@@ -317,7 +317,7 @@ def _hybrid_cnot_synthesis_impl(
 
 def hybrid_cnot_synthesis(
     state: QState,
-    map_gates: bool = False,
+    map_gates: bool = True,
     stats: HybridCnotSynthesisStatistics = None,
 ):
     """A hybrid method combining both qubit- and cardinality- reduction.
