@@ -20,7 +20,7 @@ from xyz.utils import global_stopwatch_report
 from xyz.utils import print_yellow
 
 from ._exact_cnot_synthesis import exact_cnot_synthesis
-from ._sparse_state_synthesis import cardinality_reduction
+from ._cardinality_reduction import cardinality_reduction
 from ._ground_state_calibration import ground_state_calibration
 from ._support_reduction import support_reduction
 from ._qubit_decomposition import (

@@ -9,6 +9,5 @@ Last Modified time: 2023-06-25 12:59:39
 """
 
 from .prepare_state import *
-from ._exact_cnot_synthesis_legacy import exact_cnot_synthesis_legacy
 from ._heuristic_cnot_synthesis import heuristic_cnot_synthesis
 from .library_cnot_synthesis import library_cnot_synthesis
