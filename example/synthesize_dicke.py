@@ -12,7 +12,7 @@ import numpy as np
 from xyz import (
     D_state,
     quantize_state,
-    hybrid_cnot_synthesis,
+    prepare_state,
     stopwatch,
     HybridCnotSynthesisStatistics,
     simulate_circuit,
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     target_state = quantize_state(state_vector)
     with stopwatch("synthesis") as timer:
         stats = HybridCnotSynthesisStatistics()
-        circuit = hybrid_cnot_synthesis(target_state, map_gates=True, stats=stats)
+        circuit = prepare_state(target_state, map_gates=True, stats=stats)
     stats.report()
     cx = circuit.get_cnot_cost()
 

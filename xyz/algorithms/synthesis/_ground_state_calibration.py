@@ -15,11 +15,12 @@ from xyz.qstate import QState
 
 
 def ground_state_calibration(circuit: QCircuit, state: QState):
-    """Calculates the ground state calibration .
+    """Returns the gates to turn current state to the ground state
+    using the Pauli X operators.
 
-    :param circuit: [description]
+    :param circuit: the quantum circuit
     :type circuit: QCircuit
-    :param state: [description]
+    :param state: the basis state
     :type state: QState
     """
 

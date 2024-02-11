@@ -54,7 +54,7 @@ class TROperator(QOperatorBase, QuantizedRotation):
         if self.operator_type == QOperatorType.T1:
             next_state, theta = qstate.apply_merge1(self.target_qubit_index)
             # this is an interesting case, we need to rotate to the opposite direction
-            self.theta = theta - np.pi # we need to rotate another pi
+            self.theta = theta - np.pi  # we need to rotate another pi
             return next_state
 
     def __str__(self) -> str:

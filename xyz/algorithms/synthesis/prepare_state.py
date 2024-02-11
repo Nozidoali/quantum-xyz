@@ -17,7 +17,7 @@ from xyz.circuit import QCircuit, RY, QGate
 from xyz.qstate import QState
 from xyz.utils import stopwatch
 from xyz.utils import global_stopwatch_report
-from xyz.utils.colors import print_yellow
+from xyz.utils import print_yellow
 
 from ._exact_cnot_synthesis import exact_cnot_synthesis
 from ._sparse_state_synthesis import cardinality_reduction
@@ -37,7 +37,7 @@ EXACT_SYNTHESIS_CNOT_LIMIT = 10
 ENABLE_EXACT_SYNTHESIS = True
 
 ENABLE_QUBIT_REDUCTION = True
-ENABLE_DENSITY_REDUCTION = True
+ENABLE_CARDINALITY_REDUCTION = True
 
 ENABLE_DECOMPOSITION = False
 
@@ -54,7 +54,7 @@ class HybridCnotSynthesisStatistics:
         self.num_runs_support_reduction: int = 0
         self.time_support_reduction: float = 0
         self.time_exact_cnot_synthesis: float = 0
-        self.time_density_reduction: float = 0
+        self.time_cardinality_reduction: float = 0
         self.time_qubit_decomposition: float = 0
         self.num_reduced_supports: int = 0
         self.num_reduced_density: int = 0
@@ -69,7 +69,7 @@ class HybridCnotSynthesisStatistics:
         print(f"num_runs_support_reduction: {self.num_runs_support_reduction}")
         print(f"time_support_reduction: {self.time_support_reduction}")
         print(f"time_exact_cnot_synthesis: {self.time_exact_cnot_synthesis}")
-        print(f"time_density_reduction: {self.time_density_reduction}")
+        print(f"time_cardinality_reduction: {self.time_cardinality_reduction}")
         print(f"time_qubit_decomposition: {self.time_qubit_decomposition}")
         print(f"num_reduced_supports: {self.num_reduced_supports}")
         print(f"num_reduced_density: {self.num_reduced_density}")
@@ -80,7 +80,7 @@ class HybridCnotSynthesisStatistics:
         print("-" * 80)
 
 
-def _hybrid_cnot_synthesis_impl(
+def _prepare_state_impl(
     circuit: QCircuit,
     state: QState,
     verbose_level: int = 0,
@@ -182,19 +182,19 @@ def _hybrid_cnot_synthesis_impl(
     # sparse state synthesis
     sparse_qsp_gates: List[QGate] = None
     num_sparse_qsp_cx: int = 0
-    if ENABLE_DENSITY_REDUCTION:
+    if ENABLE_CARDINALITY_REDUCTION:
         with stopwatch("cardinality_reduction") as timer:
-            new_state, density_reduction_gates = cardinality_reduction(
+            new_state, cardinality_reduction_gates = cardinality_reduction(
                 circuit, state, verbose_level=0
             )
-        num_density_reduction_cx = sum(
-            [gate.get_cnot_cost() for gate in density_reduction_gates]
+        num_cardinality_reduction_cx = sum(
+            [gate.get_cnot_cost() for gate in cardinality_reduction_gates]
         )
 
         if stats is not None:
-            stats.time_density_reduction += timer.time()
+            stats.time_cardinality_reduction += timer.time()
 
-        rec_gates, rec_cx = _hybrid_cnot_synthesis_impl(
+        rec_gates, rec_cx = _prepare_state_impl(
             circuit,
             new_state,
             stats=stats,
@@ -203,12 +203,14 @@ def _hybrid_cnot_synthesis_impl(
         sparse_qsp_gates = []
         for gate in rec_gates:
             sparse_qsp_gates.append(gate)
-        for gate in density_reduction_gates:
+        for gate in cardinality_reduction_gates:
             sparse_qsp_gates.append(gate)
         for gate in support_reducing_gates:
             sparse_qsp_gates.append(gate)
 
-        num_sparse_qsp_cx = rec_cx + num_density_reduction_cx + num_cx_support_reduction
+        num_sparse_qsp_cx = (
+            rec_cx + num_cardinality_reduction_cx + num_cx_support_reduction
+        )
 
     # qubit decomposition
     qubit_reduction_gates: List[QGate] = None
@@ -225,7 +227,7 @@ def _hybrid_cnot_synthesis_impl(
         if stats is not None:
             stats.time_qubit_decomposition += timer.time()
 
-        rec_gates, rec_cx = _hybrid_cnot_synthesis_impl(
+        rec_gates, rec_cx = _prepare_state_impl(
             circuit,
             new_state,
             stats=stats,
@@ -253,13 +255,13 @@ def _hybrid_cnot_synthesis_impl(
         theta = 2 * np.arctan(weights1 / weights0)
         ry_gate = RY(theta, pivot_qubit)
 
-        pos_gates = _hybrid_cnot_synthesis_impl(
+        pos_gates = _prepare_state_impl(
             circuit,
             pos_state,
             stats=stats,
         )
 
-        neg_gates = _hybrid_cnot_synthesis_impl(
+        neg_gates = _prepare_state_impl(
             circuit,
             neg_state,
             stats=stats,
@@ -316,7 +318,7 @@ def _hybrid_cnot_synthesis_impl(
     return best_gates, best_num_gates
 
 
-def hybrid_cnot_synthesis(
+def prepare_state(
     state: QState,
     map_gates: bool = True,
     verbose_level: int = 0,
@@ -337,27 +339,29 @@ def hybrid_cnot_synthesis(
     num_qubits = state.num_qubits
     density = state.get_sparsity()
 
-    # 0.6 is a magic number,
-    density_reduction_cnot_estimation = int(density * num_qubits)
+    cardinality_reduction_cnot_estimation = int(density * num_qubits)
     qubit_reduction_cnot_estimation = 1 << num_qubits
 
     # pylint: disable=W0603
 
     global ENABLE_QUBIT_REDUCTION
-    global ENABLE_DENSITY_REDUCTION
-    if density_reduction_cnot_estimation < qubit_reduction_cnot_estimation:
-        print_yellow("ENABLE_DENSITY_REDUCTION")
+    global ENABLE_CARDINALITY_REDUCTION
+    if cardinality_reduction_cnot_estimation < qubit_reduction_cnot_estimation:
+        # if the state is sparse, we enable cardinality reduction method
+        print_yellow("ENABLE_CARDINALITY_REDUCTION")
         ENABLE_QUBIT_REDUCTION = False
-        ENABLE_DENSITY_REDUCTION = True
+        ENABLE_CARDINALITY_REDUCTION = True
     else:
         print_yellow("ENABLE_QUBIT_REDUCTION")
+        # otherwise, if the state is dense, we enable the qubit reduction method
         ENABLE_QUBIT_REDUCTION = True
-        ENABLE_DENSITY_REDUCTION = False
+        ENABLE_CARDINALITY_REDUCTION = False
 
+    # initialize a circuit and the quantum registers
     circuit = QCircuit(state.num_qubits, map_gates=map_gates)
 
-    with stopwatch("hybrid_cnot_synthesis") as timer:
-        gates, _ = _hybrid_cnot_synthesis_impl(
+    with stopwatch("prepare_state") as timer:
+        gates, _ = _prepare_state_impl(
             circuit,
             state,
             verbose_level=verbose_level,

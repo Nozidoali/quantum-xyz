@@ -114,9 +114,7 @@ class QState:
             # now we check the rotation angle
             weight0 = self.index_to_weight[idx0]
             weight1 = self.index_to_weight[idx1]
-            weight_total = np.sqrt(
-                (weight0 ** 2) + (weight1 ** 2)
-            )
+            weight_total = np.sqrt((weight0**2) + (weight1**2))
 
             _theta = 2 * np.arctan(weight1 / weight0)
 
@@ -149,9 +147,7 @@ class QState:
             # now we check the rotation angle
             weight0 = self.index_to_weight[idx0]
             weight1 = self.index_to_weight[idx1]
-            weight_total = np.sqrt(
-                (weight0 ** 2) + (weight1 ** 2)
-            )
+            weight_total = np.sqrt((weight0**2) + (weight1**2))
 
             _theta = 2 * np.arctan(weight0 / weight1)
 
@@ -208,12 +204,10 @@ class QState:
             # now we check the rotation angle
             weight0 = self.index_to_weight[idx0]
             weight1 = self.index_to_weight[idx1]
-            weight_total = np.sqrt(
-                (weight0 ** 2) + (weight1 ** 2)
-            )
+            weight_total = np.sqrt((weight0**2) + (weight1**2))
 
             _theta = 2 * np.arctan(weight1 / weight0)
-            
+
             if theta is None:
                 theta = _theta
             elif not np.isclose(theta, _theta, atol=MERGE_UNCERTAINTY):
@@ -250,9 +244,7 @@ class QState:
             # now we check the rotation angle
             weight0 = self.index_to_weight[idx0]
             weight1 = self.index_to_weight[idx1]
-            weight_total = np.sqrt(
-                (weight0 ** 2) + (weight1 ** 2)
-            )
+            weight_total = np.sqrt((weight0**2) + (weight1**2))
 
             _theta = 2 * np.arctan(weight1 / weight0)
 

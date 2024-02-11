@@ -10,7 +10,7 @@ Last Modified time: 2023-09-15 14:54:51
 
 import os
 from xyz import load_state
-from xyz import hybrid_cnot_synthesis
+from xyz import prepare_state
 
 REGRESSION_TEST_DIR = os.path.join(os.path.dirname(__file__), "regression_testcases")
 
@@ -48,7 +48,7 @@ def run():
         file = os.path.join(REGRESSION_TEST_DIR, f"{i}.json")
 
         state = load_state(file)
-        circuit = hybrid_cnot_synthesis(state)
+        circuit = prepare_state(state)
         print(circuit.to_qiskit())
 
 

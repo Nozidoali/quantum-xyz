@@ -20,21 +20,15 @@ def heuristic_cnot_synthesis(
     target_state: qs.QState,
     verbose_level: int = 0,
 ):
-    """This function finds the exact cnot_cnot_synthesis of a circuit .
+    """Returns the gates to prepare the target state from the ground state
 
-    :param circuit: [description]
-    :type circuit: QCircuit
-    :param qubit_mapping: [description]
-    :type qubit_mapping: dict
-    :param target_state: [description]
-    :type target_state: qs.QState
-    :param optimality_level: [description], defaults to 3
-    :type optimality_level: int, optional
-    :param verbose_level: [description], defaults to 0
-    :type verbose_level: int, optional
-    :raises ValueError: [description]
-    :return: [description]
-    :rtype: [type]
+    Args:
+        circuit (qc.QCircuit): the quantum circuit
+        target_state (qs.QState): the target state
+        verbose_level (int, optional): verbose level. Defaults to 0.
+
+    Returns:
+        List[QGate]: list of quantum gates
     """
 
     curr_state = copy.deepcopy(target_state)
