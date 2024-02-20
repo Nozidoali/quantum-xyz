@@ -70,14 +70,16 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
         yield perm[:]
 
 
+N_TESTS = 50
+
 @pytest.fixture
 def state_vectors():
     """Generate a random state vector for testing ."""
     all_state_vectors = []
-    while len(all_state_vectors) < 1:
-        num_qubit = random.randint(3, 3)
+    while len(all_state_vectors) < N_TESTS:
+        num_qubit = random.randint(3, 6)
         sparsity = random.randint(num_qubit, 2 ** (num_qubit - 1) - 1)
-        sparsity = random.randint(2 ** (num_qubit - 1) - 1, 2 ** (num_qubit - 1) - 1)
+        # sparsity = random.randint(2 ** (num_qubit - 1) - 1, 2 ** (num_qubit - 1) - 1)
         state = rand_state(num_qubit, sparsity, uniform=False)
 
         # check if the state is valid
@@ -104,13 +106,7 @@ def test_one_state(state_vectors):
         state_vector_act = simulate_circuit(circuit).data
         dist = np.linalg.norm(state_vector_act - state_vector_exp)
 
-        print("target state: ", target_state)
-        print("actual state: ", quantize_state(state_vector_act))
-
-        circ = circuit.to_qiskit()
-        print(circ)
-
-        assert dist**2 < 1e-1
+        assert dist**2 < 1e-1 # make sure the distance is small
 
 
 if __name__ == "__main__":
