@@ -46,8 +46,8 @@ ENABLE_REINDEX = True
 ENABLE_PROGESS_BAR = True
 
 
-class HybridCnotSynthesisStatistics:
-    """Classes the hybridCnothesisStatistics class ."""
+class StatePreparationStatistics:
+    """Classes the StatePreparationStatistics class ."""
 
     def __init__(self) -> None:
         self.time_total: float = 0
@@ -84,7 +84,7 @@ def _prepare_state_impl(
     circuit: QCircuit,
     state: QState,
     verbose_level: int = 0,
-    stats: HybridCnotSynthesisStatistics = None,
+    stats: StatePreparationStatistics = None,
 ):
     prev_supports = state.get_supports()
     prev_num_supports = len(prev_supports)
@@ -322,7 +322,7 @@ def prepare_state(
     state: QState,
     map_gates: bool = True,
     verbose_level: int = 0,
-    stats: HybridCnotSynthesisStatistics = None,
+    stats: StatePreparationStatistics = None,
 ):
     """A hybrid method combining both qubit- and cardinality- reduction.
     The solver would choose the best method based on a Markov decision process.

@@ -14,7 +14,7 @@ from xyz import (
     quantize_state,
     prepare_state,
     stopwatch,
-    HybridCnotSynthesisStatistics,
+    StatePreparationStatistics,
     simulate_circuit,
 )
 
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     state_vector = D_state(5, 1)
     target_state = quantize_state(state_vector)
     with stopwatch("synthesis") as timer:
-        stats = HybridCnotSynthesisStatistics()
+        stats = StatePreparationStatistics()
         circuit = prepare_state(target_state, map_gates=True, stats=stats)
     stats.report()
     cx = circuit.get_cnot_cost()

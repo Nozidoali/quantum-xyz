@@ -25,7 +25,7 @@ from xyz import (
     quantize_state,
     get_time,
 )
-from xyz import HybridCnotSynthesisStatistics
+from xyz import StatePreparationStatistics
 
 
 def rand_state(num_qubit: int, sparsity: int, uniform: bool = True) -> QState:
@@ -121,7 +121,7 @@ def test_synthesis(
     elif method == "ours":
         target_state = quantize_state(state_vector)
         with stopwatch("synthesis") as timer:
-            stats = HybridCnotSynthesisStatistics()
+            stats = StatePreparationStatistics()
         circuit = prepare_state(target_state, map_gates=map_gates, stats=stats)
         stats.report()
         cx = circuit.get_cnot_cost()
