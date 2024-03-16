@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name="quantum-xyz"
-version="0.1.1"
+version="{{VERSION_PLACEHOLDER}}"
 dependencies = [
     "llist==0.7.1",
     "matplotlib==3.7.1",
