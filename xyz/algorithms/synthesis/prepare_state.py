@@ -77,7 +77,9 @@ class StatePreparationStatistics:
         print(f"num_runs_support_reduction: {self.num_runs_support_reduction}")
         print(f"time_support_reduction: {self.time_support_reduction:0.02f} sec")
         print(f"time_exact_cnot_synthesis: {self.time_exact_cnot_synthesis:0.02f} sec")
-        print(f"time_cardinality_reduction: {self.time_cardinality_reduction:0.02f} sec")
+        print(
+            f"time_cardinality_reduction: {self.time_cardinality_reduction:0.02f} sec"
+        )
         print(f"time_qubit_decomposition: {self.time_qubit_decomposition:0.02f} sec")
         print(f"num_reduced_supports: {self.num_reduced_supports}")
         print(f"num_reduced_density: {self.num_reduced_density}")
@@ -333,7 +335,7 @@ def prepare_state(
     stats: StatePreparationStatistics = None,
 ):
     """A hybrid method combining both qubit- and cardinality- reduction.
-    
+
     This is a wrapper for the _prepare_state_impl function.
 
     :param state: the target state to be prepared
@@ -343,7 +345,7 @@ def prepare_state(
     :return: [description]
     :rtype: [type]
     """
-    
+
     # check the input state
     if not isinstance(state, QState):
         if isinstance(state, np.ndarray):

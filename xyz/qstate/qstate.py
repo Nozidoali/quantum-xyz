@@ -391,7 +391,7 @@ class QState:
                 return False
             if index < sorted_o_index_set[i]:
                 return True
-            elif index > sorted_o_index_set[i]:
+            if index > sorted_o_index_set[i]:
                 return False
         return False
 
@@ -450,15 +450,12 @@ def quantize_state(state_vector: np.ndarray):
     :param state_vector: a vector with 2**n entries, where n is the number of qubits.
     :type state_vector: np.ndarray
     """
-    
+
     if isinstance(state_vector, QState):
         return state_vector
-    
+
     if not isinstance(state_vector, np.ndarray):
-        try:
-            state_vector = np.array(state_vector)        
-        except:
-            raise ValueError("The state vector must be a numpy array.")
+        state_vector = np.array(state_vector)
 
     # discard the imaginary part
     # state_vector = state_vector.real
@@ -510,7 +507,7 @@ def from_val(val: int, num_qubits: int) -> QState:
     :rtype: QState
     """
 
-    assert val > 0 and val < 2 ** (2**num_qubits)
+    assert 0 < val < 2 ** (2**num_qubits)
     states = []
     for i in range(2**num_qubits):
         if val & 1 == 1:

@@ -56,7 +56,7 @@ def place_ones(size, count):
         yield p
 
 
-def all_states(num_qubit: int, sparsity: int) -> QState:
+def all_states(num_qubit: int, sparsity: int):
     """Return a QState with all states of the given number of qubit .
 
     :param num_qubit: [description]
