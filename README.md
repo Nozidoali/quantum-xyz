@@ -18,3 +18,16 @@ cd example
 python synthesize_dicke.py
 ```
 
+
+## Quantum State Preparation Using an Exact CNOT Synthesis Formulation
+See [xyz/algorithms/prepare_state](xyz/algorithms/prepare_state)
+
+Reference:
+```
+    @article{wang2024quantum,
+        title={Quantum State Preparation Using an Exact CNOT Synthesis Formulation},
+        author={Wang, Hanyu and Tan, Bochen and Cong, Jason and De Micheli, Giovanni},
+        journal={arXiv preprint arXiv:2401.01009},
+        year={2024}
+    }
+```
