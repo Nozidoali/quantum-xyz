@@ -290,7 +290,7 @@ def prepare_state(
     state: QState,
     map_gates: bool = True,
     verbose_level: int = 0,
-    stats: StatePreparationStatistics = None,
+    stats: StatePreparationStatistics = StatePreparationStatistics(),
 ) -> QCircuit:
     """A hybrid method combining both qubit- and cardinality- reduction.
 
