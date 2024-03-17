@@ -1,4 +1,4 @@
-# .github/workflows/deploy.yml
+# .github/workflows/cd.yml
 name: Deploy
 
 on: [deployment]
