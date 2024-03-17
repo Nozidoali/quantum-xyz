@@ -14,7 +14,6 @@ from xyz import (
     quantize_state,
     prepare_state,
     stopwatch,
-    StatePreparationStatistics,
     simulate_circuit,
 )
 
@@ -25,9 +24,7 @@ if __name__ == "__main__":
 
     # synthesize the state
     with stopwatch("synthesis") as timer:
-        stats = StatePreparationStatistics()
-        circuit = prepare_state(target_state, map_gates=True, stats=stats)
-    stats.report()
+        circuit = prepare_state(target_state, map_gates=True)
     n_cnot = circuit.get_cnot_cost()
 
     # now we measure the distance between the target state and the actual state

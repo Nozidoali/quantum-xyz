@@ -14,7 +14,6 @@ Last Modified time: 2023-11-17 00:55:53
 import numpy as np
 
 from xyz import (
-    exact_cnot_synthesis_legacy,
     exact_cnot_synthesis,
     heuristic_cnot_synthesis,
     QCircuit,

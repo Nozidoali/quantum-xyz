@@ -6,11 +6,11 @@
 Welcome to xyz's documentation!
 ===============================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+Modules
+=======
 
-   modules
+.. autosummary:: modules
+   :toctree: xyz
 
 Indices and tables
 ==================
