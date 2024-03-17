@@ -72,6 +72,7 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
 
 N_TESTS = 50
 
+
 @pytest.fixture
 def state_vectors():
     """Generate a random state vector for testing ."""
@@ -106,7 +107,7 @@ def test_one_state(state_vectors):
         state_vector_act = simulate_circuit(circuit).data
         dist = np.linalg.norm(state_vector_act - state_vector_exp)
 
-        assert dist**2 < 1e-1 # make sure the distance is small
+        assert dist**2 < 1e-1  # make sure the distance is small
 
 
 if __name__ == "__main__":

@@ -19,10 +19,11 @@ from xyz.circuit import QCircuit
 from .diff_states import get_difference
 
 
-def simulate_circuit(circuit: QCircuit):
+def simulate_circuit(circuit: QCircuit) -> np.ndarray:
     """Simulate a circuit .
+    This is a wrapper for qiskit Aer.get_backend("qasm_simulator").run(circuit).result().get_statevector()
 
-    :param circuit: [description]
+    :param circuit: the quantum circuit to simulate
     :type circuit: QCircuit
     """
     qiskit_circuit = circuit.to_qiskit()
@@ -36,7 +37,7 @@ def simulate_circuit(circuit: QCircuit):
     state_vector_actual = backend.run(transpiled).result().get_statevector()
     state_vector_actual = state_vector_actual / np.linalg.norm(state_vector_actual)
 
-    return state_vector_actual
+    return state_vector_actual.data
 
 
 def verify_circuit_and_count_cnot(

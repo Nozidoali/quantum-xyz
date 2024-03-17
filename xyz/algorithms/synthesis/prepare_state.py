@@ -8,13 +8,24 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-09-15 14:32:11
 """
 
+
+"""
+Reference:
+    @article{wang2024quantum,
+        title={Quantum State Preparation Using an Exact CNOT Synthesis Formulation},
+        author={Wang, Hanyu and Tan, Bochen and Cong, Jason and De Micheli, Giovanni},
+        journal={arXiv preprint arXiv:2401.01009},
+        year={2024}
+    }
+"""
+
 from collections import namedtuple
 from typing import List
 import numpy as np
 
 
 from xyz.circuit import QCircuit, RY, QGate
-from xyz.qstate import QState
+from xyz.qstate import QState, quantize_state
 from xyz.utils import stopwatch
 from xyz.utils import global_stopwatch_report
 from xyz.utils import print_yellow
@@ -67,10 +78,10 @@ class StatePreparationStatistics:
         print(f"time_total: {self.time_total}")
         print("-" * 80)
         print(f"num_runs_support_reduction: {self.num_runs_support_reduction}")
-        print(f"time_support_reduction: {self.time_support_reduction}")
-        print(f"time_exact_cnot_synthesis: {self.time_exact_cnot_synthesis}")
-        print(f"time_cardinality_reduction: {self.time_cardinality_reduction}")
-        print(f"time_qubit_decomposition: {self.time_qubit_decomposition}")
+        print(f"time_support_reduction: {self.time_support_reduction:0.02f} sec")
+        print(f"time_exact_cnot_synthesis: {self.time_exact_cnot_synthesis:0.02f} sec")
+        print(f"time_cardinality_reduction: {self.time_cardinality_reduction:0.02f} sec")
+        print(f"time_qubit_decomposition: {self.time_qubit_decomposition:0.02f} sec")
         print(f"num_reduced_supports: {self.num_reduced_supports}")
         print(f"num_reduced_density: {self.num_reduced_density}")
         print(f"num_saved_gates_decision: {self.num_saved_gates_decision}")
@@ -325,15 +336,23 @@ def prepare_state(
     stats: StatePreparationStatistics = None,
 ):
     """A hybrid method combining both qubit- and cardinality- reduction.
-    The solver would choose the best method based on a Markov decision process.
+    
+    This is a wrapper for the _prepare_state_impl function.
 
-    :param state: [description]
+    :param state: the target state to be prepared
     :type state: QState
     :param map_gates: [description], defaults to False
     :type map_gates: bool, optional
     :return: [description]
     :rtype: [type]
     """
+    
+    # check the input state
+    if not isinstance(state, QState):
+        if isinstance(state, np.ndarray):
+            state = quantize_state(state)
+        else:
+            raise ValueError("state must be either a QState or a numpy array")
 
     # check the initial state
     num_qubits = state.num_qubits

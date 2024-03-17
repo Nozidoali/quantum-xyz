@@ -46,7 +46,6 @@ class XOperator(QOperatorBase, QuantizedRotation):
         :return: [description]
         :rtype: str
         """
-
         return f"X({self.target_qubit_index})"
 
     def get_cost(self) -> int:
