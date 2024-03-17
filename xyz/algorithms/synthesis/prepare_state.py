@@ -90,7 +90,7 @@ class StatePreparationStatistics:
         print("-" * 80)
 
 
-def _prepare_state_impl(
+def _prepare_state_rec(
     circuit: QCircuit,
     state: QState,
     verbose_level: int = 0,
@@ -107,7 +107,7 @@ def _prepare_state_impl(
         )
 
     num_cx_support_reduction = sum(
-        [gate.get_cnot_cost() for gate in support_reducing_gates]
+        (gate.get_cnot_cost() for gate in support_reducing_gates)
     )
 
     if ENABLE_REINDEX:
@@ -135,26 +135,21 @@ def _prepare_state_impl(
     # get the states
     supports = state.get_supports()
     num_supports = len(supports)
-    density = state.get_sparsity()
+    cardinality = state.get_sparsity()
 
     if ENABLE_PROGESS_BAR:
-        print(f"num_supports: {num_supports:5d}, density: {density:5d}", end="\r")
+        print(f"num_supports: {num_supports:5d}, cardinality: {cardinality:5d}", end="\r")
 
     if stats is not None:
         stats.num_runs_support_reduction += 1
         stats.time_support_reduction += timer.time()
         stats.num_reduced_supports += prev_num_supports - num_supports
-        stats.num_reduced_density += prev_density - density
+        stats.num_reduced_density += prev_density - cardinality
 
     # check for the trivial case
-    if density == 1:
+    if cardinality == 1:
         ground_state_calibration_gates = ground_state_calibration(circuit, state)
-
-        gates = []
-        for gate in ground_state_calibration_gates:
-            gates.append(gate)
-        for gate in support_reducing_gates:
-            gates.append(gate)
+        gates = ground_state_calibration_gates + support_reducing_gates
 
         # ground state calibration has 0 CNOT
         return gates, num_cx_support_reduction
@@ -163,7 +158,7 @@ def _prepare_state_impl(
     if (
         ENABLE_EXACT_SYNTHESIS
         and num_supports <= EXACT_SYNTHESIS_QUBIT_THRESHOLD
-        and density <= EXACT_SYNTHESIS_DENSITY_THRESHOLD
+        and cardinality <= EXACT_SYNTHESIS_DENSITY_THRESHOLD
     ):
         try:
             with stopwatch("exact_cnot_synthesis") as timer:
@@ -177,12 +172,7 @@ def _prepare_state_impl(
             if stats is not None:
                 stats.time_exact_cnot_synthesis += timer.time()
 
-            gates = []
-            for gate in exact_gates:
-                gates.append(gate)
-            for gate in support_reducing_gates:
-                gates.append(gate)
-
+            gates = exact_gates + support_reducing_gates
             num_cx_exact = sum([gate.get_cnot_cost() for gate in exact_gates])
 
             return gates, num_cx_exact
@@ -198,26 +188,19 @@ def _prepare_state_impl(
                 circuit, state, verbose_level=0
             )
         num_cardinality_reduction_cx = sum(
-            [gate.get_cnot_cost() for gate in cardinality_reduction_gates]
+            (gate.get_cnot_cost() for gate in cardinality_reduction_gates)
         )
 
         if stats is not None:
             stats.time_cardinality_reduction += timer.time()
 
-        rec_gates, rec_cx = _prepare_state_impl(
+        rec_gates, rec_cx = _prepare_state_rec(
             circuit,
             new_state,
             stats=stats,
         )
 
-        sparse_qsp_gates = []
-        for gate in rec_gates:
-            sparse_qsp_gates.append(gate)
-        for gate in cardinality_reduction_gates:
-            sparse_qsp_gates.append(gate)
-        for gate in support_reducing_gates:
-            sparse_qsp_gates.append(gate)
-
+        sparse_qsp_gates = rec_gates + cardinality_reduction_gates + support_reducing_gates
         num_sparse_qsp_cx = (
             rec_cx + num_cardinality_reduction_cx + num_cx_support_reduction
         )
@@ -231,26 +214,19 @@ def _prepare_state_impl(
                 circuit, state, supports
             )
         num_qubit_reduction_cx = sum(
-            [gate.get_cnot_cost() for gate in qubit_decomposition_gates]
+            (gate.get_cnot_cost() for gate in qubit_decomposition_gates)
         )
 
         if stats is not None:
             stats.time_qubit_decomposition += timer.time()
 
-        rec_gates, rec_cx = _prepare_state_impl(
+        rec_gates, rec_cx = _prepare_state_rec(
             circuit,
             new_state,
             stats=stats,
         )
 
-        qubit_reduction_gates = []
-        for gate in rec_gates:
-            qubit_reduction_gates.append(gate)
-        for gate in qubit_decomposition_gates:
-            qubit_reduction_gates.append(gate)
-        for gate in support_reducing_gates:
-            qubit_reduction_gates.append(gate)
-
+        qubit_reduction_gates = rec_gates + qubit_decomposition_gates + support_reducing_gates
         num_qubit_reduction_cx += rec_cx + num_cx_support_reduction
 
     qubit_decomposition_gates: List[QGate] = None
@@ -265,13 +241,13 @@ def _prepare_state_impl(
         theta = 2 * np.arctan(weights1 / weights0)
         ry_gate = RY(theta, pivot_qubit)
 
-        pos_gates = _prepare_state_impl(
+        pos_gates = _prepare_state_rec(
             circuit,
             pos_state,
             stats=stats,
         )
 
-        neg_gates = _prepare_state_impl(
+        neg_gates = _prepare_state_rec(
             circuit,
             neg_state,
             stats=stats,
@@ -333,17 +309,17 @@ def prepare_state(
     map_gates: bool = True,
     verbose_level: int = 0,
     stats: StatePreparationStatistics = None,
-):
+) -> QCircuit:
     """A hybrid method combining both qubit- and cardinality- reduction.
 
-    This is a wrapper for the _prepare_state_impl function.
+    This is a wrapper for the _prepare_state_rec function.
 
     :param state: the target state to be prepared
     :type state: QState
-    :param map_gates: [description], defaults to False
+    :param map_gates: map gates to {U2, CNOT}, this will take extra time, defaults to True
     :type map_gates: bool, optional
-    :return: [description]
-    :rtype: [type]
+    :return: a quantum circuit
+    :rtype: QCircuit
     """
 
     # check the input state
@@ -355,9 +331,9 @@ def prepare_state(
 
     # check the initial state
     num_qubits = state.num_qubits
-    density = state.get_sparsity()
+    cardinality = state.get_sparsity()
 
-    cardinality_reduction_cnot_estimation = int(density * num_qubits)
+    cardinality_reduction_cnot_estimation = int(cardinality * num_qubits)
     qubit_reduction_cnot_estimation = 1 << num_qubits
 
     # pylint: disable=W0603
@@ -379,7 +355,7 @@ def prepare_state(
     circuit = QCircuit(state.num_qubits, map_gates=map_gates)
 
     with stopwatch("prepare_state") as timer:
-        gates, _ = _prepare_state_impl(
+        gates, _ = _prepare_state_rec(
             circuit,
             state,
             verbose_level=verbose_level,
