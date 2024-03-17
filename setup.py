@@ -12,7 +12,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="quantum-xyz",
-    version="{{VERSION_PLACEHOLDER}}",
+    # version="{{VERSION_PLACEHOLDER}}",
     author="Hanyu Wang",
     description="A quantum circuit synthesis library",
     classifiers=[
