@@ -28,9 +28,7 @@ def test_mcmy_mapping(num_qubits: int = 3):
     # get CX cost
     cx_cost = circuit.get_cnot_cost()
 
-    print(f"num_qubits: {num_qubits}, cx_cost: {cx_cost}")
-
-    return cx_cost
+    # print(f"num_qubits: {num_qubits}, cx_cost: {cx_cost}")
 
 
 if __name__ == "__main__":

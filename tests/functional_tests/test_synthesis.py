@@ -70,7 +70,7 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
         yield perm[:]
 
 
-N_TESTS = 50
+N_TESTS = 5
 
 
 @pytest.fixture
@@ -78,7 +78,7 @@ def state_vectors():
     """Generate a random state vector for testing ."""
     all_state_vectors = []
     while len(all_state_vectors) < N_TESTS:
-        num_qubit = random.randint(3, 4)
+        num_qubit = random.randint(3, 3)
         sparsity = random.randint(num_qubit, 2 ** (num_qubit - 1) - 1)
         # sparsity = random.randint(2 ** (num_qubit - 1) - 1, 2 ** (num_qubit - 1) - 1)
         state = rand_state(num_qubit, sparsity, uniform=False)

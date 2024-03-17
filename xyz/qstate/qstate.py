@@ -450,6 +450,15 @@ def quantize_state(state_vector: np.ndarray):
     :param state_vector: a vector with 2**n entries, where n is the number of qubits.
     :type state_vector: np.ndarray
     """
+    
+    if isinstance(state_vector, QState):
+        return state_vector
+    
+    if not isinstance(state_vector, np.ndarray):
+        try:
+            state_vector = np.array(state_vector)        
+        except:
+            raise ValueError("The state vector must be a numpy array.")
 
     # discard the imaginary part
     # state_vector = state_vector.real

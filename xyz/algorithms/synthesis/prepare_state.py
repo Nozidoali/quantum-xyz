@@ -6,10 +6,7 @@ Author: Hanyu Wang
 Created time: 2023-09-15 13:14:21
 Last Modified by: Hanyu Wang
 Last Modified time: 2023-09-15 14:32:11
-"""
 
-
-"""
 Reference:
     @article{wang2024quantum,
         title={Quantum State Preparation Using an Exact CNOT Synthesis Formulation},
