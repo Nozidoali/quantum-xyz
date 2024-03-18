@@ -70,7 +70,7 @@ def all_states(num_qubit: int, sparsity: int):
         yield perm[:]
 
 
-N_TESTS = 5
+N_TESTS = 4
 
 
 @pytest.fixture
@@ -78,7 +78,7 @@ def state_vectors():
     """Generate a random state vector for testing ."""
     all_state_vectors = []
     while len(all_state_vectors) < N_TESTS:
-        num_qubit = random.randint(3, 3)
+        num_qubit = random.randint(3, 4)
         sparsity = random.randint(num_qubit, 2 ** (num_qubit - 1) - 1)
         # sparsity = random.randint(2 ** (num_qubit - 1) - 1, 2 ** (num_qubit - 1) - 1)
         state = rand_state(num_qubit, sparsity, uniform=False)
@@ -100,7 +100,6 @@ def test_one_state(state_vectors):
         state_vector_exp = state_vector
         target_state = quantize_state(state_vector_exp)
         # print("target state: ", target_state)
-
         circuit = prepare_state(target_state, verbose_level=0)
 
         # now we measure the distance between the target state and the actual state

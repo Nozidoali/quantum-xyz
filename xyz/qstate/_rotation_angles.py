@@ -48,13 +48,13 @@ def get_ry_angles(self, qubit_index: int) -> List[float]:
 
 def get_rotation_table(self, qubit_index: int) -> dict:
     """Return the projection of the state .
-    
+
     The keys in the dictionary are the indices (we make sure that all the values of pivot qubit is 0 in the indices)
     The values in the dictionary are the rotation angles
 
     :param qubit_index: the target qubit index (the pivot)
     :type qubit_index: int
-    :return: the dictionary 
+    :return: the dictionary
     :rtype: dict
     """
     thetas = {}
@@ -80,6 +80,7 @@ def get_rotation_table(self, qubit_index: int) -> dict:
         thetas[idx0] = _theta
 
     return thetas
+
 
 def get_cry_angles(
     self, control_qubit_index: int, target_qubit_index: int
@@ -108,10 +109,6 @@ def get_cry_angles(
 
         # now we check the rotation angle
         weight_from = self.index_to_weight[idx0]
-        weight_total = np.sqrt(
-            (self.index_to_weight[idx1] ** 2) + (self.index_to_weight[idx0] ** 2)
-        )
-
         weight_to = self.index_to_weight[idx1]
         _theta = 2 * np.arctan2(weight_to, weight_from)
         thetas[idx0] = _theta

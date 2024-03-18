@@ -39,3 +39,6 @@ class CRZ(RotationGate, BasicGate, ControlledGate):
         :rtype: int
         """
         return 2
+
+    def apply(self, qstate: "QState") -> "QState":
+        raise NotImplementedError("CRZ gate is not implemented yet")
