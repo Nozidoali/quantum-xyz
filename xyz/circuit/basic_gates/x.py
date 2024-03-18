@@ -33,3 +33,6 @@ class X(BasicGate):
         :rtype: int
         """
         return 0
+
+    def apply(self, qstate: "QState") -> "QState":
+        return qstate.apply_x(self.target_qubit.index)

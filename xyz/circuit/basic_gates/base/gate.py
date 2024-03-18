@@ -70,7 +70,15 @@ class QGate:
         """
         return self.qgate_type
 
+    def apply(self, qstate: "QState") -> "QState":
+        """Returns the qstate .
 
+        :param qstate: [description]
+        :type qstate: [type]
+        :return: [description]
+        :rtype: [type]
+        """
+        raise NotImplementedError("This method is not implemented")
 class BasicGate(QGate):
     """Class method for creating a gate .
 

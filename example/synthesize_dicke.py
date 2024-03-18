@@ -15,16 +15,18 @@ from xyz import (
     prepare_state,
     stopwatch,
     simulate_circuit,
+    resynthesis,
 )
 
 
 if __name__ == "__main__":
-    state_vector = D_state(5, 1)
+    state_vector = D_state(3, 1)
     target_state = quantize_state(state_vector)
 
     # synthesize the state
     with stopwatch("synthesis") as timer:
         circuit = prepare_state(target_state, map_gates=True)
+        circuit = resynthesis(circuit)
     n_cnot = circuit.get_cnot_cost()
 
     # now we measure the distance between the target state and the actual state

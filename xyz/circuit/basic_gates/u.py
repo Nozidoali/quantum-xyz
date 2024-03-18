@@ -38,3 +38,6 @@ class U(UnitaryGate, BasicGate):
         :rtype: int
         """
         return 0
+
+    def apply(self, qstate: "QState") -> "QState":
+        raise NotImplementedError("This method is not implemented")
