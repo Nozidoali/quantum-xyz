@@ -480,8 +480,20 @@ def quantize_state(state_vector: np.ndarray):
     if isinstance(state_vector, QState):
         return state_vector
 
+    if isinstance(state_vector, str):
+        terms = state_vector.split("+")
+        index_to_weight = {}
+        for term in terms:
+            coefficient, state = term.strip().split("*")
+            coefficient = float(coefficient.strip())
+            num_qubits = len(state.strip()[1:-1])
+            index = int(state.strip()[1:-1], 2)
+            index_to_weight[index] = coefficient
+        return QState(index_to_weight, num_qubits)
+
     if not isinstance(state_vector, np.ndarray):
         state_vector = np.array(state_vector)
+        
 
     # discard the imaginary part
     # state_vector = state_vector.real

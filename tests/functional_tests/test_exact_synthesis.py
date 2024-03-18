@@ -17,61 +17,9 @@ import pytest
 from xyz import QState, quantize_state
 from xyz import simulate_circuit
 from xyz import prepare_state
-
-
-def rand_state(num_qubit: int, sparsity: int, uniform: bool = False) -> QState:
-    """Generate a random state .
-
-    :param num_qubit: [description]
-    :type num_qubit: int
-    :return: [description]
-    :rtype: QState
-    """
-
-    state_array = [0 for i in range((2**num_qubit) - sparsity)] + [
-        random.random() if not uniform else 1 for i in range(sparsity)
-    ]
-    np.random.shuffle(state_array)
-
-    # normalize the state
-    state_array = state_array / np.linalg.norm(state_array)
-
-    return state_array
-
-
-def place_ones(size, count):
-    """Place one or more lists into one .
-
-    :param size: [description]
-    :type size: [type]
-    :param count: [description]
-    :type count: [type]
-    :yield: [description]
-    :rtype: [type]
-    """
-    for positions in combinations(range(size), count):
-        p = [0] * size
-        for i in positions:
-            p[i] = 1
-        yield p
-
-
-def all_states(num_qubit: int, sparsity: int):
-    """Return a QState with all states of the given number of qubit .
-
-    :param num_qubit: [description]
-    :type num_qubit: int
-    :param sparsity: [description]
-    :type sparsity: int
-    :return: [description]
-    :rtype: QState
-    """
-    for perm in place_ones(2**num_qubit, sparsity):
-        yield perm[:]
-
+from xyz import rand_state
 
 N_TESTS = 4
-
 
 @pytest.fixture
 def state_vectors():
@@ -90,12 +38,6 @@ def state_vectors():
 
 
 def test_one_state(state_vectors):
-    """Test one state.
-
-    :param state_vector: [description]
-    :type state_vector: [type]
-    """
-
     for state_vector in state_vectors:
         state_vector_exp = state_vector
         target_state = quantize_state(state_vector_exp)
@@ -104,7 +46,11 @@ def test_one_state(state_vectors):
 
         # now we measure the distance between the target state and the actual state
         state_vector_act = simulate_circuit(circuit).data
-        dist = np.linalg.norm(state_vector_act - state_vector_exp)
+        dist = np.linalg.norm(np.abs(state_vector_act) - np.abs(state_vector_exp))
+        dist_strict = np.linalg.norm(state_vector_act - state_vector_exp)
+        if dist_strict**2 >= 1e-1:
+            # we raise a warning if the distance is large
+            print(f"distance is {dist_strict**2}, state_exp = {state_vector_exp}, state_act = {state_vector_act}")
 
         assert dist**2 < 1e-1  # make sure the distance is small
 

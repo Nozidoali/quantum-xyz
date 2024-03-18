@@ -129,7 +129,7 @@ def _prepare_state_rec(
     num_sparse_qsp_cx: int = 0
     if param.enable_cardinality_reduction:
         new_state, cardinality_reduction_gates = cardinality_reduction(
-            circuit, state, verbose_level=0
+            circuit, state, verbose_level=verbose_level
         )
         num_cardinality_reduction_cx = sum(
             (gate.get_cnot_cost() for gate in cardinality_reduction_gates)
@@ -229,8 +229,6 @@ def prepare_state(
 
     cardinality_reduction_cnot_estimation = int(cardinality * num_qubits)
     qubit_reduction_cnot_estimation = 1 << num_qubits
-
-    # pylint: disable=W0603
 
     if param is None:
         # we design the default parameters

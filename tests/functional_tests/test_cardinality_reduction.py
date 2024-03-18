@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2024-03-18 18:02:05
 Last Modified by: Hanyu Wang
-Last Modified time: 2024-03-18 19:13:28
+Last Modified time: 2024-03-18 19:12:39
 '''
 
 import random
@@ -44,9 +44,9 @@ def test_one_state(state_vectors):
         target_state = quantize_state(state_vector_exp)
         # print("target state: ", target_state)
         circuit = prepare_state(target_state, verbose_level=0, param=StatePreparationParameters(
-            enable_cardinality_reduction=False,
+            enable_cardinality_reduction=True,
             enable_exact_synthesis=False,
-            enable_qubit_reduction=True,
+            enable_qubit_reduction=False,
         ))
 
         # now we measure the distance between the target state and the actual state

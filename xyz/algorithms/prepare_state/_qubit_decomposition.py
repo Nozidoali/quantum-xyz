@@ -413,18 +413,20 @@ def qubit_decomposition_opt(
             [circuit.qubit_at(support) for support in control_indices],
             circuit.qubit_at(pivot),
         )
-
         gates = [gate]
 
     # we update the state
     index_to_weight = {index: 0 for index in state.index_set}
     for index, weight in state.index_to_weight.items():
-        if index & (1 << pivot) == 0:
-            index_to_weight[index] += weight
-        else:
-            index_to_weight[index ^ (1 << pivot)] = np.sqrt(
-                weight**2 + state.index_to_weight.get(index ^ (1 << pivot), 0) ** 2
-            )
+        idx0 = index & ~(1 << pivot)
+        idx1 = index | (1 << pivot)
+        reversed_idx = index ^ (1 << pivot)
+        if reversed_idx not in state.index_to_weight:
+            index_to_weight[idx0] = weight
+            continue
+        weight0 = state.index_to_weight[idx0]
+        weight1 = state.index_to_weight[idx1]
+        index_to_weight[idx0] = np.sqrt(weight0 ** 2 + weight1 ** 2)
 
     new_state = QState(index_to_weight, state.num_qubits)
 

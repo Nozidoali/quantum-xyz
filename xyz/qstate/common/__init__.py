@@ -12,3 +12,4 @@ from .w_state import *
 from .dicke_state import *
 from .ghz_state import *
 from .c_state import *
+from .rand_state import *
