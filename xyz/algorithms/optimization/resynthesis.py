@@ -10,7 +10,7 @@ Last Modified time: 2024-03-18 02:25:07
 
 import numpy as np
 from typing import List
-from xyz.circuit import QCircuit, QBit
+from xyz.circuit import QCircuit, QBit, RY, CX
 from xyz.qstate import QState
 
 def get_candidate_controls(rotation_table: dict, num_qubits: int) -> List[int]:
@@ -74,22 +74,97 @@ def resynthesis_window(
     
     # we can run dependency analysis to find the potential control qubits
     all_control_qubits: list = get_candidate_controls(ry_delta, state_begin.num_qubits)
+    n_control_qubits: int = len(all_control_qubits)
     
-    if len(all_control_qubits) >= n_cnots_old:
-        # no need to resynthesize
-        return window_old
+    for n_cnot_new in range(len(all_control_qubits), n_cnots_old):
+        
+        A = []
+        b = []
+        
+        cnot_configuration = []
+        # get all the permutations
+        
+        # lets consider more complicated cases later
+        if n_control_qubits > 1:
+            raise NotImplementedError("n_control_qubits > 1 is not supported yet")
+        
+        cnot_configuration = [all_control_qubits[0]]
+        
+        n_constraints: int = len(ry_delta)
+        constraint_keys: list = list(ry_delta.keys())
+        n_vars: int = (n_cnot_new + 2) * (n_constraints + 1) - 1
+                
+        def add_constraints(vars: list, coefficients: list, value: float = 0):
+            vector = [0] * n_vars
+            for i, v in enumerate(vars):
+                vector[v] = coefficients[i]
+            A.append(vector)
+            b.append(value)
+            
+        def get_theta_var_at(k: int):
+            return k
+        
+        def get_phi_var_at(k: int, x: int):
+            return (n_cnot_new + 1) * (k+1) + x
+        
+        def get_rx(k: int, x: int):
+            rx_bool = (constraint_keys[x] >> cnot_configuration[k]) & 1
+            rx = 1 if rx_bool is 1 else -1
+            return rx
+        
+        def get_control_qubit_at(k: int):
+            return circuit.qubit_at(cnot_configuration[k])
+        
+        # add the initial constraints
+        for x in range(n_constraints):
+            # phi_0^x = ry_angles_begin^x
+            variables = [get_phi_var_at(0, x)]
+            coefficients = [1]
+            add_constraints(variables, coefficients, ry_angles_begin[x])
+        
+        # add the first step:
+        for x in range(n_constraints):
+            # phi_1^x = phi_0^x + theta_0
+            variables = [get_theta_var_at(0), get_phi_var_at(0, x), get_phi_var_at(1, x)]
+            coefficients = [-1, -1, 1]
+            add_constraints(variables, coefficients)
+        
+        for k in range(n_cnot_new):
+            # phi_k+1^x = pi/2 + R_k^x ( phi_k^x - pi/2 ) + theta_k
+            for x in range(n_constraints):
+                rx = get_rx(k, x)
+                variables = [get_theta_var_at(k+1), get_phi_var_at(k+1, x), get_phi_var_at(k+2, x)]
+                coefficients = [1, rx, -1]
+                value = np.pi / 2 * (rx - 1)
+                add_constraints(variables, coefficients, value)
+                
+        # add the final constraints:
+        for x in range(n_constraints):
+            # phi_n_cnots^x = ry_angles_end^x
+            variables = [get_phi_var_at(n_cnot_new + 1, x)]
+            coefficients = [1]
+            add_constraints(variables, coefficients, ry_angles_end[x])
     
-    print(
-        f"state_begin: {state_begin}, state_end: {state_end}, n_cnots = {n_cnots_old}"
-    )
-    print(f"ry_delta: {ry_delta}, all_control_qubits: {all_control_qubits}")
+        sol, residuals, rank, s = np.linalg.lstsq(A, b, rcond=None)
+
+        if residuals.size > 0 and np.allclose(residuals, 0):
+            pass
+        elif residuals.size == 0:
+            pass
+        else:
+            # no solution found
+            continue
+        
+        theta = sol[get_theta_var_at(0)]
+        new_window = [RY(theta, target_qubit)]
+        for k in range(n_cnot_new):
+            theta = sol[get_theta_var_at(k+1)]
+            new_window += [CX(get_control_qubit_at(k), False, target_qubit)]
+            new_window += [RY(theta, target_qubit)]
+        # return window_old
+        return new_window
     
-    # get all the permutations
-    
-    
-    # we construct the linear system
-    
-    return []
+    return window_old
 
 
 def resynthesis(circuit: QCircuit) -> QCircuit:
@@ -130,5 +205,6 @@ def resynthesis(circuit: QCircuit) -> QCircuit:
         new_gates = resynthesis_window(
             circuit, state_begin, state_end, curr_target_qubit, curr_window
         )
+        new_circuit.add_gates(new_gates)
 
     return new_circuit

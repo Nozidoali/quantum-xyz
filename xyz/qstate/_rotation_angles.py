@@ -38,14 +38,8 @@ def get_ry_angles(self, qubit_index: int) -> List[float]:
 
         # now we check the rotation angle
         weight_from = self.index_to_weight[idx0]
-        weight_total = np.sqrt(
-            (self.index_to_weight[idx1] ** 2) + (self.index_to_weight[idx0] ** 2)
-        )
-
-        if self.index_to_weight[idx1] > 0:
-            _theta = 2 * np.arccos(weight_from / weight_total)
-        else:
-            _theta = -2 * np.arccos(weight_from / weight_total)
+        weight_to = self.index_to_weight[idx1]
+        _theta = 2 * np.arctan2(weight_to, weight_from)
 
         thetas.append(_theta)
 
@@ -80,14 +74,8 @@ def get_rotation_table(self, qubit_index: int) -> dict:
 
         # now we check the rotation angle
         weight_from = self.index_to_weight[idx0]
-        weight_total = np.sqrt(
-            (self.index_to_weight[idx1] ** 2) + (self.index_to_weight[idx0] ** 2)
-        )
-
-        if self.index_to_weight[idx1] > 0:
-            _theta = 2 * np.arccos(weight_from / weight_total)
-        else:
-            _theta = -2 * np.arccos(weight_from / weight_total)
+        weight_to = self.index_to_weight[idx1]
+        _theta = 2 * np.arctan2(weight_to, weight_from)
 
         thetas[idx0] = _theta
 
@@ -124,11 +112,8 @@ def get_cry_angles(
             (self.index_to_weight[idx1] ** 2) + (self.index_to_weight[idx0] ** 2)
         )
 
-        if self.index_to_weight[idx1] > 0:
-            _theta = 2 * np.arccos(weight_from / weight_total)
-        else:
-            _theta = -2 * np.arccos(weight_from / weight_total)
-
+        weight_to = self.index_to_weight[idx1]
+        _theta = 2 * np.arctan2(weight_to, weight_from)
         thetas[idx0] = _theta
 
     cry_thetas = []
