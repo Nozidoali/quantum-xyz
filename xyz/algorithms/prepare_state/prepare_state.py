@@ -124,7 +124,7 @@ def _prepare_state_rec(
         except ValueError:
             pass
 
-    # sparse state synthesis
+    # cardinality reduction method (m-flow)
     sparse_qsp_gates: List[QGate] = None
     num_sparse_qsp_cx: int = 0
     if param.enable_cardinality_reduction:
@@ -147,7 +147,7 @@ def _prepare_state_rec(
             rec_cx + num_cardinality_reduction_cx + num_cx_support_reduction
         )
 
-    # qubit decomposition
+    # qubit reduction method (n-flow)
     qubit_reduction_gates: List[QGate] = None
     num_qubit_reduction_cx: int = 0
     if param.enable_qubit_reduction:
