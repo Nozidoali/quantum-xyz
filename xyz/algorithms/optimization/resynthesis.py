@@ -79,7 +79,7 @@ def resynthesis_window(
 
     # we can run dependency analysis to find the potential control qubits
     all_control_qubits: list = get_candidate_controls(ry_delta, state_begin.num_qubits)
-    n_control_qubits: int = len(all_control_qubits)
+    # n_control_qubits: int = len(all_control_qubits)
 
     def get_rx(k: int, x: int):
         rx_bool = (constraint_keys[x] >> cnot_configuration[k]) & 1
@@ -101,9 +101,7 @@ def resynthesis_window(
 
         if n_cnot_new > len(all_control_qubits):
             # need to think about this
-            raise NotImplementedError("better opportunities found, but no solver")
-            break 
-        
+            raise NotImplementedError("better opportunities found, but no solver")        
 
         cnot_configuration = all_control_qubits
 
