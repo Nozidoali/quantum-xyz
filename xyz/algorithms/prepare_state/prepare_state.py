@@ -261,5 +261,6 @@ def prepare_state(
 
     circuit.add_gates(gates)
 
-    global_stopwatch_report()
+    if verbose_level >= 1:
+        global_stopwatch_report()
     return circuit

@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2024-03-18 18:44:35
 Last Modified by: Hanyu Wang
-Last Modified time: 2024-03-18 18:46:03
+Last Modified time: 2024-04-02 14:49:10
 '''
 
 import random
@@ -13,7 +13,7 @@ import numpy as np
 
 from itertools import combinations
 
-def rand_state(num_qubit: int, sparsity: int, uniform: bool = False):
+def rand_state(num_qubit: int, sparsity: int, uniform: bool = False) -> np.ndarray:
     state_array = [0 for i in range((2**num_qubit) - sparsity)] + [
         random.random() if not uniform else 1 for i in range(sparsity)
     ]
