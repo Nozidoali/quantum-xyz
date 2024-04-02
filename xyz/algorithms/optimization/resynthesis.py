@@ -96,10 +96,16 @@ def resynthesis_window(
         # get all the permutations
 
         # lets consider more complicated cases later
-        if n_control_qubits > 1:
-            raise NotImplementedError("n_control_qubits > 1 is not supported yet")
+        # if n_control_qubits > 1:
+            # raise NotImplementedError("n_control_qubits > 1 is not supported yet")
 
-        cnot_configuration = [all_control_qubits[0]]
+        if n_cnot_new > len(all_control_qubits):
+            # need to think about this
+            raise NotImplementedError("better opportunities found, but no solver")
+            break 
+        
+
+        cnot_configuration = all_control_qubits
 
         thetas = []
         for k in range(n_cnot_new + 1):
@@ -144,7 +150,10 @@ def resynthesis_window(
                     value=np.pi / 2 * (rx - 1),
                 )
 
-        solver.solve()
+        success = solver.solve()
+        if not success:
+            # we cannot find a solution
+            break
         theta = solver.get_solution(thetas[0])
         new_window = [RY(theta, target_qubit)]
         for k in range(n_cnot_new):

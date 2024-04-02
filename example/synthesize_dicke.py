@@ -17,14 +17,14 @@ from xyz import (
     simulate_circuit,
     resynthesis,
 )
-
+import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
-    state_vector = D_state(6, 1)
+    state_vector = D_state(4, 2)
     target_state = quantize_state(state_vector)
 
     # synthesize the state
-    with stopwatch("synthesis") as timer:
+    with stopwatch("synthesis", verbose = True) as timer:
         circuit = prepare_state(target_state, map_gates=True)
         # circuit = resynthesis(circuit)
     n_cnot = circuit.get_cnot_cost()
@@ -33,6 +33,7 @@ if __name__ == "__main__":
     state_vector_act = simulate_circuit(circuit)
     dist = np.linalg.norm(state_vector_act - state_vector)
 
-    print(circuit.to_qiskit())
+    qc = circuit.to_qiskit()
+    # print(circuit.to_qiskit())
     print("target state: ", quantize_state(state_vector))
     print("actual state: ", quantize_state(state_vector_act))
