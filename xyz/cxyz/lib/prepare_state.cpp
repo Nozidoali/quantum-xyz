@@ -2,7 +2,7 @@
  * Author: Hanyu Wang
  * Created time: 2024-03-30 18:18:02
  * Last Modified by: Hanyu Wang
- * Last Modified time: 2024-04-02 12:33:44
+ * Last Modified time: 2024-04-02 14:32:55
  */
 
 #include "qcircuit.hpp"
@@ -170,7 +170,7 @@ void prepare_state_impl(const QState& state, QCircuit& circuit)
 
 QCircuit prepare_state(const QState& state)
 {
-    QCircuit circuit;
+    QCircuit circuit(state.n_bits);
     detail::prepare_state_impl<false>(state, circuit);
     return circuit;
 }

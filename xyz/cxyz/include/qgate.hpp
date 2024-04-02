@@ -2,7 +2,7 @@
  * Author: Hanyu Wang
  * Created time: 2024-03-30 19:27:46
  * Last Modified by: Hanyu Wang
- * Last Modified time: 2024-04-02 09:52:06
+ * Last Modified time: 2024-04-02 14:03:53
  */
 
 #pragma once
@@ -37,6 +37,7 @@ public:
     static bool is_trivial(double theta, bool use_x = false);
     double theta;
     Rotation(double theta) : theta(theta) {};
+    std::string to_string() const;
 };
 
 class RY : public QGate, public Rotation
@@ -58,6 +59,7 @@ public:
     uint32_t ctrl;
     bool phase;
     Controlled(uint32_t ctrl, bool phase) : ctrl(ctrl), phase(phase) {};
+    std::string to_string() const;
 };
 
 class MultiControlled
