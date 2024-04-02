@@ -90,3 +90,6 @@ class MCRY(RotationGate, BasicGate, MultiControlledGate):
                 f"len(self.control_qubits) = {len(self.control_qubits)} is not supported"
             )
         return MCRY_CNOT_COST[index_str]
+
+    def apply(self, qstate: "QState") -> "QState":
+        raise NotImplementedError("MCRY gate is not implemented yet")

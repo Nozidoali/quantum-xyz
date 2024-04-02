@@ -39,3 +39,6 @@ class CRX(RotationGate, BasicGate, ControlledGate):
         :rtype: int
         """
         return 2
+
+    def apply(self, qstate: "QState") -> "QState":
+        raise NotImplementedError("CRX gate is not implemented yet")

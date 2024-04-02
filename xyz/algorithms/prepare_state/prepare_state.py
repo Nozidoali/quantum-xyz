@@ -21,7 +21,7 @@ from typing import List
 import numpy as np
 
 
-from xyz.circuit import QCircuit, RY, QGate
+from xyz.circuit import QCircuit, QGate
 from xyz.qstate import QState, quantize_state
 from xyz.utils import stopwatch
 from xyz.utils import global_stopwatch_report
@@ -32,68 +32,17 @@ from ._cardinality_reduction import cardinality_reduction
 from ._ground_state_calibration import ground_state_calibration
 from ._support_reduction import support_reduction
 from ._qubit_decomposition import (
-    select_pivot_qubit,
-    to_controlled_gate,
     qubit_decomposition_opt,
 )
-
-EXACT_SYNTHESIS_QUBIT_THRESHOLD = 4
-EXACT_SYNTHESIS_DENSITY_THRESHOLD = 10
-
-EXACT_SYNTHESIS_CNOT_LIMIT = 10
-
-ENABLE_EXACT_SYNTHESIS = True
-
-ENABLE_QUBIT_REDUCTION = True
-ENABLE_CARDINALITY_REDUCTION = True
-
-ENABLE_DECOMPOSITION = False
-
-ENABLE_REINDEX = True
-
-ENABLE_PROGESS_BAR = True
-
-
-class StatePreparationStatistics:
-    """Classes the StatePreparationStatistics class ."""
-
-    def __init__(self) -> None:
-        self.time_total: float = 0
-        self.num_runs_support_reduction: int = 0
-        self.time_support_reduction: float = 0
-        self.time_exact_cnot_synthesis: float = 0
-        self.time_cardinality_reduction: float = 0
-        self.time_qubit_decomposition: float = 0
-        self.num_reduced_supports: int = 0
-        self.num_reduced_density: int = 0
-        self.num_saved_gates_decision: int = 0
-        self.num_methods: dict = {}
-
-    def report(self):
-        """Report the number of runs supported by the benchmark ."""
-        print("-" * 80)
-        print(f"time_total: {self.time_total}")
-        print("-" * 80)
-        print(f"num_runs_support_reduction: {self.num_runs_support_reduction}")
-        print(f"time_support_reduction: {self.time_support_reduction:0.02f} sec")
-        print(f"time_exact_cnot_synthesis: {self.time_exact_cnot_synthesis:0.02f} sec")
-        print(
-            f"time_cardinality_reduction: {self.time_cardinality_reduction:0.02f} sec"
-        )
-        print(f"time_qubit_decomposition: {self.time_qubit_decomposition:0.02f} sec")
-        print(f"num_reduced_supports: {self.num_reduced_supports}")
-        print(f"num_reduced_density: {self.num_reduced_density}")
-        print(f"num_saved_gates_decision: {self.num_saved_gates_decision}")
-        print("-" * 80)
-        for method, num in self.num_methods.items():
-            print(f"{method}: {num}")
-        print("-" * 80)
+from ._stats import StatePreparationStatistics
+from ._params import StatePreparationParameters
 
 
 def _prepare_state_rec(
     circuit: QCircuit,
     state: QState,
     verbose_level: int = 0,
+    param: StatePreparationParameters = StatePreparationParameters(),
     stats: StatePreparationStatistics = StatePreparationStatistics(),
 ):
     prev_supports = state.get_supports()
@@ -109,7 +58,7 @@ def _prepare_state_rec(
         (gate.get_cnot_cost() for gate in support_reducing_gates)
     )
 
-    if ENABLE_REINDEX:
+    if param.enable_reindex:
         # compact the state
         # now we get the sub state and sub circuit:
         sub_index_to_weight = {}
@@ -136,7 +85,7 @@ def _prepare_state_rec(
     num_supports = len(supports)
     cardinality = state.get_sparsity()
 
-    if ENABLE_PROGESS_BAR:
+    if param.enable_progress_bar:
         print(
             f"num_supports: {num_supports:5d}, cardinality: {cardinality:5d}", end="\r"
         )
@@ -155,9 +104,9 @@ def _prepare_state_rec(
 
     # exact synthesis
     if (
-        ENABLE_EXACT_SYNTHESIS
-        and num_supports <= EXACT_SYNTHESIS_QUBIT_THRESHOLD
-        and cardinality <= EXACT_SYNTHESIS_DENSITY_THRESHOLD
+        param.enable_exact_synthesis
+        and num_supports <= StatePreparationParameters.EXACT_SYNTHESIS_QUBIT_THRESHOLD
+        and cardinality <= StatePreparationParameters.EXACT_SYNTHESIS_DENSITY_THRESHOLD
     ):
         try:
             exact_gates = exact_cnot_synthesis(
@@ -165,7 +114,7 @@ def _prepare_state_rec(
                 state,
                 optimality_level=3,
                 verbose_level=verbose_level,
-                cnot_limit=EXACT_SYNTHESIS_CNOT_LIMIT,
+                cnot_limit=StatePreparationParameters.EXACT_SYNTHESIS_CNOT_LIMIT,
             )
             if stats is not None:
                 stats.time_exact_cnot_synthesis += timer.time()
@@ -175,12 +124,12 @@ def _prepare_state_rec(
         except ValueError:
             pass
 
-    # sparse state synthesis
+    # cardinality reduction method (m-flow)
     sparse_qsp_gates: List[QGate] = None
     num_sparse_qsp_cx: int = 0
-    if ENABLE_CARDINALITY_REDUCTION:
+    if param.enable_cardinality_reduction:
         new_state, cardinality_reduction_gates = cardinality_reduction(
-            circuit, state, verbose_level=0
+            circuit, state, verbose_level=verbose_level
         )
         num_cardinality_reduction_cx = sum(
             (gate.get_cnot_cost() for gate in cardinality_reduction_gates)
@@ -198,10 +147,10 @@ def _prepare_state_rec(
             rec_cx + num_cardinality_reduction_cx + num_cx_support_reduction
         )
 
-    # qubit decomposition
+    # qubit reduction method (n-flow)
     qubit_reduction_gates: List[QGate] = None
     num_qubit_reduction_cx: int = 0
-    if ENABLE_QUBIT_REDUCTION:
+    if param.enable_qubit_reduction:
         qubit_decomposition_gates, new_state = qubit_decomposition_opt(
             circuit, state, supports
         )
@@ -219,36 +168,6 @@ def _prepare_state_rec(
         )
         num_qubit_reduction_cx += rec_cx + num_cx_support_reduction
 
-    qubit_decomposition_gates: List[QGate] = None
-    num_qubit_decomposition_cx: int = 0  # not implemented yet
-    if ENABLE_DECOMPOSITION:
-        pivot = select_pivot_qubit(state, supports)
-        pivot_qubit = circuit.qubit_at(pivot)
-        neg_state, pos_state, weights0, weights1 = state.cofactors(pivot)
-        # we first add a rotation gate to the pivot qubit
-        theta = 2 * np.arctan(weights1 / weights0)
-        ry_gate = RY(theta, pivot_qubit)
-        pos_gates = _prepare_state_rec(
-            circuit,
-            pos_state,
-            stats=stats,
-        )
-        neg_gates = _prepare_state_rec(
-            circuit,
-            neg_state,
-            stats=stats,
-        )
-
-        qubit_decomposition_gates = [ry_gate]
-        for gate in pos_gates:
-            controlled_gate = to_controlled_gate(gate, pivot_qubit, True)
-            qubit_decomposition_gates.append(controlled_gate)
-        for gate in neg_gates:
-            controlled_gate = to_controlled_gate(gate, pivot_qubit, False)
-            qubit_decomposition_gates.append(controlled_gate)
-        for gate in support_reducing_gates:
-            qubit_decomposition_gates.append(gate)
-
     # we choose the best one
     # based on the number of CNOT gates
     Method = namedtuple("method", ["name", "gates", "num_gates"])
@@ -259,14 +178,6 @@ def _prepare_state_rec(
     if qubit_reduction_gates is not None:
         candidates.append(
             Method("qubit_reduction", qubit_reduction_gates, num_qubit_reduction_cx)
-        )
-    if qubit_decomposition_gates is not None:
-        candidates.append(
-            Method(
-                "qubit_decomposition",
-                qubit_decomposition_gates,
-                num_qubit_decomposition_cx,
-            )
         )
 
     # pylint: disable=unnecessary-lambda
@@ -290,6 +201,7 @@ def prepare_state(
     state: QState,
     map_gates: bool = True,
     verbose_level: int = 0,
+    param: StatePreparationParameters = None,
     stats: StatePreparationStatistics = StatePreparationStatistics(),
 ) -> QCircuit:
     """A hybrid method combining both qubit- and cardinality- reduction.
@@ -318,20 +230,19 @@ def prepare_state(
     cardinality_reduction_cnot_estimation = int(cardinality * num_qubits)
     qubit_reduction_cnot_estimation = 1 << num_qubits
 
-    # pylint: disable=W0603
-
-    global ENABLE_QUBIT_REDUCTION
-    global ENABLE_CARDINALITY_REDUCTION
-    if cardinality_reduction_cnot_estimation < qubit_reduction_cnot_estimation:
-        # if the state is sparse, we enable cardinality reduction method
-        print_yellow("ENABLE_CARDINALITY_REDUCTION")
-        ENABLE_QUBIT_REDUCTION = False
-        ENABLE_CARDINALITY_REDUCTION = True
-    else:
-        print_yellow("ENABLE_QUBIT_REDUCTION")
-        # otherwise, if the state is dense, we enable the qubit reduction method
-        ENABLE_QUBIT_REDUCTION = True
-        ENABLE_CARDINALITY_REDUCTION = False
+    if param is None:
+        # we design the default parameters
+        param = StatePreparationParameters()
+        if cardinality_reduction_cnot_estimation < qubit_reduction_cnot_estimation:
+            # if the state is sparse, we enable cardinality reduction method
+            print_yellow("ENABLE_CARDINALITY_REDUCTION")
+            param.enable_qubit_reduction = False
+            param.enable_cardinality_reduction = True
+        else:
+            print_yellow("ENABLE_QUBIT_REDUCTION")
+            # otherwise, if the state is dense, we enable the qubit reduction method
+            param.enable_qubit_reduction = True
+            param.enable_cardinality_reduction = False
 
     # initialize a circuit and the quantum registers
     circuit = QCircuit(state.num_qubits, map_gates=map_gates)
@@ -341,6 +252,7 @@ def prepare_state(
             circuit,
             state,
             verbose_level=verbose_level,
+            param=param,
             stats=stats,
         )
 

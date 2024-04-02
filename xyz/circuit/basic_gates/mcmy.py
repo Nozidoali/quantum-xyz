@@ -46,3 +46,6 @@ class MCMY(AdvancedGate):
         :rtype: int
         """
         return 1 << len(self.control_qubits)
+
+    def apply(self, qstate: "QState") -> "QState":
+        raise NotImplementedError("MCMY gate is not implemented yet")

@@ -40,3 +40,6 @@ class CU(BasicGate, UnitaryGate, ControlledGate):
         :rtype: int
         """
         return 2
+
+    def apply(self, qstate: "QState") -> "QState":
+        raise NotImplementedError("CU gate is not implemented yet")

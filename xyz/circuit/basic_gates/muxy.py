@@ -41,3 +41,6 @@ class MULTIPLEXY(AdvancedGate):
         :rtype: int
         """
         return 2
+
+    def apply(self, qstate: "QState") -> "QState":
+        raise NotImplementedError("MULTIPLEXY gate is not implemented yet")

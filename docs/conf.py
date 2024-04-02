@@ -64,4 +64,4 @@ html_theme_options = {"collapse_navigation": False}
 html_static_path = ["_static"]
 
 
-numpydoc_show_class_members = False 
+numpydoc_show_class_members = False

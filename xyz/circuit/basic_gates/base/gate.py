@@ -70,7 +70,6 @@ class QGate:
         """
         return self.qgate_type
 
-
 class BasicGate(QGate):
     """Class method for creating a gate .
 
@@ -94,7 +93,16 @@ class BasicGate(QGate):
         :rtype: QBit
         """
         return self.target_qubit
+    
+    def apply(self, qstate: "QState") -> "QState":
+        """Returns the qstate .
 
+        :param qstate: [description]
+        :type qstate: [type]
+        :return: [description]
+        :rtype: [type]
+        """
+        raise NotImplementedError("This method is not implemented")
 
 class AdvancedGate(QGate):
     """Class method that creates a AdvancedGate class .
@@ -105,3 +113,13 @@ class AdvancedGate(QGate):
 
     def __init__(self, qgate_type: QGateType) -> None:
         QGate.__init__(self, qgate_type)
+
+    def apply(self, qstate: "QState") -> "QState":
+        """Returns the qstate .
+
+        :param qstate: [description]
+        :type qstate: [type]
+        :return: [description]
+        :rtype: [type]
+        """
+        raise NotImplementedError("This method is not implemented")

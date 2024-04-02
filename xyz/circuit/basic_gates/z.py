@@ -33,3 +33,6 @@ class Z(BasicGate):
         :rtype: int
         """
         return 0
+
+    def apply(self, qstate: "QState") -> "QState":
+        raise NotImplementedError("Z gate not implemented")

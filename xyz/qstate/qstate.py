@@ -96,6 +96,32 @@ class QState:
                 index_to_weight[rdx] -= weight * np.sin(theta / 2)
         return QState(index_to_weight, self.num_qubits)
 
+    def apply_cry(
+        self, control_qubit_index: int, phase: bool, qubit_index: int, theta: float
+    ) -> "QState":
+        """Apply the controlled Y operator to the given qubit .
+
+        :param qubit_index: [description]
+        :type qubit_index: int
+        """
+        index_to_weight = {idx: 0 for idx in self.index_set}
+        for idx, weight in self.index_to_weight.items():
+            # no rotation
+            if (idx >> control_qubit_index) & 1 != phase:
+                index_to_weight[idx] = self.index_to_weight[idx]
+                continue
+            rdx = idx ^ (1 << qubit_index)
+            if rdx not in self.index_set:
+                index_to_weight[rdx] = 0
+
+            if idx >> qubit_index & 1 == 0:
+                index_to_weight[idx] += weight * np.cos(theta / 2)
+                index_to_weight[rdx] += weight * np.sin(theta / 2)
+            else:
+                index_to_weight[idx] += weight * np.cos(theta / 2)
+                index_to_weight[rdx] -= weight * np.sin(theta / 2)
+        return QState(index_to_weight, self.num_qubits)
+
     def apply_merge0(self, qubit_index: int) -> "QState":
         """Apply the Y operator to the given qubit .
 
@@ -454,8 +480,20 @@ def quantize_state(state_vector: np.ndarray):
     if isinstance(state_vector, QState):
         return state_vector
 
+    if isinstance(state_vector, str):
+        terms = state_vector.split("+")
+        index_to_weight = {}
+        for term in terms:
+            coefficient, state = term.strip().split("*")
+            coefficient = float(coefficient.strip())
+            num_qubits = len(state.strip()[1:-1])
+            index = int(state.strip()[1:-1], 2)
+            index_to_weight[index] = coefficient
+        return QState(index_to_weight, num_qubits)
+
     if not isinstance(state_vector, np.ndarray):
         state_vector = np.array(state_vector)
+        
 
     # discard the imaginary part
     # state_vector = state_vector.real

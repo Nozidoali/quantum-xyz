@@ -34,3 +34,9 @@ class RY(RotationGate, BasicGate):
         :rtype: int
         """
         return 0
+
+    def apply(self, qstate: "QState") -> "QState":
+        return qstate.apply_ry(
+            self.target_qubit.index,
+            self.theta,
+        )

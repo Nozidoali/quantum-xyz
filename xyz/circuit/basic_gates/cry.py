@@ -39,3 +39,11 @@ class CRY(RotationGate, BasicGate, ControlledGate):
         :rtype: int
         """
         return 2
+
+    def apply(self, qstate: "QState") -> "QState":
+        return qstate.apply_cry(
+            self.control_qubit.index,
+            self.phase,
+            self.target_qubit.index,
+            self.theta,
+        )

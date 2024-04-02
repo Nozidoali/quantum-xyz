@@ -35,3 +35,10 @@ class CX(BasicGate, ControlledGate):
         :rtype: int
         """
         return 1
+
+    def apply(self, qstate: "QState") -> "QState":
+        return qstate.apply_cx(
+            self.control_qubit.index,
+            self.phase,
+            self.target_qubit.index,
+        )
