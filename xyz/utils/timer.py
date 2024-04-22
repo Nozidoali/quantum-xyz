@@ -54,7 +54,7 @@ class stopwatch:
         self.toc = time.perf_counter()
         self.duration = self.toc - self.tic
         if self.name is not None and self.verbose:
-            print_green(f"{self.name:<25}: {duration:>8.02f} sec")
+            print_green(f"{self.name:<25}: {self.duration:>8.02f} sec")
 
     def time(self):
         """
