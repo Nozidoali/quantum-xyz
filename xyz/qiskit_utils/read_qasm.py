@@ -9,7 +9,7 @@ Last Modified time: 2024-04-22 17:53:19
 """
 
 from ..circuit import QCircuit, QGate, QBit, X, RY, CX
-from qiskit import qasm3, QuantumCircuit, QuantumRegister
+from qiskit import qasm3
 
 
 def read_qasm(filename: str) -> QCircuit:
@@ -17,7 +17,7 @@ def read_qasm(filename: str) -> QCircuit:
     read_qasm:
     read a qasm file and return the corresponding QCircuit object
     """
-    with open(filename, "r") as f:
+    with open(filename, "r", encoding="utf-8") as f:
         program = f.read()
     qc = qasm3.loads(program)
 
@@ -25,7 +25,8 @@ def read_qasm(filename: str) -> QCircuit:
     n_qubits = qc.num_qubits
     circuit = QCircuit(n_qubits)
 
-    for instr, qargs, cargs in qc.data:
+    for instr, qargs, _ in qc.data:
+        # pylint: disable=W0212
         gate: QGate = None
 
         if instr.name == "x":

@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2024-04-22 18:35:53
 Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-22 19:16:55
+Last Modified time: 2024-04-22 20:33:20
 '''
 
 from xyz.circuit import QCircuit, QBit
@@ -66,16 +66,16 @@ def extract_windows(circuit: QCircuit):
                     try:
                         if gates[j].control_qubit == curr_target_qubit:
                             break
-                    except:
+                    except AttributeError:
                         pass
-
+                    
                     if gates[j].target_qubit != curr_target_qubit:
                         uncommute_qubits.add(gates[j].target_qubit)
                     else:
                         try:
                             if gates[j].control_qubit in uncommute_qubits:
                                 break
-                        except:
+                        except AttributeError:
                             pass
                         
                         is_taken[j] = True

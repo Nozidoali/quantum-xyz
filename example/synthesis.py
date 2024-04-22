@@ -31,7 +31,7 @@ from xyz import StatePreparationParameters as Param
 
 if __name__ == "__main__":
     # n_qubits = 6
-    
+
     # state_vector = D_state(n_qubits, int(n_qubits / 2))
     # target_state = quantize_state(state_vector)
     # param = Param(
@@ -42,8 +42,8 @@ if __name__ == "__main__":
     # circuit = prepare_state(
     #     target_state, map_gates=True, verbose_level=3, param=param
     # )
-    
-    circuit = read_qasm("dicke_11.qasm")
+
+    circuit = read_qasm("./benchmarks/dicke_6.qasm")
 
     # print(to_qiskit(circuit))
 
