@@ -55,7 +55,7 @@ def test_one_state(state_vectors):
         )
 
         # now we measure the distance between the target state and the actual state
-        state_vector_act = simulate_circuit(circuit).data
+        state_vector_act = simulate_circuit(circuit)
         dist = np.linalg.norm(np.abs(state_vector_act) - np.abs(state_vector_exp))
         dist_strict = np.linalg.norm(state_vector_act - state_vector_exp)
         if dist_strict**2 >= 1e-4:

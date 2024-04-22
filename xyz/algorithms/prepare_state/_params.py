@@ -21,7 +21,7 @@ class StatePreparationParameters:
         enable_cardinality_reduction: bool = True,
         enable_decomposition: bool = False,
         enable_progress_bar: bool = True,
-        enable_reindex: bool = True,
+        enable_reindex: bool = False,
     ) -> None:
         self.enable_exact_synthesis: bool = enable_exact_synthesis
         self.enable_qubit_reduction: bool = enable_qubit_reduction

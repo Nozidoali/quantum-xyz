@@ -32,16 +32,16 @@ from ._cardinality_reduction import cardinality_reduction
 from ._ground_state_calibration import ground_state_calibration
 from ._support_reduction import support_reduction
 from ._qubit_reduction import qubit_reduction
-from ._stats import StatePreparationStatistics
-from ._params import StatePreparationParameters
+from ._stats import StatePreparationStatistics as Stats
+from ._params import StatePreparationParameters as Params
 
 
 def _prepare_state_rec(
     circuit: QCircuit,
     state: QState,
     verbose_level: int = 0,
-    param: StatePreparationParameters = StatePreparationParameters(),
-    stats: StatePreparationStatistics = StatePreparationStatistics(),
+    param: Params = Params(),
+    stats: Stats = Stats(),
 ):
     prev_supports = state.get_supports()
     prev_num_supports = len(prev_supports)
@@ -101,8 +101,8 @@ def _prepare_state_rec(
     # exact synthesis
     if (
         param.enable_exact_synthesis
-        and num_supports <= StatePreparationParameters.EXACT_SYNTHESIS_QUBIT_THRESHOLD
-        and cardinality <= StatePreparationParameters.EXACT_SYNTHESIS_DENSITY_THRESHOLD
+        and num_supports <= Params.EXACT_SYNTHESIS_QUBIT_THRESHOLD
+        and cardinality <= Params.EXACT_SYNTHESIS_DENSITY_THRESHOLD
     ):
         try:
             exact_gates = exact_cnot_synthesis(
@@ -110,7 +110,7 @@ def _prepare_state_rec(
                 state,
                 optimality_level=3,
                 verbose_level=verbose_level,
-                cnot_limit=StatePreparationParameters.EXACT_SYNTHESIS_CNOT_LIMIT,
+                cnot_limit=Params.EXACT_SYNTHESIS_CNOT_LIMIT,
             )
             if stats is not None:
                 stats.time_exact_cnot_synthesis += timer.time()
@@ -197,8 +197,8 @@ def prepare_state(
     state: QState,
     map_gates: bool = True,
     verbose_level: int = 0,
-    param: StatePreparationParameters = None,
-    stats: StatePreparationStatistics = StatePreparationStatistics(),
+    param: Params = None,
+    stats: Stats = Stats(),
 ) -> QCircuit:
     """A hybrid method combining both qubit- and cardinality- reduction.
 
@@ -228,7 +228,7 @@ def prepare_state(
 
     if param is None:
         # we design the default parameters
-        param = StatePreparationParameters()
+        param = Params()
         if cardinality_reduction_cnot_estimation < qubit_reduction_cnot_estimation:
             # if the state is sparse, we enable cardinality reduction method
             print_yellow("ENABLE_CARDINALITY_REDUCTION")
