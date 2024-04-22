@@ -9,6 +9,5 @@ Last Modified time: 2023-08-12 00:02:46
 """
 
 from .basic_gates import *
-from .super_gates import *
 from .qcircuit import *
 from .decomposition import *

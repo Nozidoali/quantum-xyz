@@ -16,8 +16,8 @@ from xyz import (
     stopwatch,
     simulate_circuit,
     resynthesis,
+    to_qiskit
 )
-import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     state_vector = D_state(4, 2)
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     state_vector_act = simulate_circuit(circuit)
     dist = np.linalg.norm(state_vector_act - state_vector)
 
-    qc = circuit.to_qiskit()
-    # print(circuit.to_qiskit())
+    qc = to_qiskit(circuit)
+    print(qc)
     print("target state: ", quantize_state(state_vector))
     print("actual state: ", quantize_state(state_vector_act))

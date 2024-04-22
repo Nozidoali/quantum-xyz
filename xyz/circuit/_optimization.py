@@ -45,8 +45,7 @@ def _add_gate_optimized(self, gate: QGate) -> None:
         case QGateType.RY:
             if gate.is_trivial():
                 return
-            else:
-                add_gate_mapped(self, gate)
+            add_gate_mapped(self, gate)
 
         case QGateType.CRY:
             add_gate_mapped(self, gate)

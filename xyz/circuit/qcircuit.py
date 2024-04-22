@@ -17,8 +17,6 @@ from typing import List
 # internal modules
 from .basic_gates import QGate, QGateType, QBit
 from ._optimization import _add_gate_optimized, _add_gates_optimized
-from ._qiskit import _to_qiskit
-
 
 class QCircuit:
     """the class of quantum circuit"""
@@ -124,10 +122,9 @@ class QCircuit:
         """
         if gate_type is None:
             return len(self.__gates)
-        else:
-            return len(
-                [gate for gate in self.__gates if gate.get_qgate_type() == gate_type]
-            )
+        return len(
+            [gate for gate in self.__gates if gate.get_qgate_type() == gate_type]
+        )
 
     def get_cnot_cost(self) -> int:
         """
@@ -137,18 +134,6 @@ class QCircuit:
         for gate in self.__gates:
             cnot_cost += gate.get_cnot_cost()
         return cnot_cost
-
-    def to_qiskit(self):
-        """Convert the sequence to a Qiskit string .
-
-        :param with_measurement: [description], defaults to True
-        :type with_measurement: bool, optional
-        :param with_tomography: [description], defaults to False
-        :type with_tomography: bool, optional
-        :return: [description]
-        :rtype: [type]
-        """
-        return _to_qiskit(self)
 
     def __str__(self) -> str:
         """Convert the sequence to a string .

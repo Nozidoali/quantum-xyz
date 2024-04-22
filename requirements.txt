@@ -1,9 +1,7 @@
 llist==0.7.1
 matplotlib==3.7.1
 numpy==1.23.5
-qiskit==0.43
-qiskit_ibmq_provider==0.20
-qiskit-aer==0.12
+qiskit>=1.0
 scipy==1.10.1
 setuptools==67.8.0
 coverage==7.3.2

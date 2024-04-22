@@ -20,15 +20,4 @@ setup(
         "Operating System :: OS Independent",
     ],
     packages=find_packages(include=["xyz", "xyz.*"]),
-    install_requires=[
-        """
-            llist==0.7.1
-            matplotlib==3.7.1
-            numpy==1.23.5
-            qiskit==0.43.1
-            qiskit_ibmq_provider==0.20.2
-            qiskit_terra==0.24.1
-            scipy==1.10.1
-        """
-    ],
 )
