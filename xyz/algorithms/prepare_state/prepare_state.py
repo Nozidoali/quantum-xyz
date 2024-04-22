@@ -31,9 +31,7 @@ from ._exact_cnot_synthesis import exact_cnot_synthesis
 from ._cardinality_reduction import cardinality_reduction
 from ._ground_state_calibration import ground_state_calibration
 from ._support_reduction import support_reduction
-from ._qubit_decomposition import (
-    qubit_decomposition_opt,
-)
+from ._qubit_reduction import qubit_reduction
 from ._stats import StatePreparationStatistics
 from ._params import StatePreparationParameters
 
@@ -149,7 +147,7 @@ def _prepare_state_rec(
     qubit_reduction_gates: List[QGate] = None
     num_qubit_reduction_cx: int = 0
     if param.enable_qubit_reduction:
-        qubit_decomposition_gates, new_state = qubit_decomposition_opt(
+        qubit_decomposition_gates, new_state = qubit_reduction(
             circuit, state, supports
         )
         num_qubit_reduction_cx = sum(

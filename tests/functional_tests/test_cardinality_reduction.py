@@ -58,10 +58,11 @@ def test_one_state(state_vectors):
         state_vector_act = simulate_circuit(circuit).data
         dist = np.linalg.norm(np.abs(state_vector_act) - np.abs(state_vector_exp))
         dist_strict = np.linalg.norm(state_vector_act - state_vector_exp)
-        if dist_strict**2 >= 1e-1:
+        if dist_strict**2 >= 1e-4:
             # we raise a warning if the distance is large
             print(
                 f"distance is {dist_strict**2}, state_exp = {state_vector_exp}, state_act = {state_vector_act}"
             )
+            assert False
 
-        assert dist**2 < 1e-1  # make sure the distance is small
+        assert dist**2 < 1e-4  # make sure the distance is small
