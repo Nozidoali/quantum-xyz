@@ -34,6 +34,7 @@ class stopwatch:
         self.tic = None
         self.toc = None
         self.verbose = verbose
+        self.duration = None
 
     def __enter__(self):
         """
@@ -51,9 +52,9 @@ class stopwatch:
         @param exc_tb The traceback of the exception that was raised
         """
         self.toc = time.perf_counter()
-        duration = self.toc - self.tic
+        self.duration = self.toc - self.tic
         if self.name is not None and self.verbose:
-            print_green(f"{self.name:<25}: {duration:>8.02f} sec")
+            print_green(f"{self.name:<25}: {self.duration:>8.02f} sec")
 
     def time(self):
         """

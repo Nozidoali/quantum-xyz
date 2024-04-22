@@ -2,7 +2,7 @@
  * Author: Hanyu Wang
  * Created time: 2024-04-02 09:47:09
  * Last Modified by: Hanyu Wang
- * Last Modified time: 2024-04-02 09:53:19
+ * Last Modified time: 2024-04-02 14:04:50
  */
 
 #include "qgate.hpp"
@@ -16,5 +16,9 @@ bool Rotation::is_trivial(double theta, bool use_x)
     if (use_x)
         return is_zero || is_pi;
     return is_zero;
+}
+std::string Rotation::to_string() const
+{
+    return "R(" + std::to_string(theta) + ")";
 }
 } // namespace xyz

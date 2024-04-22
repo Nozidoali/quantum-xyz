@@ -2,7 +2,7 @@
  * Author: Hanyu Wang
  * Created time: 2024-03-31 14:45:41
  * Last Modified by: Hanyu Wang
- * Last Modified time: 2024-04-02 12:29:51
+ * Last Modified time: 2024-04-02 14:08:42
  */
 
 #include "qstate.hpp"
@@ -46,7 +46,8 @@ uint32_t CRY::get_cost() const
 }
 std::string CRY::to_string() const
 {
-    std::string phase_str = phase? "" : "~";
-    return "C(" + phase_str + std::to_string(ctrl) + ")RY(" + std::to_string(target_qubit) + ", " + std::to_string(theta) + ")";
+    std::string ctrl_str = Controlled::to_string();
+    std::string ry_str = RY::to_string();
+    return ctrl_str + ry_str;
 }
 } // namespace xyz

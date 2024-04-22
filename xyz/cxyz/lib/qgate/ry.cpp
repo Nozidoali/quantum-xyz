@@ -2,7 +2,7 @@
  * Author: Hanyu Wang
  * Created time: 2024-03-31 14:45:41
  * Last Modified by: Hanyu Wang
- * Last Modified time: 2024-04-02 09:39:18
+ * Last Modified time: 2024-04-02 14:08:25
  */
 
 #include "qstate.hpp"
@@ -41,6 +41,6 @@ uint32_t RY::get_cost() const
 }
 std::string RY::to_string() const
 {
-    return "RY(" + std::to_string(target_qubit) + ", " + std::to_string(theta) + ")";
+    return "RY(" + std::to_string(target_qubit) + "," + std::to_string(theta) + ")";
 }
 } // namespace xyz
