@@ -17,6 +17,7 @@ import random
 import numpy as np
 from qiskit import QuantumCircuit, QuantumRegister, transpile
 
+
 def build_state_dict_fixed(state: np.ndarray):
     """
     Builds a dict of the non zero amplitudes with their

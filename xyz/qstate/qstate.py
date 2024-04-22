@@ -15,7 +15,7 @@ import numpy as np
 
 # the merge uncertainty, if the difference between the two angles is less than
 # this value, we consider them to be the same
-MERGE_UNCERTAINTY = 1e-3
+MERGE_UNCERTAINTY = 1e-12
 
 
 N_DIGITS = 2
@@ -36,7 +36,7 @@ class QState:
 
         self.index_to_weight = {}
         for index, weight in index_to_weight.items():
-            if not np.isclose(weight, 0, atol=1e-3):
+            if not np.isclose(weight, 0, atol=MERGE_UNCERTAINTY):
                 self.index_to_weight[index] = weight
         self.index_set = self.index_to_weight.keys()
 
@@ -493,7 +493,6 @@ def quantize_state(state_vector: np.ndarray):
 
     if not isinstance(state_vector, np.ndarray):
         state_vector = np.array(state_vector)
-        
 
     # discard the imaginary part
     # state_vector = state_vector.real

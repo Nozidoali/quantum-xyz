@@ -19,8 +19,6 @@ def get_candidate_controls(rotation_table: dict, num_qubits: int) -> List[int]:
     """
     get_candidate_controls:
     return the possible control qubits for the given rotation table:
-
-
     """
     selected = set()
     candidates = list(range(num_qubits))
@@ -73,13 +71,32 @@ def resynthesis_window(
     ry_angles_begin: dict = state_begin.get_rotation_table(target_qubit.index)
     ry_angles_end: dict = state_end.get_rotation_table(target_qubit.index)
 
-    ry_delta = {
-        k: ry_angles_end[k] - ry_angles_begin[k] for k in ry_angles_begin.keys()
-    }
+    try:
+        ry_delta = {
+            k: ry_angles_end[k] - ry_angles_begin[k] for k in ry_angles_begin.keys()
+        }
+    except KeyError:
+        print(f"target_qubit: {target_qubit.index}")
+        for k in ry_angles_begin.keys():
+            if k not in ry_angles_end:
+                print(f"{k:0b} not in ry_angles_end")
+                rdx = k ^ (1 << target_qubit.index)
+                idx = k
+                if rdx in state_begin.index_to_weight:
+                    print(f"state_begin[{rdx:0b}] = {state_begin.index_to_weight[rdx]}")
+                if idx in state_begin.index_to_weight:
+                    print(f"state_begin[{idx:0b}] = {state_begin.index_to_weight[idx]}")
+                if rdx in state_end.index_to_weight:
+                    print(f"state_end[{rdx:0b}] = {state_end.index_to_weight[rdx]}")
+                if idx in state_end.index_to_weight:
+                    print(f"state_end[{idx:0b}] = {state_end.index_to_weight[idx]}")
+        exit(1)
 
     # we can run dependency analysis to find the potential control qubits
     all_control_qubits: list = get_candidate_controls(ry_delta, state_begin.num_qubits)
     # n_control_qubits: int = len(all_control_qubits)
+
+    print(f"n_cnots_old = {n_cnots_old}, all_control_qubits = {all_control_qubits}")
 
     def get_rx(k: int, x: int):
         rx_bool = (constraint_keys[x] >> cnot_configuration[k]) & 1
@@ -97,11 +114,11 @@ def resynthesis_window(
 
         # lets consider more complicated cases later
         # if n_control_qubits > 1:
-            # raise NotImplementedError("n_control_qubits > 1 is not supported yet")
+        # raise NotImplementedError("n_control_qubits > 1 is not supported yet")
 
         if n_cnot_new > len(all_control_qubits):
             # need to think about this
-            raise NotImplementedError("better opportunities found, but no solver")        
+            raise NotImplementedError("better opportunities found, but no solver")
 
         cnot_configuration = all_control_qubits
 

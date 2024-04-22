@@ -20,7 +20,6 @@ def _add_gate_optimized(self, gate: QGate) -> None:
     :param gate: [description]
     :type gate: QGate
     """
-
     match gate.get_qgate_type():
         case QGateType.CU:
             if gate.is_z_trivial():

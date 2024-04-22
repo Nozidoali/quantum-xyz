@@ -14,6 +14,7 @@ from qiskit.quantum_info import Statevector
 from xyz.circuit import QCircuit
 from .to_qiskit import to_qiskit
 
+
 def simulate_circuit(circuit: QCircuit) -> np.ndarray:
     """Simulate a circuit .
     This is a wrapper for qiskit Aer.get_backend("qasm_simulator").run(circuit).result().get_statevector()
