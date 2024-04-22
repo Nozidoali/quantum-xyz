@@ -9,7 +9,6 @@ Last Modified time: 2023-09-13 12:04:42
 """
 
 import numpy as np
-from qiskit import transpile
 from qiskit.quantum_info import Statevector
 
 from xyz.circuit import QCircuit
