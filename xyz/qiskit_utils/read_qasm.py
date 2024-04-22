@@ -34,6 +34,8 @@ def read_qasm(filename: str) -> QCircuit:
             gate = RY(instr.params[0], QBit(qargs[0]._index))
         elif instr.name == "cx":
             gate = CX(QBit(qargs[0]._index), True, QBit(qargs[1]._index))
+        elif instr.name == "cx_o0":
+            gate = CX(QBit(qargs[0]._index), False, QBit(qargs[1]._index))
         else:
             raise ValueError(f"Unsupported instruction {instr.name}")
 

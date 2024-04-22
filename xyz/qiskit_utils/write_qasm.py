@@ -19,7 +19,6 @@ def to_qasm(circuit: QCircuit) -> str:
     write the circuit to qasm format
     """
     qc = to_qiskit(circuit)
-    qc = transpile(qc, basis_gates=["ry", "x", "cx"])
     return qasm3.dumps(qc)
 
 

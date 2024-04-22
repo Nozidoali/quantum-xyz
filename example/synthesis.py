@@ -27,9 +27,25 @@ from xyz import (
 )
 
 import pandas as pd
+from xyz import StatePreparationParameters as Param
 
 if __name__ == "__main__":
-    circuit = read_qasm("dicke_7.qasm")
+    # n_qubits = 6
+    
+    # state_vector = D_state(n_qubits, int(n_qubits / 2))
+    # target_state = quantize_state(state_vector)
+    # param = Param(
+    #     enable_exact_synthesis=False,
+    #     enable_qubit_reduction=True,
+    #     enable_cardinality_reduction=False,
+    # )
+    # circuit = prepare_state(
+    #     target_state, map_gates=True, verbose_level=3, param=param
+    # )
+    
+    circuit = read_qasm("dicke_11.qasm")
+
+    # print(to_qiskit(circuit))
 
     # now we measure the distance between the target state and the actual state
     state_vector_exp = simulate_circuit(circuit)
@@ -42,6 +58,5 @@ if __name__ == "__main__":
     print("n_cnots_new: ", n_cnots_new)
 
     state_vector_act = simulate_circuit(new_circuit)
-    # print(to_qiskit(circuit))
     print("expect state: ", quantize_state(state_vector_exp))
     print("actual state: ", quantize_state(state_vector_act))

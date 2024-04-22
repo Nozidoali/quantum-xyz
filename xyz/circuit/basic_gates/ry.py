@@ -25,7 +25,7 @@ class RY(RotationGate, BasicGate):
         RotationGate.__init__(self, theta)
 
     def __str__(self) -> str:
-        return f"RY({self.theta:0.02f})"
+        return f"RY({self.target_qubit}:{self.theta:0.02f})"
 
     def get_cnot_cost(self) -> int:
         """Returns the cost of the cost of the gate.
