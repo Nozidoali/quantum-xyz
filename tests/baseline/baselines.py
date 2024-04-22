@@ -15,12 +15,7 @@ import subprocess
 import re
 import random
 import numpy as np
-from qiskit import QuantumCircuit, QuantumRegister, transpile, Aer
-from qclib.state_preparation import (
-    MergeInitialize,
-)
-
-from qclib.util import build_state_dict
+from qiskit import QuantumCircuit, QuantumRegister, transpile
 
 
 def build_state_dict_fixed(state: np.ndarray):

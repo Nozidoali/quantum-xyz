@@ -14,3 +14,4 @@ from .qstate import *
 from .utils import *
 from .boolean import *
 from .circuit import *
+from .qiskit_utils import *

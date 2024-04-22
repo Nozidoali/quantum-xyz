@@ -426,7 +426,7 @@ def qubit_decomposition_opt(
             continue
         weight0 = state.index_to_weight[idx0]
         weight1 = state.index_to_weight[idx1]
-        index_to_weight[idx0] = np.sqrt(weight0 ** 2 + weight1 ** 2)
+        index_to_weight[idx0] = np.sqrt(weight0**2 + weight1**2)
 
     new_state = QState(index_to_weight, state.num_qubits)
 

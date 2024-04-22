@@ -11,9 +11,9 @@ Last Modified time: 2023-06-22 15:01:37
 # pylint: disable=C0103
 
 from qiskit.circuit.library.standard_gates import RYGate
-from qiskit.extensions import UnitaryGate
+from qiskit.circuit.library import UnitaryGate
 
-from ..basic_gates import U, CU, MCRY
+from ..circuit.basic_gates import U, CU, MCRY
 
 
 class SpecialGates:

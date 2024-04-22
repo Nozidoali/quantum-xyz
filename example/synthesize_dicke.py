@@ -16,24 +16,25 @@ from xyz import (
     stopwatch,
     simulate_circuit,
     resynthesis,
+    to_qiskit,
 )
-import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     state_vector = D_state(4, 2)
     target_state = quantize_state(state_vector)
 
     # synthesize the state
-    with stopwatch("synthesis", verbose = True) as timer:
+    with stopwatch("synthesis", verbose=True) as timer:
         circuit = prepare_state(target_state, map_gates=True)
-        # circuit = resynthesis(circuit)
+        circuit = resynthesis(circuit)
     n_cnot = circuit.get_cnot_cost()
 
     # now we measure the distance between the target state and the actual state
     state_vector_act = simulate_circuit(circuit)
-    dist = np.linalg.norm(state_vector_act - state_vector)
+    dist = np.linalg.norm(abs(state_vector_act) - abs(state_vector))
+    assert dist < 1e-6
 
-    qc = circuit.to_qiskit()
-    # print(circuit.to_qiskit())
+    qc = to_qiskit(circuit)
+    print(qc)
     print("target state: ", quantize_state(state_vector))
     print("actual state: ", quantize_state(state_vector_act))

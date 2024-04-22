@@ -15,11 +15,11 @@ from typing import List
 from qiskit import QuantumCircuit, QuantumRegister
 
 # my own library
-from .basic_gates import QBit, QGate, QGateType
-from .super_gates import SpecialGates
+from ..circuit import QBit, QGate, QGateType, QCircuit
+from .special_gates import SpecialGates
 
 
-def _to_qiskit(self) -> QuantumCircuit:
+def to_qiskit(qcircuit: QCircuit) -> QuantumCircuit:
     """Convert this circuit to a QuantumCircuit .
 
     :param with_measurement: [description], defaults to True
@@ -29,7 +29,7 @@ def _to_qiskit(self) -> QuantumCircuit:
     :return: [description]
     :rtype: QuantumCircuit
     """
-    num_qubits = self.get_num_qubits()
+    num_qubits = qcircuit.get_num_qubits()
 
     quantum_registers = QuantumRegister(num_qubits)
 
@@ -50,7 +50,7 @@ def _to_qiskit(self) -> QuantumCircuit:
             return [quantum_registers[q.index] for q in qubit]
 
     gate: QGate
-    for gate in self.get_gates():
+    for gate in qcircuit.get_gates():
         match gate.get_qgate_type():
             case QGateType.U:
                 special_gate = SpecialGates.cu(gate)

@@ -52,22 +52,7 @@ def exact_cnot_synthesis(
     verbose_level: int = 0,
     cnot_limit: int = None,
 ):
-    """This function finds the exact cnot_cnot_synthesis of a circuit .
-
-    :param circuit: [description]
-    :type circuit: QCircuit
-    :param qubit_mapping: [description]
-    :type qubit_mapping: dict
-    :param target_state: [description]
-    :type target_state: qs.QState
-    :param optimality_level: [description], defaults to 3
-    :type optimality_level: int, optional
-    :param verbose_level: [description], defaults to 0
-    :type verbose_level: int, optional
-    :raises ValueError: [description]
-    :return: [description]
-    :rtype: [type]
-    """
+    """This function prepares the state by finding the shortest path ."""
 
     # now we start the search
     visited_states = set()

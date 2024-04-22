@@ -21,6 +21,7 @@ from xyz import rand_state
 
 N_TESTS = 4
 
+
 @pytest.fixture
 def state_vectors():
     """Generate a random state vector for testing ."""
@@ -50,7 +51,9 @@ def test_one_state(state_vectors):
         dist_strict = np.linalg.norm(state_vector_act - state_vector_exp)
         if dist_strict**2 >= 1e-1:
             # we raise a warning if the distance is large
-            print(f"distance is {dist_strict**2}, state_exp = {state_vector_exp}, state_act = {state_vector_act}")
+            print(
+                f"distance is {dist_strict**2}, state_exp = {state_vector_exp}, state_act = {state_vector_act}"
+            )
 
         assert dist**2 < 1e-1  # make sure the distance is small
 

@@ -85,10 +85,8 @@ def _prepare_state_rec(
     num_supports = len(supports)
     cardinality = state.get_sparsity()
 
-    if param.enable_progress_bar:
-        print(
-            f"num_supports: {num_supports:5d}, cardinality: {cardinality:5d}", end="\r"
-        )
+    if verbose_level >= 3:
+        print(f"state: {state}")
 
     stats.num_runs_support_reduction += 1
     stats.time_support_reduction += timer.time()

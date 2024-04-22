@@ -22,3 +22,6 @@ class QBit:
         if isinstance(__value, QBit):
             return self.index == __value.index
         return False
+
+    def __hash__(self) -> int:
+        return hash(self.index)

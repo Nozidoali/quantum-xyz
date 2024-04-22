@@ -5,6 +5,7 @@ __pycache__/
 
 # QASM files
 *.qasm
+!benchmarks/*.qasm
 
 # C extensions
 *.so
