@@ -8,16 +8,13 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-09-10 17:52:33
 """
 
-
-import copy
 import numpy as np
 
-
-from xyz.circuit.basic_gates.cx import CX
-from xyz.circuit.basic_gates.mcry import MCRY
+from xyz.circuit.gate.cx import CX
+from xyz.circuit.gate.mcry import MCRY
 from xyz.circuit.qcircuit import QCircuit
 
-from xyz.qstate import QState
+from xyz.circuit import QState
 from ._ground_state_calibration import ground_state_calibration
 
 

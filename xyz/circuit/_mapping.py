@@ -13,10 +13,10 @@ from collections import namedtuple
 from typing import List
 import numpy as np
 
-from xyz.circuit.basic_gates.ry import RY
+from xyz.circuit.gate.ry import RY
 from xyz.utils import call_with_global_timer
 
-from .basic_gates import QGate, QGateType, MULTIPLEXY, CRX, CU, MCRY, X, MCMY
+from .gate import QGate, QGateType, MULTIPLEXY, CRX, CU, MCRY, X, MCMY
 from .decomposition import decompose_mcry, control_sequence_to_gates
 
 

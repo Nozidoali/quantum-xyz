@@ -5,11 +5,11 @@
 Author: Hanyu Wang
 Created time: 2024-04-22 18:35:53
 Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-22 20:33:20
+Last Modified time: 2024-04-23 08:16:15
 '''
 
 from xyz.circuit import QCircuit, QBit
-from xyz.qstate import QState
+from xyz.circuit import QState
 
 def extract_windows_naive(circuit: QCircuit):
     

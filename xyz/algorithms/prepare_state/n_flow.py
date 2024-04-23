@@ -13,14 +13,14 @@ from typing import List
 import numpy as np
 
 from xyz.circuit import QGate, QGateType, QBit, CX, CRY
-from xyz.circuit.basic_gates.mcmy import MCMY
-from xyz.circuit.basic_gates.mcry import MCRY
-from xyz.circuit.basic_gates.ry import RY
+from xyz.circuit.gate.mcmy import MCMY
+from xyz.circuit.gate.mcry import MCRY
+from xyz.circuit.gate.ry import RY
 
 from xyz.circuit.qcircuit import QCircuit
-from xyz.qstate import QState
-from ._exact_cnot_synthesis import exact_cnot_synthesis
-from ._support_reduction import support_reduction
+from xyz.circuit import QState
+from .exact_cnot_synthesis import exact_cnot_synthesis
+from .support_reduction import support_reduction
 
 
 def to_controlled_gate(gate: QGate, control_qubit: QBit, control_phase: bool):

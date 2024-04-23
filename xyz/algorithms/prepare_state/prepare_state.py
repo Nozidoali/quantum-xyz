@@ -22,15 +22,15 @@ import numpy as np
 
 
 from xyz.circuit import QCircuit, QGate
-from xyz.qstate import QState, quantize_state
+from xyz.circuit import QState, quantize_state
 from xyz.utils import stopwatch
 from xyz.utils import global_stopwatch_report
 from xyz.utils import print_yellow
 
-from ._exact_cnot_synthesis import exact_cnot_synthesis
+from .exact_cnot_synthesis import exact_cnot_synthesis
 from .m_flow import cardinality_reduction
 from ._ground_state_calibration import ground_state_calibration
-from ._support_reduction import support_reduction
+from .support_reduction import support_reduction
 from .n_flow import qubit_reduction
 from ._stats import StatePreparationStatistics as Stats
 from ._params import StatePreparationParameters as Params

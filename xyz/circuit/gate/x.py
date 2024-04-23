@@ -10,6 +10,9 @@ Last Modified time: 2023-06-22 23:14:11
 
 # pylint: disable=C0103
 
+import numpy as np
+
+from .qstate import QState
 from .base import BasicGate, QBit, QGateType
 
 
@@ -34,5 +37,9 @@ class X(BasicGate):
         """
         return 0
 
-    def apply(self, qstate: "QState") -> "QState":
-        return qstate.apply_x(self.target_qubit.index)
+    def apply(self, qstate: QState) -> QState:
+        index_to_weight = {}
+        for idx in qstate.index_set:
+            reversed_idx = idx ^ (1 << self.target_qubit.index)
+            index_to_weight[reversed_idx] = qstate.index_to_weight[idx]
+        return QState(index_to_weight, qstate.num_qubits)

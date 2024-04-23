@@ -11,7 +11,7 @@ Last Modified time: 2023-09-09 14:41:40
 
 from xyz.circuit import X
 from xyz.circuit import QCircuit
-from xyz.qstate import QState
+from xyz.circuit import QState
 
 
 def ground_state_calibration(circuit: QCircuit, state: QState):

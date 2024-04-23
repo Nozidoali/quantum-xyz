@@ -8,7 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2024-04-22 21:55:27
 """
 
-from xyz.qstate import QState
+from xyz.circuit import QState
 from xyz.circuit import QCircuit
 
 

@@ -11,8 +11,8 @@ Last Modified time: 2023-06-22 23:31:33
 from typing import List
 import numpy as np
 
+from .qstate import QState
 from .base import BasicGate, MultiControlledGate, QBit, QGateType, RotationGate
-from xyz.qstate import QState
 
 MCRY_CNOT_COST = {
     "0": 0,

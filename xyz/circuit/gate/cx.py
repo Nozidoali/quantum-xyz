@@ -8,6 +8,9 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-22 23:14:28
 """
 
+import numpy as np
+
+from .qstate import QState
 from .base import BasicGate, ControlledGate, QBit, QGateType
 
 
@@ -36,9 +39,12 @@ class CX(BasicGate, ControlledGate):
         """
         return 1
 
-    def apply(self, qstate: "QState") -> "QState":
-        return qstate.apply_cx(
-            self.control_qubit.index,
-            self.phase,
-            self.target_qubit.index,
-        )
+    def apply(self, qstate: QState) -> QState:
+        index_to_weight = {}
+        for idx, weight in qstate.index_to_weight.items():
+            reversed_idx = idx ^ (1 << self.target_qubit.index)
+            if self.is_enabled(idx):
+                index_to_weight[reversed_idx] = weight
+            else:
+                index_to_weight[idx] = weight
+        return QState(index_to_weight, qstate.num_qubits)

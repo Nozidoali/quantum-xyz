@@ -12,7 +12,6 @@ from typing import List
 
 from .qubit import QBit
 
-
 class ControlledGate:
     """Classmethod for creating a controlled gate ."""
 

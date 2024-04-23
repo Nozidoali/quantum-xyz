@@ -9,12 +9,10 @@ Last Modified time: 2023-09-01 12:56:17
 """
 
 from queue import PriorityQueue
-from xyz.circuit.basic_gates.base.gate import QGate
-from xyz.circuit.basic_gates.cx import CX
+from xyz.circuit.gate.base.gate import QGate
+from xyz.circuit.gate.cx import CX
 from xyz.circuit import QCircuit, X, MCRY
-
-import xyz.qstate as qs
-import xyz.operator as op
+from xyz.circuit import QState
 
 from ._ground_state_calibration import ground_state_calibration
 
@@ -47,7 +45,7 @@ class AStarCost:
 
 def exact_cnot_synthesis(
     circuit: QCircuit,
-    target_state: qs.QState,
+    target_state: QState,
     optimality_level: int = 3,
     verbose_level: int = 0,
     cnot_limit: int = None,
@@ -64,7 +62,7 @@ def exact_cnot_synthesis(
         return circuit.qubit_at(qubit_index)
 
     def explore_state(
-        curr_state: qs.QState, quantum_operator: op.QOperator, curr_cost: AStarCost
+        curr_state: QState, quantum_operator: op.QOperator, curr_cost: AStarCost
     ) -> qs.QState:
         """Explore a state in a SRGraph ."""
         nonlocal visited_states, state_queue, enquened_states, record

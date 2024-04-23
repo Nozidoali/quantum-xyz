@@ -12,8 +12,8 @@ import numpy as np
 
 from xyz.circuit import CX
 from xyz.circuit import X, RY
-from xyz.circuit.qcircuit import QCircuit
-from xyz.qstate import QState
+from xyz.circuit import QCircuit
+from xyz.circuit import QState
 
 ENABLE_Y_REDUCTION = True
 
