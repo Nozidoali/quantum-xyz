@@ -22,14 +22,19 @@ from xyz import StatePreparationParameters as Param
 
 if __name__ == "__main__":
     # state_vector = rand_state(4, 6, uniform=False)
-    target_state = quantize_state("0.41*|001000> + 0.41*|010001> + 0.41*|010100> + 0.41*|011100> + 0.41*|101111> + 0.41*|111100>")
+    # target_state = quantize_state("0.41*|001000> + 0.41*|010001> + 0.41*|010100> + 0.41*|011100> + 0.41*|101111> + 0.41*|111100>")
+    target_state = quantize_state("0.71*|0010> + 0.41*|0101> + 0.41*|0111> + 0.41*|1111>")
     state_vector = target_state.to_vector()
 
     # synthesize the state
     with stopwatch("synthesis", verbose=True) as timer:
         # circuit = sparse_state_synthesis(target_state, verbose_level=3)
         circuit = prepare_state(
-            target_state, map_gates=True, verbose_level=3, param=Param()
+            target_state, map_gates=True, verbose_level=3, param=Param(
+                enable_exact_synthesis=False,
+                enable_m_flow=True,
+                enable_n_flow=False
+            )
         )
 
         # circuit = resynthesis(circuit)

@@ -159,7 +159,7 @@ class QState:
         """
         vector = np.zeros(2**self.num_qubits)
         for idx, weight in self.index_to_weight.items():
-            vector[idx] = np.sqrt(weight)
+            vector[idx] = weight
 
         # normalize the vector
         vector /= np.linalg.norm(vector)

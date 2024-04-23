@@ -183,7 +183,7 @@ def cardinality_reduction(circuit: QCircuit, state: QState, verbose_level: int =
     if verbose_level >= 3:
         print(f"\t adding gate {gate} to the circuit, new_state: {new_state}")
 
-    return new_state, gates[:]
+    return new_state, gates[::-1]
 
 
 def sparse_state_synthesis(state: QState, verbose_level: int = 0):
@@ -211,7 +211,7 @@ def sparse_state_synthesis(state: QState, verbose_level: int = 0):
         curr_state, _gates = cardinality_reduction(
             circuit, curr_state, verbose_level=verbose_level
         )
-        for gate in _gates:
+        for gate in _gates[::-1]:
             gates.append(gate)
 
     _, _gates = x_reduction(circuit, curr_state, enable_cnot=False)
