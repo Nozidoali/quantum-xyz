@@ -17,15 +17,15 @@ class StatePreparationParameters:
     def __init__(
         self,
         enable_exact_synthesis: bool = True,
-        enable_qubit_reduction: bool = False,
-        enable_cardinality_reduction: bool = True,
+        enable_n_flow: bool = False,
+        enable_m_flow: bool = True,
         enable_decomposition: bool = False,
         enable_progress_bar: bool = True,
         enable_reindex: bool = False,
     ) -> None:
         self.enable_exact_synthesis: bool = enable_exact_synthesis
-        self.enable_qubit_reduction: bool = enable_qubit_reduction
-        self.enable_cardinality_reduction: bool = enable_cardinality_reduction
+        self.enable_n_flow: bool = enable_n_flow
+        self.enable_m_flow: bool = enable_m_flow
         self.enable_decomposition: bool = enable_decomposition
         self.enable_progress_bar: bool = enable_progress_bar
         self.enable_reindex: bool = enable_reindex

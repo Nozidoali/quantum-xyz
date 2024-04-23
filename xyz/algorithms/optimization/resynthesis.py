@@ -14,7 +14,9 @@ from xyz.circuit import QCircuit
 from .window_resyn import extract_windows_naive, extract_windows, resynthesize_window
 
 
-def resynthesis(circuit: QCircuit, use_advanced_windowing: bool = True, verbose_level: int = 0) -> QCircuit:
+def resynthesis(
+    circuit: QCircuit, use_advanced_windowing: bool = True, verbose_level: int = 0
+) -> QCircuit:
     """
     Extract windows from the given circuit
     The idea is similar to rip-up and reroute in VLSI design. We extract windows from the circuit and resynthesize each window to minimize the number of CNOTs.

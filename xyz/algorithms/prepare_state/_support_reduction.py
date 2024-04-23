@@ -109,9 +109,13 @@ def support_reduction(circuit: QCircuit, state: QState, enable_cnot: bool = True
 
                 if theta is None:
                     theta = _theta
-                    index_to_weight[index0] = weight0 * np.cos(theta / 2) + weight1 * np.sin(theta / 2)
+                    index_to_weight[index0] = weight0 * np.cos(
+                        theta / 2
+                    ) + weight1 * np.sin(theta / 2)
                 elif np.isclose(theta, _theta):
-                    index_to_weight[index0] = weight0 * np.cos(theta / 2) + weight1 * np.sin(theta / 2)
+                    index_to_weight[index0] = weight0 * np.cos(
+                        theta / 2
+                    ) + weight1 * np.sin(theta / 2)
                     continue
                 else:
                     is_separable = False

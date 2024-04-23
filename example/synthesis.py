@@ -36,12 +36,10 @@ if __name__ == "__main__":
     target_state = quantize_state(state_vector)
     param = Param(
         enable_exact_synthesis=False,
-        enable_qubit_reduction=True,
-        enable_cardinality_reduction=False,
+        enable_n_flow=True,
+        enable_m_flow=False,
     )
-    circuit = prepare_state(
-        target_state, map_gates=True, verbose_level=3, param=param
-    )
+    circuit = prepare_state(target_state, map_gates=True, verbose_level=3, param=param)
 
     # circuit = read_qasm("./benchmarks/dicke_6.qasm")
 
