@@ -19,6 +19,7 @@ from xyz import (
     rand_state,
     prepare_state,
     resynthesis,
+    simulate_circuit,
 )
 from xyz import StatePreparationParameters as Param
 
@@ -30,8 +31,9 @@ if __name__ == "__main__":
     datas = []
 
     # for m_state in [n_qubits, 2**(n_qubits-1)]:
-    for n_qubits in range(3, 20):
-        for m_state in [2 ** (n_qubits - 1)]:
+    for n_qubits in range(3, 10):
+        # for m_state in [2 ** (n_qubits - 1)]:
+        for m_state in [n_qubits]:
             for _ in range(N_TESTS):
                 state_vector = rand_state(n_qubits, m_state, uniform=True)
 
@@ -40,20 +42,22 @@ if __name__ == "__main__":
 
                 # synthesize the state
                 with stopwatch("synthesis") as timer_old:
-                    param = Param(
-                        enable_exact_synthesis=False,
-                        enable_n_flow=True,
-                        enable_m_flow=False,
-                    )
                     circuit = prepare_state(
-                        target_state, map_gates=True, verbose_level=0, param=param
+                        target_state, map_gates=True, verbose_level=0
                     )
                     n_cnot_old = circuit.get_cnot_cost()
+                state_vector_act = simulate_circuit(circuit)
+                print("target state: ", quantize_state(state_vector))
+                print("actual state: ", quantize_state(state_vector_act))
+                assert np.linalg.norm(state_vector_act - state_vector) < 1e-6
 
                 with stopwatch("resynthesis") as timer_new:
                     circuit = resynthesis(circuit)
                     n_cnot_new = circuit.get_cnot_cost()
 
+                state_vector_act = simulate_circuit(circuit)
+                print("actual state: ", quantize_state(state_vector_act))
+                assert np.linalg.norm(state_vector_act - state_vector) < 1e-6
                 data = {
                     "n_qubits": n_qubits,
                     "m_state": m_state,

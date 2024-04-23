@@ -22,8 +22,8 @@ from xyz import StatePreparationParameters as Param
 
 if __name__ == "__main__":
     # state_vector = rand_state(4, 6, uniform=False)
-    state_vector = np.array([0.0, 0.46585146, 0.57011658, 0.67671966])
-    target_state = quantize_state(state_vector)
+    target_state = quantize_state("0.41*|001000> + 0.41*|010001> + 0.41*|010100> + 0.41*|011100> + 0.41*|101111> + 0.41*|111100>")
+    state_vector = target_state.to_vector()
 
     # synthesize the state
     with stopwatch("synthesis", verbose=True) as timer:

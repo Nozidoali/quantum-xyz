@@ -5,13 +5,14 @@
 Author: Hanyu Wang
 Created time: 2024-04-22 18:27:12
 Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-23 08:16:15
+Last Modified time: 2024-04-23 09:54:12
 '''
 
 import numpy as np
 
 from xyz.circuit import QBit, RY, CX
 from xyz.circuit import QState
+from xyz.algorithms.prepare_state.rotation_angles import get_rotation_table
 from ._lstsq_solver import LstSqSolver
 from ._controls import get_candidate_controls
 
@@ -41,8 +42,8 @@ def resynthesize_window(
         # skip the resynthesis
         return window_old
 
-    ry_angles_begin: dict = state_begin.get_rotation_table(target_qubit.index)
-    ry_angles_end: dict = state_end.get_rotation_table(target_qubit.index)
+    ry_angles_begin: dict = get_rotation_table(state_begin, target_qubit.index)
+    ry_angles_end: dict = get_rotation_table(state_end, target_qubit.index)
 
     ry_delta = {
         k: ry_angles_end[k] - ry_angles_begin[k] for k in ry_angles_begin.keys()
