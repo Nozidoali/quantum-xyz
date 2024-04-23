@@ -28,10 +28,10 @@ from xyz.utils import global_stopwatch_report
 from xyz.utils import print_yellow
 
 from ._exact_cnot_synthesis import exact_cnot_synthesis
-from ._cardinality_reduction import cardinality_reduction
+from .m_flow import cardinality_reduction
 from ._ground_state_calibration import ground_state_calibration
 from ._support_reduction import support_reduction
-from ._qubit_reduction import qubit_reduction
+from .n_flow import qubit_reduction
 from ._stats import StatePreparationStatistics as Stats
 from ._params import StatePreparationParameters as Params
 from ._reindex import reindex_circuit
@@ -58,7 +58,7 @@ def _prepare_state_rec(
     )
 
     if param.enable_reindex:
-        state, circuit = reindex_circuit(state, circuit)
+        state, circuit = reindex_circuit(circuit, state)
 
     # get the states
     supports = state.get_supports()

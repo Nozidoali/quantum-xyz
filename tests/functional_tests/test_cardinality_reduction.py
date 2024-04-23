@@ -16,8 +16,7 @@ import pytest
 
 from xyz import QState, quantize_state
 from xyz import simulate_circuit
-from xyz import prepare_state
-from xyz import StatePreparationParameters
+from xyz import sparse_state_synthesis
 from xyz import rand_state
 
 N_TESTS = 10
@@ -36,6 +35,10 @@ def state_vectors():
         # check if the state is valid
         all_state_vectors.append(state)
 
+    all_state_vectors.append(
+        [0.0, 0.46585146, 0.57011658, 0.67671966, 0.0, 0.0, 0.0, 0.0]
+    )
+
     return all_state_vectors
 
 
@@ -43,16 +46,7 @@ def test_one_state(state_vectors):
     for state_vector in state_vectors:
         state_vector_exp = state_vector
         target_state = quantize_state(state_vector_exp)
-        # print("target state: ", target_state)
-        circuit = prepare_state(
-            target_state,
-            verbose_level=0,
-            param=StatePreparationParameters(
-                enable_m_flow=True,
-                enable_exact_synthesis=False,
-                enable_n_flow=False,
-            ),
-        )
+        circuit = sparse_state_synthesis(target_state, verbose_level=0)
 
         # now we measure the distance between the target state and the actual state
         state_vector_act = simulate_circuit(circuit)

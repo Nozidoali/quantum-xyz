@@ -9,9 +9,10 @@ Last Modified time: 2023-06-22 23:31:33
 """
 
 from typing import List
+import numpy as np
 
 from .base import BasicGate, MultiControlledGate, QBit, QGateType, RotationGate
-
+from xyz.qstate import QState
 
 MCRY_CNOT_COST = {
     "0": 0,
@@ -75,15 +76,10 @@ class MCRY(RotationGate, BasicGate, MultiControlledGate):
                 for qubit, phase in zip(self.control_qubits, self.phases)
             ]
         )
-        return f"MCRY({self.theta:0.02f}, {control_str})"
+        return f"MCRY({self.target_qubit.index}:{self.theta:0.02f}, {control_str})"
 
     def get_cnot_cost(self) -> int:
-        """Returns the cost of the cost of the gate.
-
-        :return: [description]
-        :rtype: int
-        """
-
+        """Returns the cost of the cost of the gate."""
         index_str = str(len(self.control_qubits))
         if index_str not in MCRY_CNOT_COST:
             raise ValueError(
@@ -91,5 +87,26 @@ class MCRY(RotationGate, BasicGate, MultiControlledGate):
             )
         return MCRY_CNOT_COST[index_str]
 
-    def apply(self, qstate: "QState") -> "QState":
-        raise NotImplementedError("MCRY gate is not implemented yet")
+    def conjugate(self) -> "MCRY":
+        """Conjugate the gate ."""
+        return MCRY(-self.theta, self.control_qubits, self.phases, self.target_qubit)
+
+    def apply(self, qstate: QState) -> QState:
+        """Apply the gate to the state."""
+        index_to_weight = {idx: 0 for idx in qstate.index_set}
+        for idx, weight in qstate.index_to_weight.items():
+            # no rotation
+            if not self.is_enabled(idx):
+                index_to_weight[idx] = qstate.index_to_weight[idx]
+                continue
+            rdx = idx ^ (1 << self.target_qubit.index)
+            if rdx not in qstate.index_set:
+                index_to_weight[rdx] = 0
+
+            if (idx >> self.target_qubit.index) & 1 == 0:
+                index_to_weight[idx] += weight * np.cos(self.theta / 2)
+                index_to_weight[rdx] += weight * np.sin(self.theta / 2)
+            else:
+                index_to_weight[idx] += weight * np.cos(self.theta / 2)
+                index_to_weight[rdx] -= weight * np.sin(self.theta / 2)
+        return QState(index_to_weight, qstate.num_qubits)

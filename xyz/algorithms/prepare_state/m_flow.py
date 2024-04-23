@@ -118,7 +118,6 @@ def cardinality_reduction(circuit: QCircuit, state: QState, verbose_level: int =
     indices = set(list(index2_candidates)[:])
     while len(indices) > 1:
         index_set, qubit, value = _maximize_difference_once(state, indices, diff_lits)
-
         diff_lits.append((qubit, value))
         indices = index_set
 
@@ -130,14 +129,11 @@ def cardinality_reduction(circuit: QCircuit, state: QState, verbose_level: int =
 
     if verbose_level >= 3:
         print(f"indices: {indices}, diff_lits: {diff_lits}")
-
-    # now we try to merge the two states, by flipping the index1 to approach index2
-    if verbose_level >= 3:
         print(f"merging indices from {index1} to {index2}")
+
     gates = []
 
-    index_to_weight = copy.copy(state.index_to_weight)
-
+    new_state: QState = state
     for qubit in range(state.num_qubits):
         if (index1 >> qubit) & 1 == (index2 >> qubit) & 1:
             continue
@@ -151,19 +147,9 @@ def cardinality_reduction(circuit: QCircuit, state: QState, verbose_level: int =
 
         gate = CX(control_qubit, control_phase, target_qubit)
         gates.append(gate)
+        new_state = gate.apply(new_state)
         if verbose_level >= 3:
-            print(f"\t adding gate {gate} to the circuit")
-
-        # modify the index_to_weight according to the CNOT
-        new_index_to_weight = {}
-        for index, weight in index_to_weight.items():
-            reserved_index = index ^ (1 << qubit)
-            if (index >> diff_qubit) & 1 == diff_value:
-                new_index_to_weight[reserved_index] = weight
-            else:
-                new_index_to_weight[index] = weight
-
-        index_to_weight = new_index_to_weight
+            print(f"\t adding gate {gate} to the circuit, new_state: {new_state}")
 
     diff_qubits, diff_values = [], []
     if len(diff_lits) > 0:
@@ -173,36 +159,44 @@ def cardinality_reduction(circuit: QCircuit, state: QState, verbose_level: int =
     control_phases = diff_values
     target_qubit = circuit.qubit_at(diff_qubit)
 
-    assert index2 in index_to_weight
+    assert index2 in new_state.index_to_weight
     reversed_index2 = index2 ^ (1 << diff_qubit)
+    assert reversed_index2 in new_state.index_to_weight
     if verbose_level >= 3:
         print(
-            f"index2 = {index2}, reversed_index2: {reversed_index2}, index_to_weight: {index_to_weight}"
+            f"index2 = {index2}, reversed_index2: {reversed_index2}, index_to_weight: {new_state.index_to_weight}"
         )
-    assert reversed_index2 in index_to_weight
 
-    theta = 2 * np.arctan(index_to_weight[reversed_index2] / index_to_weight[index2])
+    # we now merge from reversed_index2 to index2
 
-    gates.append(MCRY(theta, control_qubits, control_phases, target_qubit))
+    idx0 = reversed_index2 & ~(1 << diff_qubit)
+    idx1 = reversed_index2 | (1 << diff_qubit)
 
-    index_to_weight[index2] = np.sqrt(
-        index_to_weight[index2] ** 2 + index_to_weight[reversed_index2] ** 2
+    theta = 2 * np.arctan(
+        new_state.index_to_weight[idx1] / new_state.index_to_weight[idx0]
     )
 
-    index_to_weight.pop(reversed_index2)
+    if (index2 >> diff_qubit) & 1 == 1:
+        # from 0 to 1
+        theta = theta - np.pi
 
-    # Update the state
-    new_state = QState(index_to_weight, state.num_qubits)
+    gate = MCRY(theta, control_qubits, control_phases, target_qubit)
+    gates.append(gate)
+    new_state = gate.conjugate().apply(new_state)
+    if verbose_level >= 3:
+        print(f"\t adding gate {gate} to the circuit, new_state: {new_state}")
 
-    return new_state, gates[::-1]
+    return new_state, gates[:]
 
 
-def sparse_state_synthesis(circuit, state: QState, verbose_level: int = 0):
+def sparse_state_synthesis(state: QState, verbose_level: int = 0):
     """This function is used to synthesis sparse state.
 
     reference: https://github.com/qclib/qclib/blob/master/qclib/state_preparation/merge.py
 
     """
+
+    circuit = QCircuit(state.num_qubits)
 
     # deep copy
     curr_state = QState(state.index_to_weight, state.num_qubits)
@@ -211,22 +205,19 @@ def sparse_state_synthesis(circuit, state: QState, verbose_level: int = 0):
 
     while True:
         density = len(curr_state.index_set)
-
         if verbose_level >= 3:
             print(f"Current state: {curr_state}, density: {density}")
-
         # we reach the end of the state
         if density == 1:
             break
 
-        new_state, _gates = cardinality_reduction(
+        curr_state, _gates = cardinality_reduction(
             circuit, curr_state, verbose_level=verbose_level
         )
         for gate in _gates:
             gates.append(gate)
 
-        curr_state = new_state
-
     preprocessing_gates = ground_state_calibration(circuit, curr_state)
+    circuit.add_gates(preprocessing_gates + gates[::-1])
 
-    return preprocessing_gates + gates[::-1]
+    return circuit

@@ -23,4 +23,7 @@ def simulate_circuit(circuit: QCircuit) -> np.ndarray:
     :type circuit: QCircuit
     """
 
-    return Statevector(to_qiskit(circuit)).data
+    state_vector = Statevector(to_qiskit(circuit)).data
+    state_vector[np.abs(state_vector) < 1e-10] = 0
+
+    return state_vector

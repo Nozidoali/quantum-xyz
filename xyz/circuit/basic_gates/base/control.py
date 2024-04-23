@@ -38,13 +38,22 @@ class ControlledGate:
         """
         return self.phase
 
+    def is_enabled(self, index: int):
+        """Returns True if the control qubit is enabled .
+
+        :param index: [description]
+        :type index: int
+        :return: [description]
+        :rtype: bool
+        """
+        return (index >> self.control_qubit.index) & 1 == self.phase
 
 class MultiControlledGate:
     """Class method for creating a multiControlledGate ."""
 
     def __init__(self, control_qubits: List[QBit], phases: List[int]) -> None:
-        self.control_qubits = control_qubits
-        self.phases = list(phases)
+        self.control_qubits = control_qubits[:]
+        self.phases = list(phases)[:]
 
     def has_zero_controls(self) -> bool:
         """Returns True if any control qubits are zero .
@@ -77,3 +86,11 @@ class MultiControlledGate:
         :rtype: List[int]
         """
         return self.phases
+
+    def is_enabled(self, index: int) -> bool:
+        """Returns True if the control qubits are enabled .
+        """
+        for control_qubit, phase in zip(self.control_qubits, self.phases):
+            if (index >> control_qubit.index) & 1 != phase:
+                return False
+        return True
