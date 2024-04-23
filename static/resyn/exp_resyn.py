@@ -16,6 +16,7 @@ import numpy as np
 from xyz import (
     quantize_state,
     stopwatch,
+    W_state,
     rand_state,
     prepare_state,
     resynthesis,
@@ -35,7 +36,9 @@ if __name__ == "__main__":
         # for m_state in [2 ** (n_qubits - 1)]:
         for m_state in [n_qubits]:
             for _ in range(N_TESTS):
-                state_vector = rand_state(n_qubits, m_state, uniform=True)
+                # state_vector = rand_state(n_qubits, m_state, uniform=True)
+
+                state_vector = W_state(n_qubits)
 
                 target_state = quantize_state(state_vector)
                 # target_state = quantize_state("0.29*|00001> + 0.61*|00111> + 0.53*|01100> + 0.52*|11111>")

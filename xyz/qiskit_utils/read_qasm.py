@@ -9,7 +9,7 @@ Last Modified time: 2024-04-22 17:53:19
 """
 
 from ..circuit import QCircuit, QGate, QBit, X, RY, CX
-from qiskit import qasm3
+from qiskit import qasm2
 
 
 def read_qasm(filename: str) -> QCircuit:
@@ -19,7 +19,7 @@ def read_qasm(filename: str) -> QCircuit:
     """
     with open(filename, "r", encoding="utf-8") as f:
         program = f.read()
-    qc = qasm3.loads(program)
+    qc = qasm2.loads(program)
 
     # convert qc to QCircuit
     n_qubits = qc.num_qubits
