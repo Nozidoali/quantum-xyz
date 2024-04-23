@@ -16,10 +16,9 @@ from xyz.circuit import QCircuit, CX, CRY
 from xyz.circuit import QState
 
 from ._astar import AStarCost
-from .support_reduction import support_reduction
 from ._backtrace import backtrace
-from .rotation_angles import get_ap_cry_angles
-
+from ..support_reduction import support_reduction
+from ..rotation_angles import get_ap_cry_angles
 
 def exact_cnot_synthesis(
     circuit: QCircuit,

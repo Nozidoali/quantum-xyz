@@ -29,9 +29,8 @@ from xyz.utils import print_yellow
 
 from .exact_cnot_synthesis import exact_cnot_synthesis
 from .m_flow import cardinality_reduction
-from .ground_state_calibration import ground_state_calibration
-from .support_reduction import support_reduction
 from .n_flow import qubit_reduction
+from .support_reduction import support_reduction, x_reduction
 from ._stats import StatePreparationStatistics as Stats
 from ._params import StatePreparationParameters as Params
 from ._reindex import reindex_circuit
@@ -75,7 +74,7 @@ def _prepare_state_rec(
 
     # check for the trivial case
     if cardinality == 1:
-        ground_state_calibration_gates = ground_state_calibration(circuit, state)
+        _, ground_state_calibration_gates = x_reduction(circuit, state, False)
         gates = ground_state_calibration_gates + support_reducing_gates
         # ground state calibration has 0 CNOT
         return gates, num_cx_support_reduction

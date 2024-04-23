@@ -15,7 +15,7 @@ from xyz.circuit.gate.mcry import MCRY
 from xyz.circuit.qcircuit import QCircuit
 
 from xyz.circuit import QState
-from .ground_state_calibration import ground_state_calibration
+from .support_reduction import x_reduction
 
 
 def _maximize_difference_once(state: QState, indices: set, diff_lit: dict):
@@ -214,7 +214,7 @@ def sparse_state_synthesis(state: QState, verbose_level: int = 0):
         for gate in _gates:
             gates.append(gate)
 
-    preprocessing_gates = ground_state_calibration(circuit, curr_state)
-    circuit.add_gates(preprocessing_gates + gates[::-1])
+    _, _gates = x_reduction(circuit, curr_state, enable_cnot=False)
+    circuit.add_gates(_gates + gates[::-1])
 
     return circuit

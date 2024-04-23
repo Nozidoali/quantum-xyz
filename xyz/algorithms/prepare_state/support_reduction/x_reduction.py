@@ -15,7 +15,6 @@ from xyz.circuit import X, CX, QCircuit, QState
 def x_reduction(circuit: QCircuit, state: QState, enable_cnot: bool = True):
     signatures = state.get_qubit_signatures()
     const1 = state.get_const1_signature()
-
     signature_to_qubits = {}
 
     gates = []
