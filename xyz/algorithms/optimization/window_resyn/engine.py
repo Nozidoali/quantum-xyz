@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2024-04-22 18:27:12
 Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-23 09:54:12
+Last Modified time: 2024-04-23 15:34:23
 '''
 
 import numpy as np
@@ -17,10 +17,10 @@ from ._lstsq_solver import LstSqSolver
 from ._controls import get_candidate_controls
 
 def resynthesize_window(
-    state_begin: QState,
-    state_end: QState,
     target_qubit: QBit,
     window_old: list,
+    state_begin: QState,
+    state_end: QState,
 ):
     """
     resynthesize_window
