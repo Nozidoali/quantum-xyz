@@ -9,7 +9,6 @@ Last Modified time: 2024-04-23 09:14:59
 """
 
 import copy
-import numpy as np
 from xyz.circuit import X, CX, QCircuit, QState
 
 

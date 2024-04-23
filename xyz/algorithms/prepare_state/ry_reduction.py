@@ -9,7 +9,6 @@ Last Modified time: 2024-04-23 09:08:48
 """
 
 import copy
-import numpy as np
 from xyz.circuit import RY, QCircuit, QState
 from .rotation_angles import get_ap_ry_angles
 

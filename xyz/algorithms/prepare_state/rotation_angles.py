@@ -192,7 +192,7 @@ def get_most_frequent_theta(state: QState, qubit_index: int) -> float:
     :return: [description]
     :rtype: List[float]
     """
-    thetas = state.get_ry_angles(qubit_index)
+    thetas = get_ry_angles(state, qubit_index)
 
     best_theta = None
     best_theta_count = 0

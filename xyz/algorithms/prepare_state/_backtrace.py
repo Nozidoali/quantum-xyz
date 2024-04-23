@@ -8,7 +8,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2024-04-23 08:57:04
 """
 
-from xyz.circuit import QState, QGate
+from xyz.circuit import QState
 
 
 def backtrace(state: QState, record: dict):
