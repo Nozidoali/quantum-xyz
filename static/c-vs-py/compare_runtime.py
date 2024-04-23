@@ -27,7 +27,7 @@ from xyz import (
 def compare_runtime(state_vector: np.ndarray, verbose: bool = False):
     target_state = quantize_state(state_vector)
     with stopwatch("py", verbose=verbose) as timer_py:
-        # circuit = prepare_state(target_state, map_gates=True, param=StatePreparationParameters(enable_cardinality_reduction=False, enable_qubit_reduction=False, enable_progress_bar=False))
+        # circuit = prepare_state(target_state, map_gates=True, param=StatePreparationParameters(enable_m_flow=False, enable_n_flow=False, enable_progress_bar=False))
         circuit = prepare_state(
             target_state,
             map_gates=True,

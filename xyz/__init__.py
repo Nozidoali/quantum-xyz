@@ -9,9 +9,6 @@ Last Modified time: 2023-06-28 14:40:59
 """
 
 from .algorithms import *
-from .operator import *
-from .qstate import *
 from .utils import *
-from .boolean import *
 from .circuit import *
 from .qiskit_utils import *

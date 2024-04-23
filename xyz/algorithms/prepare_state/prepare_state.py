@@ -22,28 +22,26 @@ import numpy as np
 
 
 from xyz.circuit import QCircuit, QGate
-from xyz.qstate import QState, quantize_state
+from xyz.circuit import QState, quantize_state
 from xyz.utils import stopwatch
 from xyz.utils import global_stopwatch_report
 from xyz.utils import print_yellow
 
-from ._exact_cnot_synthesis import exact_cnot_synthesis
-from ._cardinality_reduction import cardinality_reduction
-from ._ground_state_calibration import ground_state_calibration
-from ._support_reduction import support_reduction
-from ._qubit_decomposition import (
-    qubit_decomposition_opt,
-)
-from ._stats import StatePreparationStatistics
-from ._params import StatePreparationParameters
+from .exact_cnot_synthesis import exact_cnot_synthesis
+from .m_flow import cardinality_reduction
+from .n_flow import qubit_reduction
+from .support_reduction import support_reduction, x_reduction
+from ._stats import StatePreparationStatistics as Stats
+from ._params import StatePreparationParameters as Params
+from ._reindex import reindex_circuit
 
 
 def _prepare_state_rec(
     circuit: QCircuit,
     state: QState,
     verbose_level: int = 0,
-    param: StatePreparationParameters = StatePreparationParameters(),
-    stats: StatePreparationStatistics = StatePreparationStatistics(),
+    param: Params = Params(),
+    stats: Stats = Stats(),
 ):
     prev_supports = state.get_supports()
     prev_num_supports = len(prev_supports)
@@ -59,26 +57,7 @@ def _prepare_state_rec(
     )
 
     if param.enable_reindex:
-        # compact the state
-        # now we get the sub state and sub circuit:
-        sub_index_to_weight = {}
-        old_to_new_qubit_mapping = {}
-
-        supports = state.get_supports()
-        num_supports = len(supports)
-        for new_index, old_index in enumerate(supports):
-            old_to_new_qubit_mapping[old_index] = new_index
-        for index, weight in state.index_to_weight.items():
-            new_index: int = 0
-            for i, support in enumerate(supports):
-                if index & (1 << support) != 0:
-                    new_index |= 1 << i
-            sub_index_to_weight[new_index] = weight
-        state = QState(sub_index_to_weight, num_supports)
-        circuit = circuit.sub_circuit(supports)
-
-        # then we updates the supports to the new index
-        supports = list(range(num_supports))
+        state, circuit = reindex_circuit(circuit, state)
 
     # get the states
     supports = state.get_supports()
@@ -95,7 +74,7 @@ def _prepare_state_rec(
 
     # check for the trivial case
     if cardinality == 1:
-        ground_state_calibration_gates = ground_state_calibration(circuit, state)
+        _, ground_state_calibration_gates = x_reduction(circuit, state, False)
         gates = ground_state_calibration_gates + support_reducing_gates
         # ground state calibration has 0 CNOT
         return gates, num_cx_support_reduction
@@ -103,16 +82,16 @@ def _prepare_state_rec(
     # exact synthesis
     if (
         param.enable_exact_synthesis
-        and num_supports <= StatePreparationParameters.EXACT_SYNTHESIS_QUBIT_THRESHOLD
-        and cardinality <= StatePreparationParameters.EXACT_SYNTHESIS_DENSITY_THRESHOLD
+        and num_supports <= Params.EXACT_SYNTHESIS_QUBIT_THRESHOLD
+        and cardinality <= Params.EXACT_SYNTHESIS_DENSITY_THRESHOLD
     ):
+        print_yellow("EXACT SYNTHESIS")
         try:
             exact_gates = exact_cnot_synthesis(
                 circuit,
                 state,
-                optimality_level=3,
                 verbose_level=verbose_level,
-                cnot_limit=StatePreparationParameters.EXACT_SYNTHESIS_CNOT_LIMIT,
+                cnot_limit=Params.EXACT_SYNTHESIS_CNOT_LIMIT,
             )
             if stats is not None:
                 stats.time_exact_cnot_synthesis += timer.time()
@@ -120,12 +99,13 @@ def _prepare_state_rec(
             num_cx_exact = sum((gate.get_cnot_cost() for gate in exact_gates))
             return gates, num_cx_exact
         except ValueError:
+            # if the exact synthesis fails
             pass
 
     # cardinality reduction method (m-flow)
-    sparse_qsp_gates: List[QGate] = None
+    m_flow_gates: List[QGate] = None
     num_sparse_qsp_cx: int = 0
-    if param.enable_cardinality_reduction:
+    if param.enable_m_flow:
         new_state, cardinality_reduction_gates = cardinality_reduction(
             circuit, state, verbose_level=verbose_level
         )
@@ -137,21 +117,19 @@ def _prepare_state_rec(
             circuit,
             new_state,
             stats=stats,
+            param=param,
+            verbose_level=verbose_level,
         )
-        sparse_qsp_gates = (
-            rec_gates + cardinality_reduction_gates + support_reducing_gates
-        )
+        m_flow_gates = rec_gates + cardinality_reduction_gates + support_reducing_gates
         num_sparse_qsp_cx = (
             rec_cx + num_cardinality_reduction_cx + num_cx_support_reduction
         )
 
     # qubit reduction method (n-flow)
-    qubit_reduction_gates: List[QGate] = None
+    n_flow_gates: List[QGate] = None
     num_qubit_reduction_cx: int = 0
-    if param.enable_qubit_reduction:
-        qubit_decomposition_gates, new_state = qubit_decomposition_opt(
-            circuit, state, supports
-        )
+    if param.enable_n_flow:
+        qubit_decomposition_gates, new_state = qubit_reduction(circuit, state, supports)
         num_qubit_reduction_cx = sum(
             (gate.get_cnot_cost() for gate in qubit_decomposition_gates)
         )
@@ -160,10 +138,10 @@ def _prepare_state_rec(
             circuit,
             new_state,
             stats=stats,
+            param=param,
+            verbose_level=verbose_level,
         )
-        qubit_reduction_gates = (
-            rec_gates + qubit_decomposition_gates + support_reducing_gates
-        )
+        n_flow_gates = rec_gates + qubit_decomposition_gates + support_reducing_gates
         num_qubit_reduction_cx += rec_cx + num_cx_support_reduction
 
     # we choose the best one
@@ -171,11 +149,11 @@ def _prepare_state_rec(
     Method = namedtuple("method", ["name", "gates", "num_gates"])
     candidates = []
 
-    if sparse_qsp_gates is not None:
-        candidates.append(Method("sparse_qsp", sparse_qsp_gates, num_sparse_qsp_cx))
-    if qubit_reduction_gates is not None:
+    if m_flow_gates is not None:
+        candidates.append(Method("sparse_qsp", m_flow_gates, num_sparse_qsp_cx))
+    if n_flow_gates is not None:
         candidates.append(
-            Method("qubit_reduction", qubit_reduction_gates, num_qubit_reduction_cx)
+            Method("qubit_reduction", n_flow_gates, num_qubit_reduction_cx)
         )
 
     # pylint: disable=unnecessary-lambda
@@ -199,8 +177,8 @@ def prepare_state(
     state: QState,
     map_gates: bool = True,
     verbose_level: int = 0,
-    param: StatePreparationParameters = None,
-    stats: StatePreparationStatistics = StatePreparationStatistics(),
+    param: Params = None,
+    stats: Stats = Stats(),
 ) -> QCircuit:
     """A hybrid method combining both qubit- and cardinality- reduction.
 
@@ -230,17 +208,17 @@ def prepare_state(
 
     if param is None:
         # we design the default parameters
-        param = StatePreparationParameters()
+        param = Params()
         if cardinality_reduction_cnot_estimation < qubit_reduction_cnot_estimation:
             # if the state is sparse, we enable cardinality reduction method
-            print_yellow("ENABLE_CARDINALITY_REDUCTION")
-            param.enable_qubit_reduction = False
-            param.enable_cardinality_reduction = True
+            print_yellow("enable_m_flow")
+            param.enable_n_flow = False
+            param.enable_m_flow = True
         else:
-            print_yellow("ENABLE_QUBIT_REDUCTION")
+            print_yellow("enable_n_flow")
             # otherwise, if the state is dense, we enable the qubit reduction method
-            param.enable_qubit_reduction = True
-            param.enable_cardinality_reduction = False
+            param.enable_n_flow = True
+            param.enable_m_flow = False
 
     # initialize a circuit and the quantum registers
     circuit = QCircuit(state.num_qubits, map_gates=map_gates)

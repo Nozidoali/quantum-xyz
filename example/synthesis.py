@@ -30,20 +30,18 @@ import pandas as pd
 from xyz import StatePreparationParameters as Param
 
 if __name__ == "__main__":
-    # n_qubits = 6
+    n_qubits = 4
 
-    # state_vector = D_state(n_qubits, int(n_qubits / 2))
-    # target_state = quantize_state(state_vector)
-    # param = Param(
-    #     enable_exact_synthesis=False,
-    #     enable_qubit_reduction=True,
-    #     enable_cardinality_reduction=False,
-    # )
-    # circuit = prepare_state(
-    #     target_state, map_gates=True, verbose_level=3, param=param
-    # )
+    state_vector = D_state(n_qubits, int(n_qubits / 2))
+    target_state = quantize_state(state_vector)
+    param = Param(
+        enable_exact_synthesis=False,
+        enable_n_flow=True,
+        enable_m_flow=False,
+    )
+    circuit = prepare_state(target_state, map_gates=True, verbose_level=3, param=param)
 
-    circuit = read_qasm("./benchmarks/dicke_6.qasm")
+    # circuit = read_qasm("./benchmarks/dicke_6.qasm")
 
     # print(to_qiskit(circuit))
 

@@ -15,7 +15,7 @@ Last Modified time: 2023-06-18 11:32:58
 from typing import List
 
 # internal modules
-from .basic_gates import QGate, QGateType, QBit
+from .gate import QGate, QGateType, QBit
 from ._optimization import _add_gate_optimized, _add_gates_optimized
 
 

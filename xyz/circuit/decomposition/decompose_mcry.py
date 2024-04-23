@@ -14,7 +14,7 @@ import numpy as np
 from scipy.linalg import solve
 
 from xyz.utils import call_with_global_timer
-from ..basic_gates import QGate, RY, CX, QBit
+from ..gate import QGate, RY, CX, QBit
 
 
 @call_with_global_timer

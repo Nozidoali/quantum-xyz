@@ -5,13 +5,13 @@
 Author: Hanyu Wang
 Created time: 2024-04-22 18:27:12
 Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-22 20:30:32
+Last Modified time: 2024-04-23 08:16:15
 '''
 
 import numpy as np
 
 from xyz.circuit import QBit, RY, CX
-from xyz.qstate import QState
+from xyz.circuit import QState
 from ._lstsq_solver import LstSqSolver
 from ._controls import get_candidate_controls
 
