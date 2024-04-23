@@ -27,8 +27,10 @@ if __name__ == "__main__":
 
     # synthesize the state
     with stopwatch("synthesis", verbose=True) as timer:
-        circuit = sparse_state_synthesis(target_state, verbose_level=3)
-        # circuit = prepare_state(target_state, map_gates=True, verbose_level=3, param=Param())
+        # circuit = sparse_state_synthesis(target_state, verbose_level=3)
+        circuit = prepare_state(
+            target_state, map_gates=True, verbose_level=3, param=Param()
+        )
 
         # circuit = resynthesis(circuit)
 

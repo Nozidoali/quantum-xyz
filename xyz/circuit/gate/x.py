@@ -10,8 +10,6 @@ Last Modified time: 2023-06-22 23:14:11
 
 # pylint: disable=C0103
 
-import numpy as np
-
 from .qstate import QState
 from .base import BasicGate, QBit, QGateType
 

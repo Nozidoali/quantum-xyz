@@ -12,12 +12,7 @@ import numpy as np
 
 
 def W_state(num_qubits: int) -> np.ndarray:
-    """Generate the W state for the W gate .
-
-    :param num_qubits: [description]
-    :type num_qubits: int
-    :return: [description]
-    :rtype: np.ndarray
+    """W state
     """
     state = np.zeros(2**num_qubits)
 

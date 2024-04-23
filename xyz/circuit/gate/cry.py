@@ -25,11 +25,15 @@ class CRY(RotationGate, BasicGate, ControlledGate):
         ControlledGate.__init__(self, control_qubit, phase)
 
     def __str__(self) -> str:
-        return f"CRY({self.theta:0.02f}, {self.control_qubit}[{self.phase}])"
+        control_str = "" if self.phase == 1 else "~"
+        return f"C({control_str}{self.control_qubit})RY({self.target_qubit}:{self.theta:0.02f})"
 
     def get_cnot_cost(self) -> int:
         """Returns the cost of the cost of the gate."""
         return 2
+
+    def conjugate(self) -> "CRY":
+        return CRY(-self.theta, self.control_qubit, self.phase, self.target_qubit)
 
     def apply(self, qstate: QState) -> QState:
         index_to_weight = {idx: 0 for idx in qstate.index_set}

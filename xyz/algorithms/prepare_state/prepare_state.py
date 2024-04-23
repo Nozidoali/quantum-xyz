@@ -29,7 +29,7 @@ from xyz.utils import print_yellow
 
 from .exact_cnot_synthesis import exact_cnot_synthesis
 from .m_flow import cardinality_reduction
-from ._ground_state_calibration import ground_state_calibration
+from .ground_state_calibration import ground_state_calibration
 from .support_reduction import support_reduction
 from .n_flow import qubit_reduction
 from ._stats import StatePreparationStatistics as Stats
@@ -91,7 +91,6 @@ def _prepare_state_rec(
             exact_gates = exact_cnot_synthesis(
                 circuit,
                 state,
-                optimality_level=3,
                 verbose_level=verbose_level,
                 cnot_limit=Params.EXACT_SYNTHESIS_CNOT_LIMIT,
             )

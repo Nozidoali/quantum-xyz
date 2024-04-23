@@ -12,14 +12,7 @@ import numpy as np
 
 
 def D_state(num_qubits: int, num_bits: int) -> np.ndarray:
-    """Return a D state corresponding to the D state .
-
-    :param num_qubits: [description]
-    :type num_qubits: int
-    :param num_bits: [description]
-    :type num_bits: int
-    :return: [description]
-    :rtype: np.ndarray
+    """dicke state.
     """
     state = np.zeros(2**num_qubits)
 

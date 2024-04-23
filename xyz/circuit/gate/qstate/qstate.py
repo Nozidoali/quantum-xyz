@@ -21,14 +21,6 @@ N_DIGITS = 2
 
 class QState:
     """Class method for QState"""
-
-    from ._rotation_angles import (
-        get_cry_angles,
-        get_ry_angles,
-        get_most_frequent_theta,
-        get_rotation_table,
-    )
-
     def __init__(self, index_to_weight: dict, num_qubit: int) -> None:
         self.num_qubits = num_qubit
 
@@ -119,7 +111,7 @@ class QState:
         for pattern in signatures:
             if pattern != 0:
                 lower_bound += 1
-        return lower_bound
+        return int(lower_bound / 2)
 
     def __str__(self) -> str:
         return " + ".join(

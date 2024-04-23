@@ -163,11 +163,9 @@ def _qubit_decomposition_impl(
     num_supports = len(supports)
 
     if num_supports <= 4:
-        # we can use optimality_level=3
         exact_gates = exact_cnot_synthesis(
             circuit,
             state,
-            optimality_level=3,
             verbose_level=verbose_level,
             cnot_limit=cnot_limit,
         )

@@ -8,8 +8,6 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-22 23:14:28
 """
 
-import numpy as np
-
 from .qstate import QState
 from .base import BasicGate, ControlledGate, QBit, QGateType
 
@@ -38,6 +36,14 @@ class CX(BasicGate, ControlledGate):
         :rtype: int
         """
         return 1
+
+    def conjugate(self) -> "CX":
+        """Return the conjugate of the gate .
+
+        :return: [description]
+        :rtype: CX
+        """
+        return CX(self.control_qubit, self.phase, self.target_qubit)
 
     def apply(self, qstate: QState) -> QState:
         index_to_weight = {}
