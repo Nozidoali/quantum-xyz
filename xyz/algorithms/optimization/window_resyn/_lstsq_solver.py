@@ -56,6 +56,7 @@ class LstSqSolver:
                 raise ValueError("Invalid variable type")
         self._A.append(vector)
         self._b.append(value)
+        self._n_constraints += 1
 
     def solve(self) -> None:
         sol, residuals, _, _ = np.linalg.lstsq(self._A, self._b, rcond=None)
@@ -80,3 +81,7 @@ class LstSqSolver:
         if isinstance(var, LstSqSolverVar):
             return self._solutions[var.index]
         raise ValueError("Invalid variable type")
+    
+    def print(self) -> str:
+        for i in range(self._n_constraints):
+            print(f"{self._A[i]} = {self._b[i]}")

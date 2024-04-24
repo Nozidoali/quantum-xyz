@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2024-04-22 18:27:12
 Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-23 15:34:23
+Last Modified time: 2024-04-23 19:16:52
 '''
 
 import numpy as np
@@ -48,6 +48,9 @@ def resynthesize_window(
     ry_delta = {
         k: ry_angles_end[k] - ry_angles_begin[k] for k in ry_angles_begin.keys()
     }
+    for k, theta in ry_delta.items():
+        print(f"delta_{k:0b}: {theta}")
+    print()
 
     # we can run dependency analysis to find the potential control qubits
     all_control_qubits: list = get_candidate_controls(ry_delta, state_begin.num_qubits)
@@ -65,11 +68,7 @@ def resynthesize_window(
         solver = LstSqSolver()
 
         cnot_configuration = []
-        # get all the permutations
 
-        # lets consider more complicated cases later
-        # if n_control_qubits > 1:
-        # raise NotImplementedError("n_control_qubits > 1 is not supported yet")
 
         if n_cnot_new > len(all_control_qubits):
             # need to think about this
@@ -120,6 +119,10 @@ def resynthesize_window(
                     value=np.pi / 2 * (rx - 1),
                 )
 
+        print(f"n_cnot_new: {n_cnot_new}")
+        solver.print()
+        print()
+        
         success = solver.solve()
         if not success:
             # we cannot find a solution
@@ -130,7 +133,6 @@ def resynthesize_window(
             theta = solver.get_solution(thetas[k + 1])
             new_window += [CX(get_control_qubit_at(k), False, target_qubit)]
             new_window += [RY(theta, target_qubit)]
-        # return window_old
         return new_window
 
     return window_old
