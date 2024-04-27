@@ -10,8 +10,8 @@ Last Modified time: 2024-04-23 14:36:42
 
 import xyz
 import pyzx as zx
-import matplotlib.pyplot as plt
 from pyzx.circuit import Circuit
+import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     qc = xyz.read_qasm("./dicke_3.qasm")
