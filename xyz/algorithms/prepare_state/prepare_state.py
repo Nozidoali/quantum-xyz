@@ -25,7 +25,6 @@ from xyz.circuit import QCircuit, QGate
 from xyz.circuit import QState, quantize_state
 from xyz.utils import stopwatch
 from xyz.utils import global_stopwatch_report
-from xyz.utils import print_yellow
 
 from .exact_cnot_synthesis import exact_cnot_synthesis
 from .m_flow import cardinality_reduction
@@ -62,8 +61,8 @@ def _prepare_state_rec(
         stats.time_support_reduction += timer.time()
 
     if param.enable_reindex:
-        raise NotImplementedError("reindexing is not implemented yet")
         state, circuit = reindex_circuit(circuit, state)
+        raise NotImplementedError("reindexing is not implemented yet")
 
     # get the states
     supports = state.get_supports()

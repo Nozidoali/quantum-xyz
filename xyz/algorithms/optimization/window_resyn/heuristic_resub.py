@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2024-04-25 20:21:01
 Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-26 11:15:11
+Last Modified time: 2024-04-27 04:58:55
 '''
 
 from xyz.circuit import QBit, RY, CX
@@ -20,6 +20,10 @@ def resub0(
     state_end: QState,
     verbose_level: int = 0,
 ):
+    
+    assert target_qubit.index != None
+    assert state_begin.num_qubits == state_end.num_qubits
+    assert verbose_level >= 0
 
     n_cnots_old = sum((g.get_cnot_cost() for g in window_old))
 
@@ -57,6 +61,9 @@ def resub1(
     verbose_level: int = 0,
 ):
 
+    assert target_qubit.index != None
+    assert verbose_level >= 0
+
     n_cnots_old = sum((g.get_cnot_cost() for g in window_old))
 
     if n_cnots_old <= 1:
@@ -66,9 +73,6 @@ def resub1(
     ry_angles_begin: dict = get_rotation_table(state_begin, target_qubit.index)
     ry_angles_end: dict = get_rotation_table(state_end, target_qubit.index)
 
-    ry_delta = {
-        k: ry_angles_end[k] - ry_angles_begin[k] for k in ry_angles_begin.keys()
-    }
     # we can run dependency analysis to find the potential control qubits
     # all_control_qubits: list = get_candidate_controls(ry_delta, state_begin.num_qubits)
     # n_control_qubits: int = len(all_control_qubits)
@@ -99,6 +103,8 @@ def resubN(
     state_end: QState,
     verbose_level: int = 0,
 ):
+    
+    assert verbose_level >= 0
 
     all_control_qubits = set()    
     for gate in window_old:
@@ -116,9 +122,6 @@ def resubN(
     ry_angles_begin: dict = get_rotation_table(state_begin, target_qubit.index)
     ry_angles_end: dict = get_rotation_table(state_end, target_qubit.index)
 
-    ry_delta = {
-        k: ry_angles_end[k] - ry_angles_begin[k] for k in ry_angles_begin.keys()
-    }
     # we can run dependency analysis to find the potential control qubits
     # all_control_qubits: list = get_candidate_controls(ry_delta, state_begin.num_qubits)
     # n_control_qubits: int = len(all_control_qubits)
@@ -147,6 +150,8 @@ def resub2N(
     state_end: QState,
     verbose_level: int = 0,
 ):
+    
+    assert verbose_level >= 0
 
     all_control_qubits = set()    
     for gate in window_old:
@@ -164,9 +169,6 @@ def resub2N(
     ry_angles_begin: dict = get_rotation_table(state_begin, target_qubit.index)
     ry_angles_end: dict = get_rotation_table(state_end, target_qubit.index)
 
-    ry_delta = {
-        k: ry_angles_end[k] - ry_angles_begin[k] for k in ry_angles_begin.keys()
-    }
     # we can run dependency analysis to find the potential control qubits
     # all_control_qubits: list = get_candidate_controls(ry_delta, state_begin.num_qubits)
     # n_control_qubits: int = len(all_control_qubits)

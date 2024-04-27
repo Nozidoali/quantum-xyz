@@ -5,16 +5,13 @@
 Author: Hanyu Wang
 Created time: 2024-04-22 18:27:12
 Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-26 12:15:06
+Last Modified time: 2024-04-27 04:56:25
 '''
-
-import numpy as np
-import copy
 
 from xyz.circuit import QBit
 from xyz.circuit import QState
-from .heuristic_resub import *
-from xyz.algorithms.prepare_state import get_rotation_table, get_most_frequent_theta
+from .heuristic_resub import resub0, resub1, resubN, resub2N
+from xyz.algorithms.prepare_state import get_rotation_table
 
 def resynthesize_window(
     target_qubit: QBit,
@@ -87,7 +84,7 @@ def resynthesize_window(
     )
     
     if verbose_level >= 1:
-        print(f"new window:")
+        print("new window:")
         for gate in new_window:
             print(f"\t{gate}")
         print("-"*80)

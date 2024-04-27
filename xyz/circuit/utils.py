@@ -32,7 +32,7 @@ def to_figure(circuit_str: str) -> str:
     )
 
 
-PLACEHOLDER = "\qw"
+PLACEHOLDER = "\\qw"
 
 
 def theta_to_str(theta: float) -> str:
@@ -85,7 +85,7 @@ def to_tikz(circuit: QCircuit) -> str:
         i = j + 1
         match gate.get_qgate_type():
             case QGateType.X:
-                qubit_str[gate.target_qubit.index][i] = f"\\gate{{X}}"
+                qubit_str[gate.target_qubit.index][i] = "\\gate{{X}}"
             case QGateType.RY:
                 gate: RY
                 qubit_str[gate.target_qubit.index][i] = ry_box(theta=gate.theta)
@@ -96,7 +96,7 @@ def to_tikz(circuit: QCircuit) -> str:
                 qubit_str[gate.control_qubit.index][
                     i
                 ] = f"\\{control_type}{{{control_dist}}}"
-                qubit_str[gate.target_qubit.index][i] = f"\\targ"
+                qubit_str[gate.target_qubit.index][i] = "\\targ"
             case QGateType.CRY:
                 gate: CRY
                 control_type = "ctrl" if gate.phase else "ctrlo"

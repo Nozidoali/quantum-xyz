@@ -5,10 +5,12 @@
 Author: Hanyu Wang
 Created time: 2024-04-25 19:32:29
 Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-25 20:20:50
+Last Modified time: 2024-04-27 04:59:32
 '''
 
-from .lstsq_solver import *
+import numpy as np
+
+from .lstsq_solver import LstSqSolver
 
 def try_resub(ry_angles_begin: dict, ry_angles_end: dict, cnot_configuration: list):
 
