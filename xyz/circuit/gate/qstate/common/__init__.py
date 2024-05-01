@@ -13,3 +13,4 @@ from .dicke_state import *
 from .ghz_state import *
 from .qba_state import *
 from .rand_state import *
+from .ground_state import *

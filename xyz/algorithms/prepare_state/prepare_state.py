@@ -86,7 +86,7 @@ def _prepare_state_rec(
     # exact synthesis
     if (
         param.enable_exact_synthesis
-        and num_supports <= Params.EXACT_SYNTHESIS_QUBIT_THRESHOLD
+        and num_supports <= param.n_qubits_max
         and cardinality <= Params.EXACT_SYNTHESIS_DENSITY_THRESHOLD
     ):
         try:

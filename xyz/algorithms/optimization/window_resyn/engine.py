@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2024-04-22 18:27:12
 Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-27 04:56:25
+Last Modified time: 2024-04-29 09:25:57
 '''
 
 from xyz.circuit import QBit
@@ -51,13 +51,16 @@ def resynthesize_window(
         for k in ry_delta.keys():
             print(f"\t|{k:0{state_begin.num_qubits}b}>: {ry_angles_begin[k]:0.02f} -> {ry_angles_end[k]:0.02f}")
     
-    new_window = resub0(
-        target_qubit=target_qubit,
-        window_old=window_old,
-        state_begin=state_begin,
-        state_end=state_end,
-        verbose_level=verbose_level,
-    )
+    new_window = window_old[:]
+    
+    if False:
+        new_window = resub0(
+            target_qubit=target_qubit,
+            window_old=new_window,
+            state_begin=state_begin,
+            state_end=state_end,
+            verbose_level=verbose_level,
+        )
     
     new_window = resub1(
         target_qubit=target_qubit,
@@ -75,13 +78,14 @@ def resynthesize_window(
         verbose_level=verbose_level,
     )
     
-    new_window = resub2N(
-        target_qubit=target_qubit,
-        window_old=new_window,
-        state_begin=state_begin,
-        state_end=state_end,
-        verbose_level=verbose_level,
-    )
+    if False:
+        new_window = resub2N(
+            target_qubit=target_qubit,
+            window_old=new_window,
+            state_begin=state_begin,
+            state_end=state_end,
+            verbose_level=verbose_level,
+        )
     
     if verbose_level >= 1:
         print("new window:")

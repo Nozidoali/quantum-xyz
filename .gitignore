@@ -155,3 +155,7 @@ tests/regression_testcases/*.json
 
 # data files
 tests/*.csv
+
+# pkl files 
+*.pkl
+*.txt

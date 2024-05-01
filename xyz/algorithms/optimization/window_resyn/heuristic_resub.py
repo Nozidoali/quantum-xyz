@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2024-04-25 20:21:01
 Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-27 04:58:55
+Last Modified time: 2024-04-29 09:02:49
 '''
 
 from xyz.circuit import QBit, RY, CX

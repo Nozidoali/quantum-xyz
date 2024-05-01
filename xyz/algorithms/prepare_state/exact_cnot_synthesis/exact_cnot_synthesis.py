@@ -84,6 +84,8 @@ def exact_cnot_synthesis(
     curr_cost = AStarCost(0, curr_state.get_lower_bound())
     state_queue.put((curr_cost, curr_state))
     solution_reached: bool = False
+    
+    curr_n, curr_m = len(curr_state.get_supports()), curr_state.get_sparsity()
 
     # This function is called by the search loop.
     while not state_queue.empty():
@@ -92,7 +94,10 @@ def exact_cnot_synthesis(
         curr_cost, curr_state = state_queue.get()
 
         if verbose_level >= 2:
-            print(f"\n\ncurr_state: {curr_state}, cost: {curr_cost}")
+            print(f"curr_state: {curr_state}, cost: {curr_cost}")
+            print(f"queue size: {state_queue.qsize()}")
+            print(f"visited states: {len(visited_states)}")
+            print(f"enqueued states: {len(enqueued)}")
 
         if cnot_limit is not None and curr_cost.cnot_cost > cnot_limit:
             # this will then raise an ValueError
@@ -106,6 +111,12 @@ def exact_cnot_synthesis(
         curr_state_repr = curr_state.repr()
         visited_states.add(curr_state_repr)
         supports = curr_state.get_supports()
+        _curr_n, _curr_m = len(supports), curr_state.get_sparsity()
+        
+        if curr_state.num_qubits > 4 and (_curr_n < curr_n or _curr_m < curr_m):
+            curr_n, curr_m = _curr_n, _curr_m
+            state_queue = PriorityQueue()
+            enqueued = {}
 
         search_done = False
 
@@ -114,7 +125,7 @@ def exact_cnot_synthesis(
         if len(gates) > 0:
             curr_state = explore_state(curr_state, gates, curr_cost, new_state)
             search_done = True
-
+            
         if not search_done:
             # apply CRY
             for target_qubit in supports:

@@ -26,7 +26,7 @@ if __name__ == "__main__":
     # synthesize the state
     with stopwatch("synthesis", verbose=True) as timer:
         circuit = prepare_state(target_state, map_gates=True)
-        circuit = resynthesis(circuit, verbose_level=2)
+        circuit = resynthesis(circuit, verbose_level=0)
     n_cnot = circuit.get_cnot_cost()
 
     # now we measure the distance between the target state and the actual state
