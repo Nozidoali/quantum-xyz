@@ -34,6 +34,11 @@ from xyz import StatePreparationParameters as Param
 
 import pandas as pd
 
+REPORT_TIME = True
+REPORT_G = False
+WRITE_FILES = True
+N_LIST = list(range(3,10))
+
 def generate_initial_circuit(state_vector: np.ndarray, data = {}) -> QCircuit:
     # synthesize the state using the best method
     state = quantize_state(state_vector)
@@ -60,8 +65,10 @@ def generate_initial_circuit(state_vector: np.ndarray, data = {}) -> QCircuit:
     data["n_qubits"] = n
     data["m_state"] = m
     data["n_g2_initial"] = n_cnot
-    data["n_g_initial"] = len(circuit.get_gates()) - n_cnot
-    data["time_initial"] = timer_old.time()
+    if REPORT_G:
+        data["n_g_initial"] = len(circuit.get_gates()) - n_cnot
+    if REPORT_TIME:
+        data["time_initial"] = timer_old.time()
     state_vector_act = simulate_circuit(circuit)
     assert np.linalg.norm(state_vector_act - state_vector) < 1e-6
     write_qasm(circuit, f"qsp_dataset/{name}_{n}_{m}.init.qasm")
@@ -73,8 +80,10 @@ def run_ours(circuit: QCircuit, state_vector: np.ndarray, data = {}) -> QCircuit
         new_circuit = resynthesis(circuit)
     n_cnot_new = new_circuit.get_cnot_cost()
     data["n_g2_ours"] = n_cnot_new
-    data["n_g_ours"] = len(new_circuit.get_gates()) - n_cnot_new
-    data["time_ours"] = timer_new.time()
+    if REPORT_G:
+        data["n_g_ours"] = len(new_circuit.get_gates()) - n_cnot_new
+    if REPORT_TIME:
+        data["time_ours"] = timer_new.time()
     state_vector_act = simulate_circuit(new_circuit)
     assert np.linalg.norm(state_vector_act - state_vector) < 1e-6
     n, m = data["n_qubits"], data["m_state"]
@@ -88,8 +97,10 @@ def run_date24(circuit: QCircuit, state_vector: np.ndarray, data = {}) -> QCircu
         new_circuit = prepare_state(state_vector, map_gates=True, verbose_level=0)
     n_cnot_new = new_circuit.get_cnot_cost()
     data["n_g2_date24"] = n_cnot_new
-    data["n_g_date24"] = len(new_circuit.get_gates()) - n_cnot_new
-    data["time_date24"] = timer_new.time()
+    if REPORT_G:
+        data["n_g_date24"] = len(new_circuit.get_gates()) - n_cnot_new
+    if REPORT_TIME:
+        data["time_date24"] = timer_new.time()
     state_vector_act = simulate_circuit(new_circuit)
     assert np.linalg.norm(state_vector_act - state_vector) < 1e-6
     n, m = data["n_qubits"], data["m_state"]
@@ -112,8 +123,10 @@ def run_pyzx(circuit: QCircuit, state_vector: np.ndarray, data = {}) -> QCircuit
     assert zx.compare_tensors(c, c_zx)
     n_cnot_pyzx = c.stats_dict()["twoqubit"]
     data["n_g2_pyzx"] = n_cnot_pyzx
-    data["n_g_pyzx"] = c.stats_dict()["gates"] - n_cnot_pyzx
-    data["time_pyzx"] = timer_pyzx.time()
+    if REPORT_G:
+        data["n_g_pyzx"] = c.stats_dict()["gates"] - n_cnot_pyzx
+    if REPORT_TIME:
+        data["time_pyzx"] = timer_pyzx.time()
     
     # with open("/tmp/temp_opt.qasm", "w") as f:
     #     f.write(c.to_qasm())
@@ -157,8 +170,10 @@ def run_qiskit(circuit: QCircuit, state_vector: np.ndarray, data = {}) -> QCircu
     # print()
     n_total = sum(qc_opt.count_ops().values())
     data["n_g2_qiskit"] = qc_opt.count_ops().get("cx", 0)
-    data["n_g_qiskit"] = n_total - data["n_g2_qiskit"]
-    data["time_qiskit"] = timer_qiskit.time()
+    if REPORT_G:
+        data["n_g_qiskit"] = n_total - data["n_g2_qiskit"]
+    if REPORT_TIME:
+        data["time_qiskit"] = timer_qiskit.time()
     
     return qc_opt
 
@@ -179,8 +194,10 @@ def run_bqskit(circuit: QCircuit, state_vector: np.ndarray, data = {}) -> QCircu
     qc_opt = bqskit_to_qiskit(c)
     n_total = sum(qc_opt.count_ops().values())
     data["n_g2_bqskit"] = qc_opt.count_ops().get("cx", 0)
-    data["n_g_bqskit"] = n_total - data["n_g2_bqskit"]
-    data["time_bqskit"] = timer_bqskit.time()
+    if REPORT_G:
+        data["n_g_bqskit"] = n_total - data["n_g2_bqskit"]
+    if REPORT_TIME:
+        data["time_bqskit"] = timer_bqskit.time()
     with open(f"qsp_dataset/{name}_{n}_{m}.bqskit.qasm", "w") as f:
         f.write(OPENQASM2Language().encode(c))
     
@@ -215,49 +232,45 @@ def run_bqskit_flow(circuit: QCircuit, state_vector: np.ndarray, data = {}) -> Q
     qc_opt = bqskit_to_qiskit(opt_circuit)
     n_total = sum(qc_opt.count_ops().values())
     data["n_g2_bqskit_flow"] = qc_opt.count_ops().get("cx", 0)
-    data["n_g_bqskit_flow"] = n_total - data["n_g2_bqskit_flow"]
-    data["time_bqskit_flow"] = timer_bqskit.time()
+    if REPORT_G:
+        data["n_g_bqskit_flow"] = n_total - data["n_g2_bqskit_flow"]
+    if REPORT_TIME:
+        data["time_bqskit_flow"] = timer_bqskit.time()
 
 def get_benchmarks():
     
     benchmarks = []
 
     # W state
-    for n_qubits in range(3, 13, 3):
+    for n_qubits in N_LIST:
         state_vector = W_state(n_qubits)
         benchmarks.append(("W", state_vector))
         
     # Dicke states
-    for n_qubits in range(3, 13, 3):
+    for n_qubits in N_LIST:
         state_vector = D_state(n_qubits, n_qubits//2)
-        benchmarks.append(("Dicke-Dense", state_vector))
-    for n_qubits in range(3, 13, 3):
-        state_vector = D_state(n_qubits, 2)
-        benchmarks.append(("Dicke-Sparse", state_vector))
+        benchmarks.append(("Dicke", state_vector))
         
     # QBA states
-    for n_qubits in range(3, 13, 3):
-        state_vector = QBA_state(n_qubits, (2**(n_qubits-1))-1)
-        benchmarks.append(("QBA-Sparse", state_vector))
-    for n_qubits in range(3, 13, 3):
+    for n_qubits in N_LIST:
         state_vector = QBA_state(n_qubits, (2**(n_qubits-1))+1)
         benchmarks.append(("QBA-Dense", state_vector))
 
     # Random dense states
-    for n_qubits in range(4, 13, 3):
+    for n_qubits in N_LIST:
         state_vector = rand_state(n_qubits, 2**(n_qubits-1), uniform=True)
         benchmarks.append(("Random-Dense-Uniform", state_vector))
     
-    for n_qubits in range(4, 13, 3):
+    for n_qubits in N_LIST:
         state_vector = rand_state(n_qubits, 2**(n_qubits-1), uniform=False)
         benchmarks.append(("Random-Dense-Nonuniform", state_vector))
     
     # Random sparse states
-    for n_qubits in range(4, 13, 3):
+    for n_qubits in N_LIST:
         state_vector = rand_state(n_qubits, n_qubits, uniform=True)
         benchmarks.append(("Random-Sparse-Uniform", state_vector))
         
-    for n_qubits in range(4, 13, 3):
+    for n_qubits in N_LIST:
         state_vector = rand_state(n_qubits, n_qubits, uniform=False)
         benchmarks.append(("Random-Sparse-Nonuniform", state_vector))
 
@@ -274,13 +287,13 @@ if __name__ == "__main__":
         try:
             circuit = generate_initial_circuit(state_vector, data)
             # print(to_qiskit(circuit))
-            new_circuit_ours = run_ours(circuit, state_vector, data)
             # new_circuit_pyzx = run_pyzx(circuit, state_vector, data)
             # new_circuit_pyzx_ga = run_pyzx_ga(circuit, state_vector, data)
-            # new_circuit_date24 = run_date24(circuit, state_vector, data)
-            # new_circuit_qiskit = run_qiskit(circuit, state_vector, data)
+            new_circuit_qiskit = run_qiskit(circuit, state_vector, data)
+            new_circuit_date24 = run_date24(circuit, state_vector, data)
             # new_circuit_bqskit = run_bqskit(circuit, state_vector, data)
-            # new_circuit_bqskit = run_bqskit_flow(circuit, state_vector, data)
+            new_circuit_bqskit = run_bqskit_flow(circuit, state_vector, data)
+            new_circuit_ours = run_ours(circuit, state_vector, data)
         except AssertionError:            
             print("Initial circuit")
             print(to_qiskit(circuit))
