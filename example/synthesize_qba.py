@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2024-04-25 17:33:17
 Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-27 03:50:55
+Last Modified time: 2024-05-05 17:16:12
 '''
 
 import numpy as np
@@ -27,7 +27,7 @@ if __name__ == "__main__":
         circuit = xyz.prepare_state(target_state, map_gates=True, param=param)
         
     n_cnot = circuit.get_cnot_cost()
-    # circuit = xyz.resynthesis(circuit, verbose_level=2)
+    circuit = xyz.resynthesis(circuit, verbose_level=2)
     
     # now we measure the distance between the target state and the actual state
     state_vector_act = xyz.simulate_circuit(circuit)
@@ -39,4 +39,4 @@ if __name__ == "__main__":
     print("actual state: ", xyz.quantize_state(state_vector_act))
     assert dist < 1e-6
 
-    print(xyz.to_tikz(circuit))
+    # print(xyz.to_tikz(circuit))

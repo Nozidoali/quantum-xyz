@@ -37,7 +37,9 @@ import pandas as pd
 REPORT_TIME = True
 REPORT_G = False
 WRITE_FILES = True
-N_LIST = list(range(3,10))
+# N_LIST = list(range(3,10))
+N_LIST = list(range(11,20))
+REPEAT = 0
 
 def generate_initial_circuit(state_vector: np.ndarray, data = {}) -> QCircuit:
     # synthesize the state using the best method
@@ -49,6 +51,7 @@ def generate_initial_circuit(state_vector: np.ndarray, data = {}) -> QCircuit:
         f.write(str(quantize_state(state_vector)))
     print(f"Generating initial circuit for qsp_dataset/{name}_{n}_{m}.pkl")
     enable_m_flow: bool = m*n < (1<<n)
+    # enable_m_flow: bool = True
     enable_n_flow: bool = ~enable_m_flow
     param = Param(
         enable_compression=False,
@@ -241,41 +244,44 @@ def get_benchmarks():
     
     benchmarks = []
 
-    # W state
-    for n_qubits in N_LIST:
-        state_vector = W_state(n_qubits)
-        benchmarks.append(("W", state_vector))
+    # # W state
+    # for n_qubits in N_LIST:
+    #     state_vector = W_state(n_qubits)
+    #     benchmarks.append(("W", state_vector))
         
-    # Dicke states
-    for n_qubits in N_LIST:
-        state_vector = D_state(n_qubits, n_qubits//2)
-        benchmarks.append(("Dicke", state_vector))
+    # # Dicke states
+    # for n_qubits in N_LIST:
+    #     state_vector = D_state(n_qubits, n_qubits//2)
+    #     benchmarks.append(("Dicke", state_vector))
         
     # QBA states
     for n_qubits in N_LIST:
         state_vector = QBA_state(n_qubits, (2**(n_qubits-1))+1)
         benchmarks.append(("QBA-Dense", state_vector))
 
-    # Random dense states
-    for n_qubits in N_LIST:
-        state_vector = rand_state(n_qubits, 2**(n_qubits-1), uniform=True)
-        benchmarks.append(("Random-Dense-Uniform", state_vector))
-    
-    for n_qubits in N_LIST:
-        state_vector = rand_state(n_qubits, 2**(n_qubits-1), uniform=False)
-        benchmarks.append(("Random-Dense-Nonuniform", state_vector))
-    
-    # Random sparse states
-    for n_qubits in N_LIST:
-        state_vector = rand_state(n_qubits, n_qubits, uniform=True)
-        benchmarks.append(("Random-Sparse-Uniform", state_vector))
+    for _ in range(REPEAT):
+
+        # Random dense states
+        for n_qubits in N_LIST:
+            state_vector = rand_state(n_qubits, 2**(n_qubits-1), uniform=True)
+            benchmarks.append(("Random-Dense-Uniform", state_vector))
         
-    for n_qubits in N_LIST:
-        state_vector = rand_state(n_qubits, n_qubits, uniform=False)
-        benchmarks.append(("Random-Sparse-Nonuniform", state_vector))
+        for n_qubits in N_LIST:
+            state_vector = rand_state(n_qubits, 2**(n_qubits-1), uniform=False)
+            benchmarks.append(("Random-Dense-Nonuniform", state_vector))
+        
+        # Random sparse states
+        for n_qubits in N_LIST:
+            state_vector = rand_state(n_qubits, n_qubits, uniform=True)
+            benchmarks.append(("Random-Sparse-Uniform", state_vector))
+            
+        for n_qubits in N_LIST:
+            state_vector = rand_state(n_qubits, n_qubits, uniform=False)
+            benchmarks.append(("Random-Sparse-Nonuniform", state_vector))
 
     return benchmarks
-    
+
+import xyz
 if __name__ == "__main__":
     N_TESTS = 1
 
@@ -285,15 +291,19 @@ if __name__ == "__main__":
         state_vector: np.ndarray
         data = {"name": name}
         try:
+            circuit = xyz.run_qclib(state_vector)
+            print(circuit)
             circuit = generate_initial_circuit(state_vector, data)
+            # print(to_qiskit(circuit))
+            # circuit = run_date24(circuit, state_vector, data)
             # print(to_qiskit(circuit))
             # new_circuit_pyzx = run_pyzx(circuit, state_vector, data)
             # new_circuit_pyzx_ga = run_pyzx_ga(circuit, state_vector, data)
             new_circuit_qiskit = run_qiskit(circuit, state_vector, data)
-            new_circuit_date24 = run_date24(circuit, state_vector, data)
             # new_circuit_bqskit = run_bqskit(circuit, state_vector, data)
             new_circuit_bqskit = run_bqskit_flow(circuit, state_vector, data)
             new_circuit_ours = run_ours(circuit, state_vector, data)
+            # print(to_qiskit(new_circuit_ours))
         except AssertionError:            
             print("Initial circuit")
             print(to_qiskit(circuit))

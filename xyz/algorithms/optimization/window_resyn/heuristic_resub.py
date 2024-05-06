@@ -5,7 +5,7 @@
 Author: Hanyu Wang
 Created time: 2024-04-25 20:21:01
 Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-29 09:02:49
+Last Modified time: 2024-05-03 23:15:39
 '''
 
 from xyz.circuit import QBit, RY, CX
@@ -85,6 +85,9 @@ def resub1(
 
     n_cnot_new = 1
     for control_qubit in all_control_qubits:
+    # for control_qubit in range(state_begin.num_qubits):
+    #     if control_qubit == target_qubit.index:
+    #         continue
         cnot_configuration = [control_qubit]
         success, thetas = try_resub(ry_angles_begin, ry_angles_end, cnot_configuration)
         if success:
