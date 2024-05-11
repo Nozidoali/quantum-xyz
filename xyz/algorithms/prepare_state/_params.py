@@ -11,7 +11,7 @@ Last Modified time: 2024-03-18 17:57:10
 
 class StatePreparationParameters:
     EXACT_SYNTHESIS_DENSITY_THRESHOLD = 10
-    EXACT_SYNTHESIS_CNOT_LIMIT = 10
+    EXACT_SYNTHESIS_CNOT_LIMIT = 20
 
     def __init__(
         self,

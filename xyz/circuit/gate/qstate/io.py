@@ -57,3 +57,10 @@ def from_val(val: int, num_qubits: int) -> QState:
         for j in range(num_qubits):
             patterns[j] = patterns[j] << 1 | ((value >> j) & 1)
     return QState(patterns, len(states))
+
+
+def from_set(index_set: set, num_qubits: int) -> QState:
+    """Return the state from the set representation ."""
+
+    index_to_weight = {index: 1 for index in index_set}
+    return QState(index_to_weight, num_qubits)

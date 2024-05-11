@@ -147,10 +147,10 @@ class QState:
 
     def repr(self) -> int:
         """Return a hex representation of the bitmap ."""
-        # self.index_set = sorted(self.index_set)
-        # signatures = self.get_qubit_signatures()
-        # return hash(tuple(sorted(signatures, key=lambda x: bin(x).count("1"))))
-        return hash(self)
+        self.index_set = sorted(self.index_set)
+        signatures = self.get_qubit_signatures()
+        return hash(tuple(sorted(signatures, key=lambda x: bin(x).count("1"))))
+        # return hash(self)
 
     def to_vector(self) -> np.ndarray:
         """Return the vector representation of the state ."""

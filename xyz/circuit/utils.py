@@ -10,7 +10,7 @@ Last Modified time: 2024-04-24 12:48:38
 
 import numpy as np
 from .qcircuit import QCircuit
-from .gate import QGateType, CX, RY, X, CRY, MCRY
+from .gate import QGateType, CX, RY, CRY, MCRY
 
 
 def to_figure(circuit_str: str) -> str:

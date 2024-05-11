@@ -14,6 +14,8 @@ from xyz.circuit import QCircuit, QState, CX, CRY
 from ..support_reduction import support_reduction
 from ..rotation_angles import get_ap_cry_angles
 
+APPLY_HEURISTIC = True
+
 
 def get_state_transitions(circuit: QCircuit, curr_state: QState, supports: list = None):
     if supports is None:
@@ -50,31 +52,34 @@ def get_state_transitions(circuit: QCircuit, curr_state: QState, supports: list 
                     ]
                 )
 
-                transitions.append(
-                    [
-                        None,
+                if not APPLY_HEURISTIC:
+                    transitions.append(
                         [
-                            CRY(
-                                cry_angle - np.pi,
-                                circuit.qubit_at(control_qubit),
-                                phase,
-                                circuit.qubit_at(target_qubit),
-                            )
-                        ],
-                    ]
-                )
+                            None,
+                            [
+                                CRY(
+                                    cry_angle - np.pi,
+                                    circuit.qubit_at(control_qubit),
+                                    phase,
+                                    circuit.qubit_at(target_qubit),
+                                )
+                            ],
+                        ]
+                    )
 
         # apply CNOT
         for target_qubit in supports:
             for control_qubit in supports:
                 if control_qubit == target_qubit:
                     continue
-                for phase in [True, False]:
-                    gate = CX(
-                        circuit.qubit_at(control_qubit),
-                        phase,
-                        circuit.qubit_at(target_qubit),
-                    )
-                    transitions.append([None, [gate]])
+                # for phase in [True, False]:
+                if APPLY_HEURISTIC:
+                    for phase in [True]:
+                        gate = CX(
+                            circuit.qubit_at(control_qubit),
+                            phase,
+                            circuit.qubit_at(target_qubit),
+                        )
+                        transitions.append([None, [gate]])
 
     return transitions

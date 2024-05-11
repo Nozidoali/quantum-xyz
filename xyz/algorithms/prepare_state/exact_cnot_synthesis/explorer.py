@@ -11,6 +11,7 @@ Last Modified time: 2024-05-11 11:03:16
 from queue import PriorityQueue
 from xyz.circuit import QState
 from ._astar import AStarCost
+from .precompute import QSPDatabase
 
 
 class Explorer:
@@ -21,10 +22,15 @@ class Explorer:
         self.enqueued = {}
         self.record = {}
         self.verbose_level = verbose_level
+        self.enqueued_states_of_cost = {}
+        self.qsp_database = QSPDatabase(verbose_level)
+
+    def get_lower_bound(self, state: QState):
+        return self.qsp_database.lookup(state)
 
     def add_state(self, state: QState):
-        self.state_queue.put((AStarCost(0, state.get_lower_bound()), state))
-        self.enqueued[state.repr()] = AStarCost(0, state.get_lower_bound())
+        self.state_queue.put((AStarCost(0, self.get_lower_bound(state)), state))
+        self.enqueued[state.repr()] = AStarCost(0, self.get_lower_bound(state))
 
     def reset(self):
         self.state_queue = PriorityQueue()
@@ -60,7 +66,7 @@ class Explorer:
         cnot_cost = sum([gate.get_cnot_cost() for gate in gates])
         next_cost = AStarCost(
             curr_cost.cnot_cost + cnot_cost,
-            next_state.get_lower_bound(),
+            self.get_lower_bound(next_state),
         )
         repr_next = next_state.repr()
 
@@ -75,6 +81,10 @@ class Explorer:
         # now we add the state to the queue
         self.state_queue.put((next_cost, next_state))
         self.enqueued[repr_next] = next_cost
+
+        if next_cost not in self.enqueued_states_of_cost:
+            self.enqueued_states_of_cost[next_cost] = 0
+        self.enqueued_states_of_cost[next_cost] += 1
 
         # we record the gate
         gates_to_record: list = gates[:]

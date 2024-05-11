@@ -13,7 +13,7 @@ from xyz.circuit import QState
 
 from ._astar import AStarCost
 from ._backtrace import backtrace
-from ._state_transitions import get_state_transitions
+from .state_transitions import get_state_transitions
 from .explorer import Explorer
 
 
@@ -53,14 +53,21 @@ def exact_cnot_synthesis(
             solution_reached = True
             break
 
+        if curr_state.repr() in explorer.visited_states:
+            continue
+
         explorer.visit_state(curr_state)
 
         supports = curr_state.get_supports()
         _curr_n, _curr_m = len(supports), curr_state.get_sparsity()
-        if curr_state.num_qubits > 5 and (_curr_n < curr_n or _curr_m < curr_m):
-            curr_n, curr_m = _curr_n, _curr_m
-            explorer.reset()
+        if curr_state.num_qubits > 4:
+            if _curr_n < curr_n:
+                pass
+                # curr_n, curr_m = _curr_n, _curr_m
+                # explorer.reset()
 
+            if _curr_m < curr_m:
+                pass
         transitions = get_state_transitions(circuit, curr_state, supports)
         for next_state, gates in transitions:
             explorer.explore_state(curr_state, gates, curr_cost, next_state)
