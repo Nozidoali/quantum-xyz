@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
 
-'''
+"""
 Author: Hanyu Wang
 Created time: 2024-04-23 10:08:01
 Last Modified by: Hanyu Wang
 Last Modified time: 2024-04-23 10:08:21
-'''
+"""
 
 import numpy as np
 from .qstate import QState
+
 
 def quantize_state(state_vector: np.ndarray):
     """Quantize a state to the number of qubits .
@@ -50,4 +51,3 @@ def quantize_state(state_vector: np.ndarray):
         if not np.isclose(coefficient, 0):
             index_to_weight[idx] = coefficient
     return QState(index_to_weight, num_qubits)
-

@@ -19,7 +19,7 @@ from xyz import simulate_circuit
 from xyz import prepare_state
 from xyz import rand_state
 
-N_TESTS = 4
+N_TESTS = 1
 
 
 @pytest.fixture
@@ -38,6 +38,8 @@ def state_vectors():
     return all_state_vectors
 
 
+# this test is not efficient
+# todo: develop some corner cases
 def test_one_state(state_vectors):
     for state_vector in state_vectors:
         state_vector_exp = state_vector

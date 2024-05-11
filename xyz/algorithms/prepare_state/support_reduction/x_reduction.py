@@ -53,13 +53,15 @@ def x_reduction(circuit: QCircuit, state: QState, enable_cnot: bool = True):
             gates.append(gate)
             new_state = gate.apply(new_state)
             continue
-        
+
         # check double CNOTs
         if enable_cnot:
-            for control_qubit2 in range(qubit_index+1, len(signatures)):
+            for control_qubit2 in range(qubit_index + 1, len(signatures)):
                 signature2 = signatures[control_qubit2]
                 if signature2 ^ signature in signature_to_qubits:
-                    control_qubit = circuit.qubit_at(signature_to_qubits[signature2 ^ signature])
+                    control_qubit = circuit.qubit_at(
+                        signature_to_qubits[signature2 ^ signature]
+                    )
                     control_qubit2 = circuit.qubit_at(control_qubit2)
                     target_qubit = circuit.qubit_at(qubit_index)
 
@@ -70,9 +72,11 @@ def x_reduction(circuit: QCircuit, state: QState, enable_cnot: bool = True):
                     gates.append(gate)
                     new_state = gate.apply(new_state)
                     break
-                
+
                 if signature2 ^ const1 ^ signature in signature_to_qubits:
-                    control_qubit = circuit.qubit_at(signature_to_qubits[signature2 ^ const1 ^ signature])
+                    control_qubit = circuit.qubit_at(
+                        signature_to_qubits[signature2 ^ const1 ^ signature]
+                    )
                     control_qubit2 = circuit.qubit_at(control_qubit2)
                     target_qubit = circuit.qubit_at(qubit_index)
                     control_phase = False
@@ -84,7 +88,6 @@ def x_reduction(circuit: QCircuit, state: QState, enable_cnot: bool = True):
                     gates.append(gate)
                     new_state = gate.apply(new_state)
                     break
-                
 
         signature_to_qubits[signature] = qubit_index
 

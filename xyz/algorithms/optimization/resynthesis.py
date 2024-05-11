@@ -31,7 +31,9 @@ def resynthesis(
     new_circuit = QCircuit(circuit.get_num_qubits())
 
     for target_qubit, window, state_begin, state_end in windows:
-        new_window = resynthesize_window(target_qubit, window, state_begin, state_end, verbose_level=verbose_level)
+        new_window = resynthesize_window(
+            target_qubit, window, state_begin, state_end, verbose_level=verbose_level
+        )
         new_circuit.add_gates(new_window)
 
     return new_circuit

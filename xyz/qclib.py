@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
 
-'''
+"""
 Author: Hanyu Wang
 Created time: 2024-05-05 17:03:46
 Last Modified by: Hanyu Wang
 Last Modified time: 2024-05-05 17:15:50
-'''
+"""
 
 import numpy as np
 from qiskit import transpile
@@ -32,10 +32,11 @@ def build_state_dict_fixed(state: np.ndarray):
 
 def run_qclib(state: np.array):
     from qclib.state_preparation import LowRankInitialize, MergeInitialize
+
     state_dict = build_state_dict_fixed(state)
 
     n_qubits = int(np.log2(len(state)))
-    
+
     circuit = QuantumCircuit(n_qubits)
     MergeInitialize.initialize(circuit, state_dict)
 

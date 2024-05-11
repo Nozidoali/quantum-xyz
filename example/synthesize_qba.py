@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
 
-'''
+"""
 Author: Hanyu Wang
 Created time: 2024-04-25 17:33:17
 Last Modified by: Hanyu Wang
 Last Modified time: 2024-05-05 17:16:12
-'''
+"""
 
 import numpy as np
 import xyz
@@ -15,7 +15,7 @@ if __name__ == "__main__":
     # state_vector = xyz.QBA_state(6, 33)
     state_vector = xyz.QBA_state(4, 9)
     target_state = xyz.quantize_state(state_vector)
-    
+
     # synthesize the state
     with xyz.stopwatch("synthesis", verbose=True) as timer:
         param = xyz.StatePreparationParameters(
@@ -25,10 +25,10 @@ if __name__ == "__main__":
             enable_exact_synthesis=False,
         )
         circuit = xyz.prepare_state(target_state, map_gates=True, param=param)
-        
+
     n_cnot = circuit.get_cnot_cost()
     circuit = xyz.resynthesis(circuit, verbose_level=2)
-    
+
     # now we measure the distance between the target state and the actual state
     state_vector_act = xyz.simulate_circuit(circuit)
     dist = np.linalg.norm(abs(state_vector_act) - abs(state_vector))

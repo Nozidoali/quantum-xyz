@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
 
-'''
+"""
 Author: Hanyu Wang
 Created time: 2024-04-22 18:27:12
 Last Modified by: Hanyu Wang
 Last Modified time: 2024-05-05 19:13:10
-'''
+"""
 
 from xyz.circuit import QBit
 from xyz.circuit import QState
 from .heuristic_resub import resub0, resub1, resubN, resub2N
 from xyz.algorithms.prepare_state import get_rotation_table
+
 
 def resynthesize_window(
     target_qubit: QBit,
@@ -42,17 +43,19 @@ def resynthesize_window(
             k: ry_angles_end[k] - ry_angles_begin[k] for k in ry_angles_begin.keys()
         }
         # print the target
-        print("-"*80)
+        print("-" * 80)
         print(f"target qubit: {target_qubit}")
         for gate in window_old:
             print(f"\t{gate}")
         print(f"state_begin: {state_begin}")
         print(f"state_end: {state_end}")
         for k in ry_delta.keys():
-            print(f"\t|{k:0{state_begin.num_qubits}b}>: {ry_angles_begin[k]:0.02f} -> {ry_angles_end[k]:0.02f}")
-    
+            print(
+                f"\t|{k:0{state_begin.num_qubits}b}>: {ry_angles_begin[k]:0.02f} -> {ry_angles_end[k]:0.02f}"
+            )
+
     new_window = window_old[:]
-    
+
     if False:
         new_window = resub0(
             target_qubit=target_qubit,
@@ -61,7 +64,7 @@ def resynthesize_window(
             state_end=state_end,
             verbose_level=verbose_level,
         )
-    
+
     new_window = resub1(
         target_qubit=target_qubit,
         window_old=new_window,
@@ -69,7 +72,7 @@ def resynthesize_window(
         state_end=state_end,
         verbose_level=verbose_level,
     )
-    
+
     new_window = resubN(
         target_qubit=target_qubit,
         window_old=new_window,
@@ -77,7 +80,7 @@ def resynthesize_window(
         state_end=state_end,
         verbose_level=verbose_level,
     )
-    
+
     # new_window = resub2N(
     #     target_qubit=target_qubit,
     #     window_old=new_window,
@@ -85,11 +88,11 @@ def resynthesize_window(
     #     state_end=state_end,
     #     verbose_level=verbose_level,
     # )
-    
+
     if verbose_level >= 1:
         print("new window:")
         for gate in new_window:
             print(f"\t{gate}")
-        print("-"*80)
-    
+        print("-" * 80)
+
     return new_window

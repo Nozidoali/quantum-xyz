@@ -48,7 +48,7 @@ def _prepare_state_rec(
 
     support_reducing_gates = []
     num_cx_support_reduction = 0
-    
+
     if param.enable_compression:
         # first, run support reduction
         with stopwatch("support_reduction") as timer:
@@ -135,7 +135,9 @@ def _prepare_state_rec(
     num_qubit_reduction_cx: int = 0
     if param.enable_n_flow:
         with stopwatch("qubit_reduction") as timer:
-            qubit_decomposition_gates, new_state = qubit_reduction(circuit, state, supports)
+            qubit_decomposition_gates, new_state = qubit_reduction(
+                circuit, state, supports
+            )
         num_qubit_reduction_cx = sum(
             (gate.get_cnot_cost() for gate in qubit_decomposition_gates)
         )

@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
 
-'''
+"""
 Author: Hanyu Wang
 Created time: 2024-04-25 19:32:29
 Last Modified by: Hanyu Wang
 Last Modified time: 2024-04-27 04:59:32
-'''
+"""
 
 import numpy as np
 
 from .lstsq_solver import LstSqSolver
 
-def try_resub(ry_angles_begin: dict, ry_angles_end: dict, cnot_configuration: list):
 
+def try_resub(ry_angles_begin: dict, ry_angles_end: dict, cnot_configuration: list):
     def get_rx(k: int, x: int):
         rx_bool = (constraint_keys[x] >> cnot_configuration[k]) & 1
         rx = 1 if rx_bool == 1 else -1
@@ -65,12 +65,12 @@ def try_resub(ry_angles_begin: dict, ry_angles_end: dict, cnot_configuration: li
                 coefficients=[-1, 1, rx],
                 value=np.pi / 2 * (rx - 1),
             )
-            
+
     success = solver.solve()
     if not success:
         # we cannot find a solution
         return False, None
-    
+
     thetas = [solver.get_solution(theta) for theta in thetas]
 
     return True, thetas

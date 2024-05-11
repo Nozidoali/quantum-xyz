@@ -19,8 +19,10 @@ MERGE_UNCERTAINTY = 1e-12
 
 N_DIGITS = 2
 
+
 class QState:
     """Class method for QState"""
+
     def __init__(self, index_to_weight: dict, num_qubit: int) -> None:
         self.num_qubits = num_qubit
 
@@ -36,8 +38,7 @@ class QState:
         return QState(self.index_to_weight, self.num_qubits)
 
     def get_supports(self) -> List[int]:
-        """Return the support of the state .
-        """
+        """Return the support of the state ."""
         signatures = self.get_qubit_signatures()
         qubit_indices = []
         for qubit, pattern in enumerate(signatures):
@@ -46,13 +47,11 @@ class QState:
         return qubit_indices
 
     def get_sparsity(self) -> int:
-        """Return the sparsity of the state .
-        """
+        """Return the sparsity of the state ."""
         return len(self.index_set)
 
     def to_value(self) -> int:
-        """Return the value of the state .
-        """
+        """Return the value of the state ."""
         value = 0
         for basis in self.index_set:
             value |= 1 << basis
@@ -67,13 +66,11 @@ class QState:
         return signatures
 
     def get_const1_signature(self) -> int:
-        """Returns the number of signed unsigned signatures .
-        """
+        """Returns the number of signed unsigned signatures ."""
         return (1 << len(self.index_set)) - 1
 
     def cofactors(self, pivot_qubit: int) -> Tuple["QState", "QState"]:
-        """Returns the cofactors of the given qubit .
-        """
+        """Returns the cofactors of the given qubit ."""
 
         index_to_weight0 = {}
         index_to_weight1 = {}
@@ -98,14 +95,12 @@ class QState:
 
     @staticmethod
     def ground_state(num_qubits: int) -> "QState":
-        """Return the ground state .
-        """
+        """Return the ground state ."""
         state = QState({0: 1.0}, num_qubits)
         return state
 
     def get_lower_bound(self) -> int:
-        """Returns the lower bound of the state .
-        """
+        """Returns the lower bound of the state ."""
         lower_bound: int = 0
         signatures = self.get_qubit_signatures()
         for pattern in signatures:
@@ -147,16 +142,14 @@ class QState:
         # return hash(str(self))
 
     def repr(self) -> int:
-        """Return a hex representation of the bitmap .
-        """
+        """Return a hex representation of the bitmap ."""
         # self.index_set = sorted(self.index_set)
         # signatures = self.get_qubit_signatures()
         # return hash(tuple(sorted(signatures, key=lambda x: bin(x).count("1"))))
         return hash(self)
 
     def to_vector(self) -> np.ndarray:
-        """Return the vector representation of the state .
-        """
+        """Return the vector representation of the state ."""
         vector = np.zeros(2**self.num_qubits)
         for idx, weight in self.index_to_weight.items():
             vector[idx] = weight
@@ -167,8 +160,7 @@ class QState:
         return vector
 
     def to_file(self, filename: str):
-        """Writes the benchmark to a file .
-        """
+        """Writes the benchmark to a file ."""
 
         # we format the index as a string
         index_to_weight = {
@@ -180,4 +172,3 @@ class QState:
 
         with open(filename, "w", encoding="utf-8") as file:
             file.write(benchmark_str)
-

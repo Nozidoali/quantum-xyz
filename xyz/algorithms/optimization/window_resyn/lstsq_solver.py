@@ -81,7 +81,7 @@ class LstSqSolver:
         if isinstance(var, LstSqSolverVar):
             return self._solutions[var.index]
         raise ValueError("Invalid variable type")
-    
+
     def print(self) -> str:
         for i in range(self._n_constraints):
             print(f"{self._A[i]} = {self._b[i]}")
