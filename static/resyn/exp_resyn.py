@@ -37,8 +37,8 @@ import pandas as pd
 REPORT_TIME = True
 REPORT_G = False
 WRITE_FILES = True
-# N_LIST = list(range(3,10))
-N_LIST = list(range(11,20))
+N_LIST = list(range(3,10))
+# N_LIST = list(range(11,20))
 REPEAT = 0
 
 def generate_initial_circuit(state_vector: np.ndarray, data = {}) -> QCircuit:
@@ -87,8 +87,10 @@ def run_ours(circuit: QCircuit, state_vector: np.ndarray, data = {}) -> QCircuit
         data["n_g_ours"] = len(new_circuit.get_gates()) - n_cnot_new
     if REPORT_TIME:
         data["time_ours"] = timer_new.time()
-    state_vector_act = simulate_circuit(new_circuit)
-    assert np.linalg.norm(state_vector_act - state_vector) < 1e-6
+    with stopwatch("simulation") as timer_sim:
+        state_vector_act = simulate_circuit(new_circuit)
+        assert np.linalg.norm(state_vector_act - state_vector) < 1e-6
+    data["time_sim"] = timer_sim.time()
     n, m = data["n_qubits"], data["m_state"]
     write_qasm(new_circuit, f"qsp_dataset/{name}_{n}_{m}.iccad24.qasm")
     print(f"Initial circuit saved to qsp_dataset/{name}_{n}_{m}.iccad24.qasm")
@@ -244,15 +246,15 @@ def get_benchmarks():
     
     benchmarks = []
 
-    # # W state
-    # for n_qubits in N_LIST:
-    #     state_vector = W_state(n_qubits)
-    #     benchmarks.append(("W", state_vector))
+    # W state
+    for n_qubits in N_LIST:
+        state_vector = W_state(n_qubits)
+        benchmarks.append(("W", state_vector))
         
-    # # Dicke states
-    # for n_qubits in N_LIST:
-    #     state_vector = D_state(n_qubits, n_qubits//2)
-    #     benchmarks.append(("Dicke", state_vector))
+    # Dicke states
+    for n_qubits in N_LIST:
+        state_vector = D_state(n_qubits, n_qubits//2)
+        benchmarks.append(("Dicke", state_vector))
         
     # QBA states
     for n_qubits in N_LIST:
@@ -291,8 +293,7 @@ if __name__ == "__main__":
         state_vector: np.ndarray
         data = {"name": name}
         try:
-            circuit = xyz.run_qclib(state_vector)
-            print(circuit)
+            # circuit = xyz.run_qclib(state_vector)
             circuit = generate_initial_circuit(state_vector, data)
             # print(to_qiskit(circuit))
             # circuit = run_date24(circuit, state_vector, data)
