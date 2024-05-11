@@ -19,6 +19,8 @@ MERGE_UNCERTAINTY = 1e-12
 
 N_DIGITS = 2
 
+DISABLE_ASTAR = True
+
 
 class QState:
     """Class method for QState"""
@@ -101,6 +103,8 @@ class QState:
 
     def get_lower_bound(self) -> int:
         """Returns the lower bound of the state ."""
+        if DISABLE_ASTAR:
+            return 0
         lower_bound: int = 0
         signatures = self.get_qubit_signatures()
         for pattern in signatures:

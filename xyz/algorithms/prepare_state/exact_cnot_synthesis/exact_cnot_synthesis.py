@@ -8,8 +8,6 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-09-01 12:56:17
 """
 
-import numpy as np
-from typing import List
 from xyz.circuit import QCircuit
 from xyz.circuit import QState
 
@@ -59,7 +57,7 @@ def exact_cnot_synthesis(
 
         supports = curr_state.get_supports()
         _curr_n, _curr_m = len(supports), curr_state.get_sparsity()
-        if curr_state.num_qubits > 4 and (_curr_n < curr_n or _curr_m < curr_m):
+        if curr_state.num_qubits > 5 and (_curr_n < curr_n or _curr_m < curr_m):
             curr_n, curr_m = _curr_n, _curr_m
             explorer.reset()
 

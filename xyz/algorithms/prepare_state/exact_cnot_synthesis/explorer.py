@@ -9,7 +9,7 @@ Last Modified time: 2024-05-11 11:03:16
 """
 
 from queue import PriorityQueue
-from xyz.circuit import QCircuit, QState
+from xyz.circuit import QState
 from ._astar import AStarCost
 
 
@@ -56,6 +56,7 @@ class Explorer:
         if next_state is None:
             for gate in gates[::-1]:
                 next_state = gate.conjugate().apply(curr_state)
+
         cnot_cost = sum([gate.get_cnot_cost() for gate in gates])
         next_cost = AStarCost(
             curr_cost.cnot_cost + cnot_cost,
@@ -66,6 +67,7 @@ class Explorer:
         # we skip the state if it is already visited
         if repr_next in self.visited_states:
             return None
+
         # we skip the state if it is already enquened and the cost is higher
         if repr_next in self.enqueued and next_cost >= self.enqueued[repr_next]:
             return None

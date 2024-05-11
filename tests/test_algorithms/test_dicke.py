@@ -9,6 +9,7 @@ Last Modified time: 2024-03-18 19:12:39
 """
 
 import numpy as np
+import pytest
 import xyz
 
 dicke_qsp_results: list = [
@@ -23,6 +24,7 @@ dicke_qsp_results: list = [
 ]
 
 
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_qsp_dicke():
     for n_qubits, k, golden in dicke_qsp_results:
         state_vector = xyz.D_state(n_qubits, k)

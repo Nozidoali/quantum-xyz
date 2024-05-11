@@ -10,7 +10,7 @@ Last Modified time: 2024-05-05 19:13:10
 
 from xyz.circuit import QBit
 from xyz.circuit import QState
-from .heuristic_resub import resub0, resub1, resubN, resub2N
+from .heuristic_resub import resub1, resubN
 from xyz.algorithms.prepare_state import get_rotation_table
 
 
@@ -55,15 +55,6 @@ def resynthesize_window(
             )
 
     new_window = window_old[:]
-
-    if False:
-        new_window = resub0(
-            target_qubit=target_qubit,
-            window_old=new_window,
-            state_begin=state_begin,
-            state_end=state_end,
-            verbose_level=verbose_level,
-        )
 
     new_window = resub1(
         target_qubit=target_qubit,
