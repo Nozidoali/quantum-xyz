@@ -14,9 +14,11 @@ from xyz.circuit import QState, from_set
 
 
 class QSPDatabase:
+    N_QUBIT_MAX: int = 4
+
     def __init__(self, verbose_level: int = 0) -> None:
         self.verbose_level = verbose_level
-        self.database = None
+        self.databases = {}
 
     @staticmethod
     def get_db_filename(n_qubits: int):
@@ -25,20 +27,25 @@ class QSPDatabase:
     def load_database(self, n_qubits: int):
         try:
             with open(self.get_db_filename(n_qubits), "rb") as f:
-                self.database = pickle.load(f)
+                self.databases[n_qubits] = pickle.load(f)
         except FileNotFoundError:
             self.init_database(n_qubits)
             self.save_database(n_qubits)
 
     def lookup(self, state: QState):
-        if self.database is None:
+        num_qubits = state.num_qubits
+        if num_qubits > self.N_QUBIT_MAX:
+            return 0
+        if num_qubits not in self.databases:
             # load the database
             self.load_database(state.num_qubits)
-        return self.database[state.repr()]
+        assert num_qubits in self.databases
+        assert state.repr() in self.databases[num_qubits], f"{state.repr()}"
+        return self.databases[num_qubits][state.repr()]
 
     def save_database(self, n_qubits: int):
         with open(self.get_db_filename(n_qubits), "wb") as f:
-            pickle.dump(self.database, f)
+            pickle.dump(self.databases[n_qubits], f)
 
     @staticmethod
     def get_repr(index_set: set, n_qubits: int):
@@ -109,7 +116,7 @@ class QSPDatabase:
         return ret
 
     def init_database(self, n_qubits: int):
-        self.database = {}
+        database = {}
 
         if self.verbose_level >= 1:
             print("Initializing database...")
@@ -121,9 +128,9 @@ class QSPDatabase:
 
         while not queue.empty():
             if self.verbose_level >= 1:
-                if len(self.database) % 100 == 0:
+                if len(database) % 100 == 0:
                     print(
-                        f"Database size: {len(self.database)}, Queue size: {queue.qsize()}, Enqueued size: {len(enqueued_set)}"
+                        f"Database size: {len(database)}, Queue size: {queue.qsize()}, Enqueued size: {len(enqueued_set)}"
                     )
 
             curr_cost, curr_set = queue.get()
@@ -131,11 +138,11 @@ class QSPDatabase:
 
             visited_repr.add(curr_repr)
 
-            if curr_repr in self.database:
+            if curr_repr in database:
                 continue
 
-            if curr_repr not in self.database:
-                self.database[curr_repr] = curr_cost
+            if curr_repr not in database:
+                database[curr_repr] = curr_cost
 
             for next_set, cnot_cost in self.get_next_set(curr_set, n_qubits):
                 next_repr = self.get_repr(next_set, n_qubits)
@@ -149,4 +156,6 @@ class QSPDatabase:
 
         if self.verbose_level >= 1:
             print("Database initialized.")
-            print(f"Database size: {len(self.database)}")
+            print(f"Database size: {len(database)}")
+
+        self.databases[n_qubits] = database

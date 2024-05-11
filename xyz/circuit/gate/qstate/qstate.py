@@ -35,17 +35,21 @@ class QState:
         self.index_set = self.index_to_weight.keys()
 
         self.sparsity: int = len(index_to_weight)
+        self.supports: list = None
 
     def __deepcopy__(self, memo):
         return QState(self.index_to_weight, self.num_qubits)
 
     def get_supports(self) -> List[int]:
         """Return the support of the state ."""
+        if self.supports is not None:
+            return self.supports[:]
         signatures = self.get_qubit_signatures()
         qubit_indices = []
         for qubit, pattern in enumerate(signatures):
             if pattern != 0:
                 qubit_indices.append(qubit)
+        self.supports = qubit_indices
         return qubit_indices
 
     def get_sparsity(self) -> int:

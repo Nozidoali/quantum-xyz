@@ -52,27 +52,29 @@ def get_state_transitions(circuit: QCircuit, curr_state: QState, supports: list 
                     ]
                 )
 
-                if not APPLY_HEURISTIC:
-                    transitions.append(
+                transitions.append(
+                    [
+                        None,
                         [
-                            None,
-                            [
-                                CRY(
-                                    cry_angle - np.pi,
-                                    circuit.qubit_at(control_qubit),
-                                    phase,
-                                    circuit.qubit_at(target_qubit),
-                                )
-                            ],
-                        ]
-                    )
+                            CRY(
+                                cry_angle - np.pi,
+                                circuit.qubit_at(control_qubit),
+                                phase,
+                                circuit.qubit_at(target_qubit),
+                            )
+                        ],
+                    ]
+                )
 
+    if APPLY_HEURISTIC and len(transitions) > 0:
+        return transitions
+
+    for target_qubit in supports:
         # apply CNOT
         for target_qubit in supports:
             for control_qubit in supports:
                 if control_qubit == target_qubit:
                     continue
-                # for phase in [True, False]:
                 if APPLY_HEURISTIC:
                     for phase in [True]:
                         gate = CX(
@@ -81,5 +83,12 @@ def get_state_transitions(circuit: QCircuit, curr_state: QState, supports: list 
                             circuit.qubit_at(target_qubit),
                         )
                         transitions.append([None, [gate]])
-
+                else:
+                    for phase in [True, False]:
+                        gate = CX(
+                            circuit.qubit_at(control_qubit),
+                            phase,
+                            circuit.qubit_at(target_qubit),
+                        )
+                        transitions.append([None, [gate]])
     return transitions

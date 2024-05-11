@@ -26,6 +26,21 @@ class Explorer:
         self.qsp_database = QSPDatabase(verbose_level)
 
     def get_lower_bound(self, state: QState):
+        sub_index_to_weight = {}
+        old_to_new_qubit_mapping = {}
+        supports = state.get_supports()
+        num_supports = len(supports)
+        if num_supports != state.num_qubits:
+            for new_index, old_index in enumerate(supports):
+                old_to_new_qubit_mapping[old_index] = new_index
+            for index, weight in state.index_to_weight.items():
+                new_index: int = 0
+                for i, support in enumerate(supports):
+                    if index & (1 << support) != 0:
+                        new_index |= 1 << i
+                sub_index_to_weight[new_index] = weight
+            new_state = QState(sub_index_to_weight, num_supports)
+            return self.qsp_database.lookup(new_state)
         return self.qsp_database.lookup(state)
 
     def add_state(self, state: QState):

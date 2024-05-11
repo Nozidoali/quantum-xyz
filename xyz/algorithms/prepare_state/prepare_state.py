@@ -165,6 +165,7 @@ def _prepare_state_rec(
         )
 
     # pylint: disable=unnecessary-lambda
+    assert len(candidates) > 0, "no candidates found"
     best_candidate = min(candidates, key=lambda x: x.num_gates)
     worst_candidate = max(candidates, key=lambda x: x.num_gates)
 

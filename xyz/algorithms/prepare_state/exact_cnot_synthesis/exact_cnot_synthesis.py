@@ -62,11 +62,13 @@ def exact_cnot_synthesis(
         _curr_n, _curr_m = len(supports), curr_state.get_sparsity()
         if curr_state.num_qubits > 4:
             if _curr_n < curr_n:
-                pass
                 # curr_n, curr_m = _curr_n, _curr_m
                 # explorer.reset()
+                pass
 
             if _curr_m < curr_m:
+                # curr_n, curr_m = _curr_n, _curr_m
+                # explorer.reset()
                 pass
         transitions = get_state_transitions(circuit, curr_state, supports)
         for next_state, gates in transitions:
