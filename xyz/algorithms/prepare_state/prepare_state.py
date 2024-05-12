@@ -25,7 +25,6 @@ from xyz.circuit import QCircuit, QGate
 from xyz.circuit import QState, quantize_state
 from xyz.utils import stopwatch
 from xyz.utils import global_stopwatch_report
-from xyz.utils import print_yellow
 
 from .exact_cnot_synthesis import exact_cnot_synthesis
 from .m_flow import cardinality_reduction
@@ -47,17 +46,23 @@ def _prepare_state_rec(
     prev_num_supports = len(prev_supports)
     prev_density = state.get_sparsity()
 
-    # first, run support reduction
-    with stopwatch("support_reduction") as timer:
-        state, support_reducing_gates = support_reduction(
-            circuit, state, enable_cnot=True
+    support_reducing_gates = []
+    num_cx_support_reduction = 0
+
+    if param.enable_compression:
+        # first, run support reduction
+        with stopwatch("support_reduction") as timer:
+            state, support_reducing_gates = support_reduction(
+                circuit, state, enable_cnot=True
+            )
+        num_cx_support_reduction = sum(
+            (gate.get_cnot_cost() for gate in support_reducing_gates)
         )
-    num_cx_support_reduction = sum(
-        (gate.get_cnot_cost() for gate in support_reducing_gates)
-    )
+        stats.time_support_reduction += timer.time()
 
     if param.enable_reindex:
         state, circuit = reindex_circuit(circuit, state)
+        raise NotImplementedError("reindexing is not implemented yet")
 
     # get the states
     supports = state.get_supports()
@@ -68,7 +73,6 @@ def _prepare_state_rec(
         print(f"state: {state}")
 
     stats.num_runs_support_reduction += 1
-    stats.time_support_reduction += timer.time()
     stats.num_reduced_supports += prev_num_supports - num_supports
     stats.num_reduced_density += prev_density - cardinality
 
@@ -82,17 +86,17 @@ def _prepare_state_rec(
     # exact synthesis
     if (
         param.enable_exact_synthesis
-        and num_supports <= Params.EXACT_SYNTHESIS_QUBIT_THRESHOLD
+        and num_supports <= param.n_qubits_max
         and cardinality <= Params.EXACT_SYNTHESIS_DENSITY_THRESHOLD
     ):
-        print_yellow("EXACT SYNTHESIS")
         try:
-            exact_gates = exact_cnot_synthesis(
-                circuit,
-                state,
-                verbose_level=verbose_level,
-                cnot_limit=Params.EXACT_SYNTHESIS_CNOT_LIMIT,
-            )
+            with stopwatch("exact_cnot_synthesis") as timer:
+                exact_gates = exact_cnot_synthesis(
+                    circuit,
+                    state,
+                    verbose_level=verbose_level,
+                    cnot_limit=Params.EXACT_SYNTHESIS_CNOT_LIMIT,
+                )
             if stats is not None:
                 stats.time_exact_cnot_synthesis += timer.time()
             gates = exact_gates + support_reducing_gates
@@ -106,9 +110,10 @@ def _prepare_state_rec(
     m_flow_gates: List[QGate] = None
     num_sparse_qsp_cx: int = 0
     if param.enable_m_flow:
-        new_state, cardinality_reduction_gates = cardinality_reduction(
-            circuit, state, verbose_level=verbose_level
-        )
+        with stopwatch("cardinality_reduction") as timer:
+            new_state, cardinality_reduction_gates = cardinality_reduction(
+                circuit, state, verbose_level=verbose_level
+            )
         num_cardinality_reduction_cx = sum(
             (gate.get_cnot_cost() for gate in cardinality_reduction_gates)
         )
@@ -129,7 +134,10 @@ def _prepare_state_rec(
     n_flow_gates: List[QGate] = None
     num_qubit_reduction_cx: int = 0
     if param.enable_n_flow:
-        qubit_decomposition_gates, new_state = qubit_reduction(circuit, state, supports)
+        with stopwatch("qubit_reduction") as timer:
+            qubit_decomposition_gates, new_state = qubit_reduction(
+                circuit, state, supports
+            )
         num_qubit_reduction_cx = sum(
             (gate.get_cnot_cost() for gate in qubit_decomposition_gates)
         )
@@ -157,6 +165,7 @@ def _prepare_state_rec(
         )
 
     # pylint: disable=unnecessary-lambda
+    assert len(candidates) > 0, "no candidates found"
     best_candidate = min(candidates, key=lambda x: x.num_gates)
     worst_candidate = max(candidates, key=lambda x: x.num_gates)
 
@@ -211,11 +220,11 @@ def prepare_state(
         param = Params()
         if cardinality_reduction_cnot_estimation < qubit_reduction_cnot_estimation:
             # if the state is sparse, we enable cardinality reduction method
-            print_yellow("enable_m_flow")
+            # print_yellow("enable_m_flow")
             param.enable_n_flow = False
             param.enable_m_flow = True
         else:
-            print_yellow("enable_n_flow")
+            # print_yellow("enable_n_flow")
             # otherwise, if the state is dense, we enable the qubit reduction method
             param.enable_n_flow = True
             param.enable_m_flow = False

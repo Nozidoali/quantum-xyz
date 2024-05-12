@@ -10,9 +10,8 @@ Last Modified time: 2024-03-18 17:57:10
 
 
 class StatePreparationParameters:
-    EXACT_SYNTHESIS_QUBIT_THRESHOLD = 4
-    EXACT_SYNTHESIS_DENSITY_THRESHOLD = 10
-    EXACT_SYNTHESIS_CNOT_LIMIT = 10
+    EXACT_SYNTHESIS_DENSITY_THRESHOLD = 100
+    EXACT_SYNTHESIS_CNOT_LIMIT = 100
 
     def __init__(
         self,
@@ -20,12 +19,14 @@ class StatePreparationParameters:
         enable_n_flow: bool = False,
         enable_m_flow: bool = True,
         enable_decomposition: bool = False,
-        enable_progress_bar: bool = True,
+        enable_compression: bool = True,
         enable_reindex: bool = False,
+        n_qubits_max: int = 4,
     ) -> None:
         self.enable_exact_synthesis: bool = enable_exact_synthesis
         self.enable_n_flow: bool = enable_n_flow
         self.enable_m_flow: bool = enable_m_flow
         self.enable_decomposition: bool = enable_decomposition
-        self.enable_progress_bar: bool = enable_progress_bar
+        self.enable_compression: bool = enable_compression
         self.enable_reindex: bool = enable_reindex
+        self.n_qubits_max: int = n_qubits_max

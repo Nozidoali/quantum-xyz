@@ -131,10 +131,7 @@ class QCircuit:
         """
         Get the number of CNOT gates in the circuit
         """
-        cnot_cost: int = 0
-        for gate in self.__gates:
-            cnot_cost += gate.get_cnot_cost()
-        return cnot_cost
+        return sum([gate.get_cnot_cost() for gate in self.__gates])
 
     def __str__(self) -> str:
         """Convert the sequence to a string .

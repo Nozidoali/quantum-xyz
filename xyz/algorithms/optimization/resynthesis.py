@@ -15,7 +15,7 @@ from .window_resyn import extract_windows_naive, extract_windows, resynthesize_w
 
 
 def resynthesis(
-    circuit: QCircuit, use_advanced_windowing: bool = True, verbose_level: int = 0
+    circuit: QCircuit, use_advanced_windowing: bool = False, verbose_level: int = 0
 ) -> QCircuit:
     """
     Extract windows from the given circuit
@@ -31,12 +31,9 @@ def resynthesis(
     new_circuit = QCircuit(circuit.get_num_qubits())
 
     for target_qubit, window, state_begin, state_end in windows:
-        new_window = resynthesize_window(state_begin, state_end, target_qubit, window)
+        new_window = resynthesize_window(
+            target_qubit, window, state_begin, state_end, verbose_level=verbose_level
+        )
         new_circuit.add_gates(new_window)
-
-        if verbose_level >= 1:
-            n_cnots_old = sum((g.get_cnot_cost() for g in window))
-            n_cnots_new = sum((g.get_cnot_cost() for g in new_window))
-            print(f"n_cnots_old: {n_cnots_old}, n_cnots_new: {n_cnots_new}")
 
     return new_circuit

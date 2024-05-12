@@ -11,7 +11,7 @@ Last Modified time: 2023-06-20 00:06:35
 import numpy as np
 
 
-def C_state(num_qubits: int, threshold: int) -> np.ndarray:
+def QBA_state(num_qubits: int, threshold: int) -> np.ndarray:
     """Cyclic state.
     """
     state = np.zeros(2**num_qubits)

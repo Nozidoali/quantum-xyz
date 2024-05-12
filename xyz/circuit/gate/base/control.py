@@ -12,6 +12,7 @@ from typing import List
 
 from .qubit import QBit
 
+
 class ControlledGate:
     """Classmethod for creating a controlled gate ."""
 
@@ -46,6 +47,7 @@ class ControlledGate:
         :rtype: bool
         """
         return (index >> self.control_qubit.index) & 1 == self.phase
+
 
 class MultiControlledGate:
     """Class method for creating a multiControlledGate ."""
@@ -87,8 +89,7 @@ class MultiControlledGate:
         return self.phases
 
     def is_enabled(self, index: int) -> bool:
-        """Returns True if the control qubits are enabled .
-        """
+        """Returns True if the control qubits are enabled ."""
         for control_qubit, phase in zip(self.control_qubits, self.phases):
             if (index >> control_qubit.index) & 1 != phase:
                 return False

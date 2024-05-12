@@ -13,7 +13,7 @@ xyz
 
    .. autosummary::
    
-      C_state
+      QBA_state
       D_state
       GHZ_state
       W_state

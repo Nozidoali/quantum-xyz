@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
 
-'''
+"""
 Author: Hanyu Wang
 Created time: 2024-04-22 18:29:16
 Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-22 18:29:31
-'''
+Last Modified time: 2024-04-25 19:06:51
+"""
 
 import numpy as np
 from typing import List
+
 
 def get_candidate_controls(rotation_table: dict, num_qubits: int) -> List[int]:
     """
@@ -22,6 +23,7 @@ def get_candidate_controls(rotation_table: dict, num_qubits: int) -> List[int]:
         candidates_to_remove: set = set()
         for qubit_index in candidates:
             index_reversed = index ^ (1 << qubit_index)
+            # this condition is buggy!
             if index_reversed not in rotation_table:
                 continue
             theta_reversed: float = rotation_table[index_reversed]
@@ -33,4 +35,3 @@ def get_candidate_controls(rotation_table: dict, num_qubits: int) -> List[int]:
             candidates.remove(qubit_index)
 
     return list(selected)
-
