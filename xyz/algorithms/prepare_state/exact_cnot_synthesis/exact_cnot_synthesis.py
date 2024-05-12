@@ -16,6 +16,9 @@ from ._backtrace import backtrace
 from .state_transitions import get_state_transitions
 from .explorer import Explorer
 
+N_FRONT_MAX = 1e7
+N_ENQUEUED_MAX = 1e6
+
 
 def exact_cnot_synthesis(
     circuit: QCircuit,
@@ -31,7 +34,10 @@ def exact_cnot_synthesis(
     # begin of the exact synthesis algorithm
     initial_state = QState.ground_state(target_state.num_qubits)
 
-    curr_n, curr_m = len(target_state.get_supports()), target_state.get_sparsity()
+    n_init, m_init = len(target_state.get_supports()), target_state.get_sparsity()
+    best_state = target_state
+    best_score = 0
+    best_cost = AStarCost(0, explorer.get_lower_bound(target_state))
 
     # This function is called by the search loop.
     solution_reached: bool = False
@@ -39,10 +45,24 @@ def exact_cnot_synthesis(
         curr_state: QState
         curr_cost: AStarCost
         curr_cost, curr_state = explorer.get_state()
+        n_cnot_at_front = explorer.get_n_front(curr_cost.cnot_cost)
 
         if verbose_level >= 2:
             print(f"curr_state: {curr_state}, cost: {curr_cost}")
             explorer.report()
+            print(f"n_cnot_at_front: {n_cnot_at_front}")
+
+        if n_cnot_at_front > N_FRONT_MAX or len(explorer.enqueued) > N_ENQUEUED_MAX:
+            if best_score > 0:
+                print(f"best_state: {best_state}, best_score: {best_score}")
+                n_init, m_init = (
+                    len(best_state.get_supports()),
+                    best_state.get_sparsity(),
+                )
+                best_score = 0
+                explorer.reset()
+                explorer.add_state(best_state, best_cost)
+                continue
 
         if cnot_limit is not None and curr_cost.cnot_cost > cnot_limit:
             # this will then raise an ValueError
@@ -60,16 +80,14 @@ def exact_cnot_synthesis(
 
         supports = curr_state.get_supports()
         _curr_n, _curr_m = len(supports), curr_state.get_sparsity()
-        if curr_state.num_qubits > 4:
-            if _curr_n < curr_n:
-                # curr_n, curr_m = _curr_n, _curr_m
-                # explorer.reset()
-                pass
+        curr_score = float(n_init * m_init - _curr_n * _curr_m) / (
+            curr_cost.cnot_cost + 1
+        )
+        if curr_score > best_score:
+            best_score = curr_score
+            best_state = curr_state
+            best_cost = curr_cost
 
-            if _curr_m < curr_m:
-                # curr_n, curr_m = _curr_n, _curr_m
-                # explorer.reset()
-                pass
         transitions = get_state_transitions(circuit, curr_state, supports)
         for next_state, gates in transitions:
             explorer.explore_state(curr_state, gates, curr_cost, next_state)

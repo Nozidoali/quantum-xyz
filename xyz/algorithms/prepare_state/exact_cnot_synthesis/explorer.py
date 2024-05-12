@@ -43,13 +43,16 @@ class Explorer:
             return self.qsp_database.lookup(new_state)
         return self.qsp_database.lookup(state)
 
-    def add_state(self, state: QState):
-        self.state_queue.put((AStarCost(0, self.get_lower_bound(state)), state))
-        self.enqueued[state.repr()] = AStarCost(0, self.get_lower_bound(state))
+    def add_state(self, state: QState, cost: AStarCost = None):
+        if cost is None:
+            cost = AStarCost(0, self.get_lower_bound(state))
+        self.state_queue.put((cost, state))
+        self.enqueued[state.repr()] = cost
 
     def reset(self):
         self.state_queue = PriorityQueue()
         self.enqueued = {}
+        self.visited_states = set()
 
     def visit_state(self, state: QState):
         self.visited_states.add(state.repr())
@@ -59,6 +62,11 @@ class Explorer:
 
     def get_state(self):
         return self.state_queue.get()
+
+    def get_n_front(self, n_cnot: int):
+        if n_cnot not in self.enqueued_states_of_cost:
+            return 0
+        return self.enqueued_states_of_cost[n_cnot]
 
     def report(self):
         print(f"queue size: {self.state_queue.qsize()}")
@@ -97,9 +105,9 @@ class Explorer:
         self.state_queue.put((next_cost, next_state))
         self.enqueued[repr_next] = next_cost
 
-        if next_cost not in self.enqueued_states_of_cost:
-            self.enqueued_states_of_cost[next_cost] = 0
-        self.enqueued_states_of_cost[next_cost] += 1
+        if next_cost.cnot_cost not in self.enqueued_states_of_cost:
+            self.enqueued_states_of_cost[next_cost.cnot_cost] = 0
+        self.enqueued_states_of_cost[next_cost.cnot_cost] += 1
 
         # we record the gate
         gates_to_record: list = gates[:]
