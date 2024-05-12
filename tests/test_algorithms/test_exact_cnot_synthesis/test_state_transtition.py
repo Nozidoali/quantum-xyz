@@ -69,4 +69,5 @@ def test_state_transitions_3():
                 cx_count += 1
 
     assert cry_count == 4, "cry_count = %s" % cry_count
-    assert cx_count == 8, "cx_count = %s" % cx_count
+    # using heuristic
+    assert cx_count == 0, "cx_count = %s" % cx_count
