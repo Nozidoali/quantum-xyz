@@ -1,9 +1,9 @@
-llist==0.7.1
 matplotlib==3.7.1
 numpy==1.23.5
-qiskit>=1.0
-scipy==1.10.1
-setuptools==67.8.0
-coverage==7.3.2
+pandas==2.2.2
 pytest==7.3.1
-pybind11==2.10.0
+qiskit==1.0.0
+qiskit_ibm_runtime==0.23.0
+scipy==1.13.0
+setuptools==67.8.0
+tomlkit==0.12.5
