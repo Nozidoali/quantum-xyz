@@ -11,6 +11,26 @@ Last Modified time: 2024-06-11 21:52:54
 import numpy as np
 from xyz.circuit import QCircuit, CX, CRY, MCRY, X
 
+"""
+Reference:
+@inproceedings{bartschi2019deterministic,
+    title={Deterministic preparation of Dicke states},
+    author={B{\"a}rtschi, Andreas and Eidenbenz, Stephan},
+    booktitle={International Symposium on Fundamentals of Computation Theory},
+    pages={126--139},
+    year={2019},
+    organization={Springer}
+}
+
+@article{sekhar2020actual,
+    title={On Actual Preparation of Dicke State on a Quantum Computer},
+    author={Sekhar Mukherjee, Chandra and Maitra, Subhamoy and Gaurav, Vineet and Roy, Dibyendu},
+    journal={arXiv e-prints},
+    pages={arXiv--2007},
+    year={2020}
+}
+
+"""
 
 def insert_scs(circuit: QCircuit, n: int, k: int, j: int):
     """
