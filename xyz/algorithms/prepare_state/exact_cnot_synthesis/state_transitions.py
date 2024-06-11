@@ -14,6 +14,7 @@ from xyz.circuit import QCircuit, QState, CX, CRY
 from ..support_reduction import support_reduction
 from ..rotation_angles import get_ap_cry_angles
 
+
 def get_state_transitions(circuit: QCircuit, curr_state: QState, supports: list = None):
     if supports is None:
         supports = curr_state.get_supports()
