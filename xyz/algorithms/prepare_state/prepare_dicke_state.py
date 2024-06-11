@@ -12,7 +12,7 @@ import numpy as np
 from xyz.circuit import QCircuit, CX, CRY, MCRY, X
 
 
-def insert_scs(circuit: QCircuit, n: int, k: int, j: int, verbose_level: int = 0):
+def insert_scs(circuit: QCircuit, n: int, k: int, j: int):
     """
     insert_scs insert the split and cyclic shift gates into the circuit.
     """
@@ -34,7 +34,7 @@ def insert_scs(circuit: QCircuit, n: int, k: int, j: int, verbose_level: int = 0
         circuit.add_gate(CX(circuit.qubit_at(j + i + 1), True, circuit.qubit_at(j)))
 
 
-def prepare_dicke_state(n: int, k: int, map_gates: bool = True, verbose_level: int = 0):
+def prepare_dicke_state(n: int, k: int, map_gates: bool = True):
     circuit = QCircuit(n, map_gates=map_gates)
 
     # prepare seed
