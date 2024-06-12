@@ -10,7 +10,7 @@ Last Modified time: 2024-05-05 19:13:10
 
 from xyz.circuit import QBit
 from xyz.circuit import QState
-from .heuristic_resub import resub1, resubN
+from .heuristic_resub import resub1, resubN, resubA, resub2N
 from xyz.algorithms.prepare_state import get_rotation_table
 
 
@@ -55,6 +55,14 @@ def resynthesize_window(
             )
 
     new_window = window_old[:]
+    
+    new_window = resubA(
+        target_qubit=target_qubit,
+        window_old=new_window,
+        state_begin=state_begin,
+        state_end=state_end,
+        verbose_level=verbose_level,
+    )
 
     new_window = resub1(
         target_qubit=target_qubit,
@@ -72,18 +80,25 @@ def resynthesize_window(
         verbose_level=verbose_level,
     )
 
-    # new_window = resub2N(
-    #     target_qubit=target_qubit,
-    #     window_old=new_window,
-    #     state_begin=state_begin,
-    #     state_end=state_end,
-    #     verbose_level=verbose_level,
-    # )
+    new_window = resub2N(
+        target_qubit=target_qubit,
+        window_old=new_window,
+        state_begin=state_begin,
+        state_end=state_end,
+        verbose_level=verbose_level,
+    )
 
     if verbose_level >= 1:
         print("new window:")
         for gate in new_window:
             print(f"\t{gate}")
         print("-" * 80)
+
+    # check the correctness of the new window
+    state: QState = state_begin
+    for gate in new_window:
+        state = gate.apply(state)
+    if not state == state_end:
+        raise ValueError("resynthesis failed")
 
     return new_window

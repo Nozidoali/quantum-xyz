@@ -12,11 +12,10 @@ import numpy as np
 
 from .lstsq_solver import LstSqSolver
 
-
-def try_resub(ry_angles_begin: dict, ry_angles_end: dict, cnot_configuration: list):
+def try_resub(ry_angles_begin: dict, ry_angles_end: dict, cnot_configuration: list, phases: list = True):
     def get_rx(k: int, x: int):
         rx_bool = (constraint_keys[x] >> cnot_configuration[k]) & 1
-        rx = 1 if rx_bool == 1 else -1
+        rx = -1 if rx_bool == phases[k] else 1
         return rx
 
     solver = LstSqSolver()
@@ -56,9 +55,8 @@ def try_resub(ry_angles_begin: dict, ry_angles_end: dict, cnot_configuration: li
             value=ry_angles_end[constraint_keys[x]],
         )
 
-    for k in range(n_cnot_new):
-        # phi_k+1^x = pi/2 + R_k^x ( phi_k^x - pi/2 ) + theta_k
-        for x in range(n_constraints):
+        for k in range(n_cnot_new):
+            # phi_k+1^x = pi/2 + R_k^x ( phi_k^x - pi/2 ) + theta_k
             rx = get_rx(k, x)
             solver.add_constraint(
                 variables=[phi[k + 2][x], thetas[k + 1], phi[k + 1][x]],
@@ -66,11 +64,15 @@ def try_resub(ry_angles_begin: dict, ry_angles_end: dict, cnot_configuration: li
                 value=np.pi / 2 * (rx - 1),
             )
 
+    # solver.print()
+
     success = solver.solve()
     if not success:
         # we cannot find a solution
+        # print("no solution found")
         return False, None
 
+    # print("solutions: ", solver.get_solutions())
     thetas = [solver.get_solution(theta) for theta in thetas]
 
     return True, thetas
