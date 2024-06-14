@@ -175,7 +175,6 @@ def resubN(
 
     control_phases = [seq for seq in product((True, False), repeat=len(cnot_configuration))]
     for control_phase in control_phases:
-        print(control_phase)
         success, thetas = try_resub(ry_angles_begin, ry_angles_end, cnot_configuration, control_phase)
         if success:
             new_window = [RY(thetas[0], target_qubit)]
