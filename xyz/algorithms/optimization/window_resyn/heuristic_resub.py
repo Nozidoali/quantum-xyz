@@ -8,10 +8,11 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2024-05-03 23:15:39
 """
 
-from xyz.circuit import QBit, RY, CX
+from xyz.circuit import QBit, RY, CX, CRY, MCRY
 from xyz.circuit import QState, is_equal
 from xyz.algorithms.prepare_state.rotation_angles import get_rotation_table
 from .try_resub import try_resub
+from itertools import product
 
 
 def resub0(
@@ -54,6 +55,32 @@ def resub0(
     return new_window
 
 
+def resubA(
+    target_qubit: QBit,
+    window_old: list,
+    state_begin: QState,
+    state_end: QState,
+    verbose_level: int = 0,
+):
+    ry_angles_begin: dict = get_rotation_table(state_begin, target_qubit.index)
+    ry_angles_end: dict = get_rotation_table(state_end, target_qubit.index)
+    n_cnot_new = 0
+
+    cnot_configuration = []
+    success, thetas = try_resub(ry_angles_begin, ry_angles_end, cnot_configuration)
+
+    if verbose_level >= 1:
+        print(f"resubA: target_qubit = {target_qubit}")
+
+    if success:
+        new_window = [RY(thetas[0], target_qubit)]
+        for k in range(n_cnot_new):
+            new_window += [CX(QBit(cnot_configuration[k]), True, target_qubit)]
+            new_window += [RY(thetas[k + 1], target_qubit)]
+        return new_window
+    return window_old
+
+
 def resub1(
     target_qubit: QBit,
     window_old: list,
@@ -70,32 +97,43 @@ def resub1(
         # skip the resynthesis
         return window_old
 
+    if verbose_level >= 1:
+        print(f"resub1: target_qubit = {target_qubit}")
+
     ry_angles_begin: dict = get_rotation_table(state_begin, target_qubit.index)
     ry_angles_end: dict = get_rotation_table(state_end, target_qubit.index)
-
-    # we can run dependency analysis to find the potential control qubits
-    # all_control_qubits: list = get_candidate_controls(ry_delta, state_begin.num_qubits)
-    # n_control_qubits: int = len(all_control_qubits)
 
     all_control_qubits = set()
     for gate in window_old:
         if isinstance(gate, CX):
             all_control_qubits.add(gate.control_qubit.index)
+        if isinstance(gate, CRY):
+            all_control_qubits.add(gate.control_qubit.index)
+        if isinstance(gate, MCRY):
+            for control_qubit in gate.control_qubits:
+                all_control_qubits.add(control_qubit.index)
     all_control_qubits = list(all_control_qubits)
 
     n_cnot_new = 1
     for control_qubit in all_control_qubits:
-        # for control_qubit in range(state_begin.num_qubits):
-        #     if control_qubit == target_qubit.index:
-        #         continue
-        cnot_configuration = [control_qubit]
-        success, thetas = try_resub(ry_angles_begin, ry_angles_end, cnot_configuration)
-        if success:
-            new_window = [RY(thetas[0], target_qubit)]
-            for k in range(n_cnot_new):
-                new_window += [CX(QBit(cnot_configuration[k]), False, target_qubit)]
-                new_window += [RY(thetas[k + 1], target_qubit)]
-            return new_window
+        for control_phase in [[True], [False]]:
+            if verbose_level >= 1:
+                print(f"resub1: control_qubit = {control_qubit}")
+            # for control_qubit in range(state_begin.num_qubits):
+            #     if control_qubit == target_qubit.index:
+            #         continue
+            cnot_configuration = [control_qubit]
+            success, thetas = try_resub(
+                ry_angles_begin, ry_angles_end, cnot_configuration, phases=control_phase
+            )
+            if success:
+                new_window = [RY(thetas[0], target_qubit)]
+                for k in range(n_cnot_new):
+                    new_window += [
+                        CX(QBit(cnot_configuration[k]), control_phase[0], target_qubit)
+                    ]
+                    new_window += [RY(thetas[k + 1], target_qubit)]
+                return new_window
 
     return window_old
 
@@ -113,7 +151,13 @@ def resubN(
     for gate in window_old:
         if isinstance(gate, CX):
             all_control_qubits.add(gate.control_qubit.index)
+        if isinstance(gate, CRY):
+            all_control_qubits.add(gate.control_qubit.index)
+        if isinstance(gate, MCRY):
+            for control_qubit in gate.control_qubits:
+                all_control_qubits.add(control_qubit.index)
     all_control_qubits = list(all_control_qubits)
+
     n_cnot_new = len(all_control_qubits)
 
     n_cnots_old = sum((g.get_cnot_cost() for g in window_old))
@@ -135,17 +179,24 @@ def resubN(
         return QBit(cnot_configuration[k])
 
     new_window = None
-    success, thetas = try_resub(ry_angles_begin, ry_angles_end, cnot_configuration)
-    if not success:
-        # we cannot find a solution
-        new_window = window_old[:]
-    else:
-        new_window = [RY(thetas[0], target_qubit)]
-        for k in range(n_cnot_new):
-            new_window += [CX(get_control_qubit_at(k), False, target_qubit)]
-            new_window += [RY(thetas[k + 1], target_qubit)]
 
-    return new_window
+    control_phases = [
+        seq for seq in product((True, False), repeat=len(cnot_configuration))
+    ]
+    for control_phase in control_phases:
+        success, thetas = try_resub(
+            ry_angles_begin, ry_angles_end, cnot_configuration, control_phase
+        )
+        if success:
+            new_window = [RY(thetas[0], target_qubit)]
+            for k in range(n_cnot_new):
+                new_window += [
+                    CX(get_control_qubit_at(k), control_phase[k], target_qubit)
+                ]
+                new_window += [RY(thetas[k + 1], target_qubit)]
+            return new_window
+
+    return window_old
 
 
 def resub2N(
@@ -182,15 +233,21 @@ def resub2N(
     def get_control_qubit_at(k: int):
         return QBit(cnot_configuration[k])
 
-    new_window = None
-    success, thetas = try_resub(ry_angles_begin, ry_angles_end, cnot_configuration)
-    if not success:
-        # we cannot find a solution
-        new_window = window_old[:]
-    else:
-        new_window = [RY(thetas[0], target_qubit)]
-        for k in range(n_cnot_new):
-            new_window += [CX(get_control_qubit_at(k), False, target_qubit)]
-            new_window += [RY(thetas[k + 1], target_qubit)]
+    control_phases = [
+        seq for seq in product((True, False), repeat=len(cnot_configuration))
+    ]
+    for control_phase in control_phases:
+        print(control_phase)
+        success, thetas = try_resub(
+            ry_angles_begin, ry_angles_end, cnot_configuration, control_phase
+        )
+        if success:
+            new_window = [RY(thetas[0], target_qubit)]
+            for k in range(n_cnot_new):
+                new_window += [
+                    CX(get_control_qubit_at(k), control_phase[k], target_qubit)
+                ]
+                new_window += [RY(thetas[k + 1], target_qubit)]
+            return new_window
 
-    return new_window
+    return window_old

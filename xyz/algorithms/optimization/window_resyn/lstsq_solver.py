@@ -62,8 +62,15 @@ class LstSqSolver:
         sol, residuals, _, _ = np.linalg.lstsq(self._A, self._b, rcond=None)
         if residuals.size > 0 and np.allclose(residuals, 0):
             self._solutions = sol
+            if not np.allclose(np.dot(self._A, sol), self._b):
+                return False
             return True
         elif residuals.size == 0:
+            if not np.allclose(np.dot(self._A, sol), self._b):
+                # print("residuals.size == 0")
+                # print("sol: ", sol)
+                # print(f"difference: {np.dot(self._A, sol) - self._b}")
+                return False
             self._solutions = sol
             return True
         else:

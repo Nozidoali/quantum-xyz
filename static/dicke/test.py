@@ -11,11 +11,17 @@ Last Modified time: 2024-06-11 21:51:45
 import xyz
 
 if __name__ == "__main__":
-    circuit = xyz.prepare_dicke_state(4, 2, map_gates=False)
-    print(xyz.to_qiskit(circuit))
-    circuit = xyz.resynthesis(circuit, verbose_level=3)
-    print(xyz.to_qiskit(circuit))
+    for n in range(4, 16):
+        for k in range(1, n // 2 + 1):
+            circuit = xyz.prepare_dicke_state(n, k, map_gates=True)
+            # print(xyz.to_qiskit(circuit))
+            circuit = xyz.resynthesis(circuit, verbose_level=0)
+            # print(xyz.to_qiskit(circuit))
 
-    # now we measure the distance between the target state and the actual state
-    state_vector_act = xyz.simulate_circuit(circuit)
-    print("actual state: ", xyz.quantize_state(state_vector_act))
+            state_vector = xyz.D_state(n, k)
+
+            # now we measure the distance between the target state and the actual state
+            # state_vector_act = xyz.simulate_circuit(circuit)
+            # print("actual state: ", xyz.quantize_state(state_vector_act))
+            n_cnots = sum((g.get_cnot_cost() for g in circuit.get_gates()))
+            print(f"n={n}, k={k}: cnot={n_cnots}")

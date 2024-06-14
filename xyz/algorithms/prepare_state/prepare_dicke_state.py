@@ -30,6 +30,7 @@ from xyz.circuit import QCircuit, CX, CRY, MCRY, X
 #     year={2020}
 # }
 
+
 def insert_scs(circuit: QCircuit, n: int, k: int, j: int):
     """
     insert_scs insert the split and cyclic shift gates into the circuit.
