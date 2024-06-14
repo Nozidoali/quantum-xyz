@@ -59,7 +59,6 @@ class LstSqSolver:
         self._n_constraints += 1
 
     def solve(self) -> None:
-
         sol, residuals, _, _ = np.linalg.lstsq(self._A, self._b, rcond=None)
         if residuals.size > 0 and np.allclose(residuals, 0):
             self._solutions = sol

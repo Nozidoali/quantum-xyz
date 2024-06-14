@@ -8,7 +8,7 @@ Quantum XYZ
 
 
 
-XYZ is a Python package for quantum compilation. It provides several implementations for quantum circuit optimizations, such as exact CNOT synthesis. [Read full documentation](https://quantum-xyz.readthedocs.io/en/latest/)
+XYZ is a Python package for quantum circuit synthesis. It provides several implementations for quantum circuit optimizations, such as exact CNOT synthesis. [Read full documentation](https://quantum-xyz.readthedocs.io/en/latest/)
 
 ## Example
 

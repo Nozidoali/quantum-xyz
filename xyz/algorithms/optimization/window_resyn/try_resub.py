@@ -12,7 +12,13 @@ import numpy as np
 
 from .lstsq_solver import LstSqSolver
 
-def try_resub(ry_angles_begin: dict, ry_angles_end: dict, cnot_configuration: list, phases: list = True):
+
+def try_resub(
+    ry_angles_begin: dict,
+    ry_angles_end: dict,
+    cnot_configuration: list,
+    phases: list = True,
+):
     def get_rx(k: int, x: int):
         rx_bool = (constraint_keys[x] >> cnot_configuration[k]) & 1
         rx = -1 if rx_bool == phases[k] else 1

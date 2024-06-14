@@ -55,7 +55,7 @@ def resynthesize_window(
             )
 
     new_window = window_old[:]
-    
+
     new_window = resubA(
         target_qubit=target_qubit,
         window_old=new_window,
