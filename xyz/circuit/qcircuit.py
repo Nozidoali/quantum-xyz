@@ -18,6 +18,7 @@ from typing import List
 from .gate import QGate, QGateType, QBit
 from ._optimization import _add_gate_optimized, _add_gates_optimized
 
+
 class QCircuit:
     """the class of quantum circuit"""
 

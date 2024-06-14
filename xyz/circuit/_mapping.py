@@ -21,13 +21,6 @@ from .decomposition import decompose_mcry, control_sequence_to_gates
 
 
 def __map_muxy(gate: MULTIPLEXY) -> List[QGate]:
-    """Convert a multi - gate into a list of gates .
-
-    :param gate: [description]
-    :type gate: MULTIPLEXY
-    :return: [description]
-    :rtype: List[QGate]
-    """
     assert gate.type == QGateType.MULTIPLEX_Y
     rotation_table = [gate.theta0, gate.theta1]
 
@@ -41,14 +34,6 @@ def __map_muxy(gate: MULTIPLEXY) -> List[QGate]:
 
 
 def __map_mcry(gate: QGate) -> List[QGate]:
-    """Convert a MCRY gate into a list of gates .
-
-    :param gate: [description]
-    :type gate: QGate
-    :raises Exception: [description]
-    :return: [description]
-    :rtype: List[QGate]
-    """
     match gate.get_qgate_type():
         case QGateType.MCRY:
             control_qubits = gate.control_qubits
@@ -82,16 +67,9 @@ def __map_mcry(gate: QGate) -> List[QGate]:
 
 
 def __map_mcmy(gate: MCMY) -> List[QGate]:
-    """Convert a MCMY gate into a list of gates .
-
-    :param gate: [description]
-    :type gate: MCMY
-    :return: [description]
-    :rtype: List[QGate]
-    """
+    """Convert a MCMY gate into a list of gates ."""
 
     rotation_table = gate.rotation_table
-
     control_sequence = decompose_mcry(rotation_table=rotation_table)
 
     gates = control_sequence_to_gates(
@@ -104,11 +82,7 @@ def __map_mcmy(gate: MCMY) -> List[QGate]:
 
 
 def theta_to_unitary(theta: float):
-    """Converts theta to a unitary unitary gate .
-
-    :param theta: [description]
-    :type theta: float
-    """
+    """Converts theta to a unitary unitary gate ."""
     raw_matrix = np.array(
         [
             [np.cos(theta / 2), -np.sin(theta / 2)],
@@ -119,17 +93,6 @@ def theta_to_unitary(theta: float):
 
 
 def unitary_convert(unitary: np.ndarray, coef: float, signal: int):
-    """Convert a vector in a unitary unitary function to a unitary function .
-
-    :param unitary: [description]
-    :type unitary: np.ndarray
-    :param coef: [description]
-    :type coef: float
-    :param signal: [description]
-    :type signal: int
-    :return: [description]
-    :rtype: [type]
-    """
     param = 1 / np.abs(coef)
 
     values, vectors = np.linalg.eig(unitary)
@@ -148,14 +111,6 @@ def unitary_convert(unitary: np.ndarray, coef: float, signal: int):
 
 
 def __map_mcry_linear(mcry_gate: MCRY) -> List[QGate]:
-    """Map a gate to the circuit .
-
-    :param gate: [description]
-    :type gate: QGate
-    :return: [description]
-    :rtype: List[QGate]
-    """
-
     assert mcry_gate.get_qgate_type() == QGateType.MCRY
 
     # we first preprocess the relavant qubits
@@ -178,20 +133,6 @@ def __map_mcry_linear(mcry_gate: MCRY) -> List[QGate]:
     def convert_rec(
         unitary: np.ndarray, num_qubits: int, is_first: bool = True, step: int = 1
     ):
-        """Convert a unitary unitary to a unitary gate .
-
-        :param unitary: [description]
-        :type unitary: np.ndarray
-        :param num_qubits: [description]
-        :type num_qubits: int
-        :param is_first: [description], defaults to True
-        :type is_first: bool, optional
-        :param step: [description], defaults to 1
-        :type step: int, optional
-        :return: [description]
-        :rtype: [type]
-        """
-
         nonlocal qubit_list
 
         pairs = namedtuple("pairs", ["control", "target"])

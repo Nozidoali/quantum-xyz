@@ -15,11 +15,6 @@ from ._mapping import add_gate_mapped
 
 
 def _add_gate_optimized(self, gate: QGate) -> None:
-    """Add a new gate to this gate .
-
-    :param gate: [description]
-    :type gate: QGate
-    """
     match gate.get_qgate_type():
         case QGateType.CU:
             if gate.is_z_trivial():

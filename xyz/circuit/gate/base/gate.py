@@ -17,9 +17,6 @@ class QGateType(Enum):
     """This method is used to set the auto - gate type for QGate type .
 
     When defining a new gate, we need to register here to get the type name of the gate .
-
-    :param Enum: [description]
-    :type Enum: [type]
     """
 
     U = auto()
@@ -72,11 +69,7 @@ class QGate:
 
 
 class BasicGate(QGate):
-    """Class method for creating a gate .
-
-    :param QGate: [description]
-    :type QGate: [type]
-    """
+    """Class method for creating a gate ."""
 
     def __init__(self, qgate_type: QGateType, target_qubit: QBit) -> None:
         QGate.__init__(self, qgate_type)
