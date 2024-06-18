@@ -15,4 +15,4 @@ from ._stats import *
 from .m_flow import *
 from .rotation_angles import *
 from .exact_cnot_synthesis import *
-from .prepare_dicke_state import *
+from .deterministic_dicke_state import *
