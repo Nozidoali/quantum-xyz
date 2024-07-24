@@ -12,14 +12,14 @@ Last Modified time: 2023-06-22 23:39:10
 from typing import List
 
 # third party library
-from qiskit import QuantumCircuit, QuantumRegister
+from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 
 # my own library
 from ..circuit import QBit, QGate, QGateType, QCircuit
 from .special_gates import SpecialGates
 
 
-def to_qiskit(qcircuit: QCircuit) -> QuantumCircuit:
+def to_qiskit(qcircuit: QCircuit, with_measurement: bool = False) -> QuantumCircuit:
     """Convert this circuit to a QuantumCircuit .
 
     :param with_measurement: [description], defaults to True
@@ -32,8 +32,11 @@ def to_qiskit(qcircuit: QCircuit) -> QuantumCircuit:
     num_qubits = qcircuit.get_num_qubits()
 
     quantum_registers = QuantumRegister(num_qubits)
-
-    circuit = QuantumCircuit(quantum_registers)
+    if with_measurement:
+        classical_registers = ClassicalRegister(num_qubits)
+        circuit = QuantumCircuit(quantum_registers, classical_registers)
+    else:
+        circuit = QuantumCircuit(quantum_registers)
 
     def _to_register(qubit: QBit | List[QBit]) -> QuantumRegister:
         """Converts a single bit value to a register .
@@ -123,5 +126,8 @@ def to_qiskit(qcircuit: QCircuit) -> QuantumCircuit:
                 raise NotImplementedError(
                     f"Gate type {gate.get_qgate_type()} is not supported yet\n Consider toggle map_gates to True"
                 )
+
+    if with_measurement:
+        circuit.measure(quantum_registers, classical_registers)
 
     return circuit
