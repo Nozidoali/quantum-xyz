@@ -67,6 +67,7 @@ def evaluate_fidelity(state_vector: np.ndarray, circuit: QCircuit) -> float:
         qc = to_qiskit(circuit, with_measurement=False)
     else:
         qc = circuit
+    
     qc.save_density_matrix()
     # qc.save_statevector()
     
@@ -217,21 +218,32 @@ def run_pyzx_ga(circuit: QCircuit, state_vector: np.ndarray, data={}) -> QCircui
 
 def run_qiskit(circuit: QCircuit, state_vector: np.ndarray, data={}) -> QCircuit:
     from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
+    from qiskit.transpiler import passes
     from qiskit.providers.fake_provider import GenericBackendV2
     from qiskit import qasm2, transpile
+    from qiskit.quantum_info import Statevector, state_fidelity
 
     from qiskit.providers.fake_provider import Fake27QPulseV1
 
     n_qubits = circuit.get_num_qubits()
     backend = GenericBackendV2(num_qubits=n_qubits)
     
-    
     pass_manager = generate_preset_pass_manager(
-        optimization_level=3, backend=backend, basis_gates=["cx", "ry", "z"]
+        optimization_level=3, backend=backend, basis_gates=["cx", "ry", "z"], 
+        coupling_map=None,  # No coupling map for disabling qubit mapping
+        initial_layout=None,  # No initial layout
+        layout_method=None,  # No layout method
+        routing_method=None,  # No routing method
+        approximation_degree=1.0,
     )
+
     qc = to_qiskit(circuit)
     with stopwatch("qiskit") as timer_qiskit:
         qc_opt = pass_manager.run(qc)
+    
+    state_vector_act = Statevector(qc_opt)
+    # state_vector_exp = Statevector(state_vector)
+    # assert state_fidelity(state_vector_exp, state_vector_act) > 0.99, f"{state_fidelity(state_vector_exp, state_vector_act)}, {state_vector_exp}, {state_vector_act}"
     # print(qc_opt.count_ops())
     # print(qc_opt)
     # print()
@@ -239,7 +251,7 @@ def run_qiskit(circuit: QCircuit, state_vector: np.ndarray, data={}) -> QCircuit
     data["n_g2_qiskit"] = qc_opt.count_ops().get("cx", 0)
     if REPORT_FIDELITY:
         with stopwatch("fidelity") as timer_fidelity:
-            data["fidelity_qiskit"] = evaluate_fidelity(state_vector, qc_opt)
+            data["fidelity_qiskit"] = evaluate_fidelity(state_vector_act.data, qc_opt)
         data["time_fidelity_qiskit"] = timer_fidelity.time()
     if REPORT_G:
         data["n_g_qiskit"] = n_total - data["n_g2_qiskit"]
@@ -367,6 +379,7 @@ def get_benchmarks():
 
 
 import xyz
+from qiskit.quantum_info import Statevector
 
 if __name__ == "__main__":
     N_TESTS = 1
@@ -390,12 +403,13 @@ if __name__ == "__main__":
             new_circuit_ours = run_ours(circuit, state_vector, data)
             # print(to_qiskit(new_circuit_ours))
         except AssertionError:
+            print(f"state vector: {quantize_state(state_vector)}")
             print("Initial circuit")
             print(to_qiskit(circuit))
             print("Errornous circuit")
-            print(to_qiskit(new_circuit_ours))
+            print(new_circuit_qiskit)
             state_exp = simulate_circuit(circuit)
-            state_act = simulate_circuit(new_circuit_ours)
+            state_act = Statevector(new_circuit_qiskit).data
             print(f"expect: {quantize_state(state_exp)}")
             print(f"actual: {quantize_state(state_act)}")
         datas.append(data)
