@@ -181,7 +181,8 @@ def resubN(
     new_window = None
 
     control_phases = [
-        seq for seq in product((True, False), repeat=len(cnot_configuration))
+        # seq for seq in product((True, False), repeat=len(cnot_configuration))
+        [False] * len(cnot_configuration)
     ]
     for control_phase in control_phases:
         success, thetas = try_resub(

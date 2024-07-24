@@ -37,10 +37,47 @@ import pandas as pd
 REPORT_TIME = True
 REPORT_G = False
 WRITE_FILES = True
-N_LIST = list(range(3, 10))
+N_LIST = list(range(3, 10, 3))
 # N_LIST = list(range(11,20))
-REPEAT = 0
+REPEAT = 10
 
+REPORT_FIDELITY = True
+
+def evaluate_fidelity(state_vector: np.ndarray, circuit: QCircuit) -> float:
+    from qiskit_aer.noise import NoiseModel
+    from qiskit_aer import AerSimulator
+    from qiskit import transpile
+    from qiskit.quantum_info import Statevector, state_fidelity, DensityMatrix  
+
+    
+    from qiskit.providers.fake_provider import Fake27QPulseV1
+    backend = Fake27QPulseV1()
+    noise_model = NoiseModel.from_backend(backend)
+    # Get coupling map from backend
+    coupling_map = backend.configuration().coupling_map
+    # Get basis gates from noise model
+    basis_gates = noise_model.basis_gates
+
+    sim_statevector = AerSimulator(
+        method="density_matrix",
+        noise_model=noise_model,
+    )
+    
+    if isinstance(circuit, QCircuit):
+        qc = to_qiskit(circuit, with_measurement=False)
+    else:
+        qc = circuit
+    qc.save_density_matrix()
+    # qc.save_statevector()
+    
+    transpiled_circuit = transpile(qc, backend=sim_statevector, optimization_level=3)
+    result = sim_statevector.run(transpiled_circuit, shots=4096).result()
+    density_matrix_act = result.data()["density_matrix"]
+    
+    state_exp = Statevector(state_vector)
+    density_matrix_exp = DensityMatrix(state_exp)
+    # state_act = Statevector(statevector)
+    return state_fidelity(density_matrix_exp, density_matrix_act)
 
 def generate_initial_circuit(state_vector: np.ndarray, data={}) -> QCircuit:
     # synthesize the state using the best method
@@ -67,14 +104,19 @@ def generate_initial_circuit(state_vector: np.ndarray, data={}) -> QCircuit:
     data["n_qubits"] = n
     data["m_state"] = m
     data["n_g2_initial"] = n_cnot
+    if REPORT_FIDELITY:
+        with stopwatch("fidelity") as timer_fidelity:
+            data["fidelity_initial"] = evaluate_fidelity(state_vector, circuit)
+        data["time_fidelity_initial"] = timer_fidelity.time()
     if REPORT_G:
         data["n_g_initial"] = len(circuit.get_gates()) - n_cnot
     if REPORT_TIME:
         data["time_initial"] = timer_old.time()
     state_vector_act = simulate_circuit(circuit)
     assert np.linalg.norm(state_vector_act - state_vector) < 1e-6
-    write_qasm(circuit, f"qsp_dataset/{name}_{n}_{m}.init.qasm")
-    print(f"Initial circuit saved to qsp_dataset/{name}_{n}_{m}.init.qasm")
+    if WRITE_FILES:
+        write_qasm(circuit, f"qsp_dataset/{name}_{n}_{m}.init.qasm")
+        print(f"Initial circuit saved to qsp_dataset/{name}_{n}_{m}.init.qasm")
     return circuit
 
 
@@ -83,6 +125,10 @@ def run_ours(circuit: QCircuit, state_vector: np.ndarray, data={}) -> QCircuit:
         new_circuit = resynthesis(circuit)
     n_cnot_new = new_circuit.get_cnot_cost()
     data["n_g2_ours"] = n_cnot_new
+    if REPORT_FIDELITY:
+        with stopwatch("fidelity") as timer_fidelity:
+            data["fidelity_ours"] = evaluate_fidelity(state_vector, new_circuit)
+        data["time_fidelity_ours"] = timer_fidelity.time()
     if REPORT_G:
         data["n_g_ours"] = len(new_circuit.get_gates()) - n_cnot_new
     if REPORT_TIME:
@@ -92,8 +138,9 @@ def run_ours(circuit: QCircuit, state_vector: np.ndarray, data={}) -> QCircuit:
         assert np.linalg.norm(state_vector_act - state_vector) < 1e-6
     data["time_sim"] = timer_sim.time()
     n, m = data["n_qubits"], data["m_state"]
-    write_qasm(new_circuit, f"qsp_dataset/{name}_{n}_{m}.iccad24.qasm")
-    print(f"Initial circuit saved to qsp_dataset/{name}_{n}_{m}.iccad24.qasm")
+    if WRITE_FILES:
+        write_qasm(new_circuit, f"qsp_dataset/{name}_{n}_{m}.iccad24.qasm")
+        print(f"Initial circuit saved to qsp_dataset/{name}_{n}_{m}.iccad24.qasm")
     return new_circuit
 
 
@@ -103,6 +150,10 @@ def run_date24(circuit: QCircuit, state_vector: np.ndarray, data={}) -> QCircuit
         new_circuit = prepare_state(state_vector, map_gates=True, verbose_level=0)
     n_cnot_new = new_circuit.get_cnot_cost()
     data["n_g2_date24"] = n_cnot_new
+    if REPORT_FIDELITY:
+        with stopwatch("fidelity") as timer_fidelity:
+            data["fidelity_date24"] = evaluate_fidelity(state_vector, new_circuit)
+        data["time_fidelity_date24"] = timer_fidelity.time()
     if REPORT_G:
         data["n_g_date24"] = len(new_circuit.get_gates()) - n_cnot_new
     if REPORT_TIME:
@@ -169,8 +220,12 @@ def run_qiskit(circuit: QCircuit, state_vector: np.ndarray, data={}) -> QCircuit
     from qiskit.providers.fake_provider import GenericBackendV2
     from qiskit import qasm2, transpile
 
+    from qiskit.providers.fake_provider import Fake27QPulseV1
+
     n_qubits = circuit.get_num_qubits()
     backend = GenericBackendV2(num_qubits=n_qubits)
+    
+    
     pass_manager = generate_preset_pass_manager(
         optimization_level=3, backend=backend, basis_gates=["cx", "ry", "z"]
     )
@@ -182,6 +237,10 @@ def run_qiskit(circuit: QCircuit, state_vector: np.ndarray, data={}) -> QCircuit
     # print()
     n_total = sum(qc_opt.count_ops().values())
     data["n_g2_qiskit"] = qc_opt.count_ops().get("cx", 0)
+    if REPORT_FIDELITY:
+        with stopwatch("fidelity") as timer_fidelity:
+            data["fidelity_qiskit"] = evaluate_fidelity(state_vector, qc_opt)
+        data["time_fidelity_qiskit"] = timer_fidelity.time()
     if REPORT_G:
         data["n_g_qiskit"] = n_total - data["n_g2_qiskit"]
     if REPORT_TIME:
@@ -207,6 +266,10 @@ def run_bqskit(circuit: QCircuit, state_vector: np.ndarray, data={}) -> QCircuit
     qc_opt = bqskit_to_qiskit(c)
     n_total = sum(qc_opt.count_ops().values())
     data["n_g2_bqskit"] = qc_opt.count_ops().get("cx", 0)
+    if REPORT_FIDELITY:
+        with stopwatch("fidelity") as timer_fidelity:
+            data["fidelity_bqskit"] = evaluate_fidelity(state_vector, qc_opt)
+        data["time_fidelity_bqskit"] = timer_fidelity.time()
     if REPORT_G:
         data["n_g_bqskit"] = n_total - data["n_g2_bqskit"]
     if REPORT_TIME:
@@ -253,6 +316,10 @@ def run_bqskit_flow(circuit: QCircuit, state_vector: np.ndarray, data={}) -> QCi
     qc_opt = bqskit_to_qiskit(opt_circuit)
     n_total = sum(qc_opt.count_ops().values())
     data["n_g2_bqskit_flow"] = qc_opt.count_ops().get("cx", 0)
+    if REPORT_FIDELITY:
+        with stopwatch("fidelity") as timer_fidelity:
+            data["fidelity_bqskit_flow"] = evaluate_fidelity(state_vector, qc_opt)
+        data["time_fidelity_bqskit_flow"] = timer_fidelity.time()
     if REPORT_G:
         data["n_g_bqskit_flow"] = n_total - data["n_g2_bqskit_flow"]
     if REPORT_TIME:
