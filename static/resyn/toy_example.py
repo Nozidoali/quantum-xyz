@@ -13,8 +13,9 @@ import numpy as np
 
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit.providers.fake_provider import GenericBackendV2
-from qiskit import qasm2, transpile
-
+from qiskit.quantum_info import Statevector, state_fidelity, DensityMatrix  
+from qiskit_aer import AerSimulator
+from qiskit import transpile
 
 def run_qiskit(circuit: xyz.QCircuit, state_vector: np.ndarray, data={}):
     n_qubits = circuit.get_num_qubits()
@@ -48,14 +49,43 @@ if __name__ == "__main__":
     # circuit.add_gate(xyz.X(xyz.QBit(1)))
     circuit.add_gate(xyz.CRY(np.pi / 2, xyz.QBit(1), True, xyz.QBit(2)))
 
-    new_circuit = xyz.resynthesis(circuit, verbose_level=2)
-    print(xyz.to_qiskit(new_circuit))
+    new_circuit = xyz.resynthesis(circuit, verbose_level=0)
+    # print(xyz.to_qiskit(new_circuit))
 
-    state = xyz.QState.ground_state(3)
+    state: xyz.QState = xyz.QState.ground_state(3)
     for gate in new_circuit.get_gates():
-        print(gate)
         state = gate.apply(state)
-        print(state)
+        # print(gate)
+        # print(state)
+
+    from qiskit_aer.noise import NoiseModel
+
+    
+    from qiskit.providers.fake_provider import Fake27QPulseV1
+    backend = Fake27QPulseV1()
+    noise_model = NoiseModel.from_backend(backend)
+    # Get coupling map from backend
+    coupling_map = backend.configuration().coupling_map
+    # Get basis gates from noise model
+    basis_gates = noise_model.basis_gates
+
+    sim_statevector = AerSimulator(
+        method="density_matrix",
+        noise_model=noise_model,
+    )
+    
+    qc = xyz.to_qiskit(new_circuit, with_measurement=False)
+    qc.save_density_matrix()
+    # qc.save_statevector()
+    
+    transpiled_circuit = transpile(qc, backend=sim_statevector)
+    result = sim_statevector.run(transpiled_circuit, shots=4096).result()
+    density_matrix_act = result.data()["density_matrix"]
+    
+    state_exp = Statevector(state.to_vector())
+    density_matrix_exp = DensityMatrix(state_exp)
+    # state_act = Statevector(statevector)
+    print(f"Fidelity: {state_fidelity(density_matrix_exp, density_matrix_act)}")
 
     # state_vector = xyz.simulate_circuit(new_circuit)
     # new_circuit_qsp = xyz.prepare_state(state_vector, map_gates=True)

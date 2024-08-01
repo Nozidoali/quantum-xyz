@@ -35,4 +35,8 @@ class Z(BasicGate):
         return 0
 
     def apply(self, qstate: "QState") -> "QState":
+        index_to_weight = {}
+        for idx in qstate.index_set:
+            if idx & (1 << self.target_qubit.index):
+                index_to_weight[idx] = -qstate.index_to_weight[idx]
         raise NotImplementedError("Z gate not implemented")

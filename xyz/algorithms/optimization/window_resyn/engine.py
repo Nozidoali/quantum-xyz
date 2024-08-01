@@ -80,13 +80,13 @@ def resynthesize_window(
         verbose_level=verbose_level,
     )
 
-    new_window = resub2N(
-        target_qubit=target_qubit,
-        window_old=new_window,
-        state_begin=state_begin,
-        state_end=state_end,
-        verbose_level=verbose_level,
-    )
+    # new_window = resub2N(
+    #     target_qubit=target_qubit,
+    #     window_old=new_window,
+    #     state_begin=state_begin,
+    #     state_end=state_end,
+    #     verbose_level=verbose_level,
+    # )
 
     if verbose_level >= 1:
         print("new window:")

@@ -16,8 +16,80 @@ customize_legend_names = {
     "n_g2_qiskit": "Qiskit Opt.",
     "n_g2_bqskit_flow": "BQSKit Leap",
     "n_g2_ours": "Ours",
+    "fidelity_iinitial": "Initial",
+    "fidelity_qiskit": "Qiskit Opt.",
+    "fidelity_bqskit_flow": "BQSKit Leap",
+    "fidelity_ours": "Ours",
 }
 
+
+def plot_fidelity():
+    df = pd.read_csv("resynthesis.csv")
+
+    # preprocessing: we set the bqskit_flow to initial if the optimized version is worse
+    df["fidelity_bqskit_flow"] = df[["fidelity_initial", "fidelity_bqskit_flow"]].max(
+        axis=1
+    )
+
+    # we first group the dataset using the name
+    df = df.groupby("name")
+
+    # for each group, we plot a bar plot
+    for name, group in df:
+        print(f"Plotting {name}")
+
+        # we create a new df with the four methods
+        datas = []
+        for n_qubits in [3, 6, 9]:
+            for method in ["initial", "qiskit", "bqskit_flow", "ours"]:
+                data = {}
+                data["n"] = n_qubits
+                data["fidelity"] = group[group["n_qubits"] == n_qubits][
+                    f"fidelity_{method}"
+                ].values[0]
+                data["method"] = method
+                datas.append(data)
+
+        df2 = pd.DataFrame(datas)
+
+        # plot the bar plot, fix the order of the methods
+        df2["method"] = pd.Categorical(
+            df2["method"], ["initial", "qiskit", "bqskit_flow", "ours"]
+        )
+
+        # set color palette
+        plt.figure()
+
+        ax = df2.pivot(index="n", columns="method", values="fidelity").plot(
+            kind="bar", stacked=False
+        )
+
+        # set the font of x and y labels
+        plt.xlabel("Number of qubits", fontsize=FONT_SIZE, fontname="serif")
+        plt.ylabel("Fidelity", fontsize=FONT_SIZE, fontname="serif")
+
+        plt.xticks(fontsize=FONT_SIZE, fontname="serif", rotation=0)
+        plt.yticks(fontsize=FONT_SIZE, fontname="serif", rotation=0)
+
+        # get the handles and labels
+        handles, labels = ax.get_legend_handles_labels()
+
+        # replace the labels
+        labels = [customize_legend_names[label] for label in labels]
+
+        # plot the legend
+        ax.legend(
+            handles=handles,
+            labels=labels,
+            fontsize=FONT_SIZE,
+            loc="upper left",
+            prop={"family": "serif", "size": FONT_SIZE},
+        )
+        
+        # set the margins
+        plt.subplots_adjust(left=LEFT, right=RIGHT, top=TOP, bottom=BOTTOM)
+
+        plt.savefig(f"resynthesis_fidelity_{name}.pdf")
 
 def plot_cnot():
     df = pd.read_csv("resynthesis.csv")
@@ -217,3 +289,4 @@ def plot_avg():
 
 if __name__ == "__main__":
     plot_cnot()
+    plot_fidelity()

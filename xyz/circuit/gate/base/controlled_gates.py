@@ -23,29 +23,15 @@ class ControlledGate:
         self.control_qubit = control_qubit
 
     def get_control_qubit(self) -> QBit:
-        """Returns the control qubit .
-
-        :return: [description]
-        :rtype: QBit
-        """
+        """Returns the control qubit ."""
         return self.control_qubit
 
     def get_phase(self) -> int:
-        """Returns the phase .
-
-        :return: [description]
-        :rtype: int
-        """
+        """Returns the phase ."""
         return self.phase
 
     def is_enabled(self, index: int):
-        """Returns True if the control qubit is enabled .
-
-        :param index: [description]
-        :type index: int
-        :return: [description]
-        :rtype: bool
-        """
+        """Returns True if the control qubit is enabled ."""
         return (index >> self.control_qubit.index) & 1 == self.phase
 
 
@@ -57,35 +43,19 @@ class MultiControlledGate:
         self.phases = list(phases)[:]
 
     def has_zero_controls(self) -> bool:
-        """Returns True if any control qubits are zero .
-
-        :return: [description]
-        :rtype: bool
-        """
+        """Returns True if any control qubits are zero ."""
         return len(self.control_qubits) == 0
 
     def has_one_control(self) -> bool:
-        """Returns True if this instruction has one control .
-
-        :return: [description]
-        :rtype: bool
-        """
+        """Returns True if this instruction has one control ."""
         return len(self.control_qubits) == 1
 
     def get_control_qubits(self) -> List[QBit]:
-        """Returns the control qubits .
-
-        :return: [description]
-        :rtype: List[QBit]
-        """
+        """Returns the control qubits ."""
         return self.control_qubits
 
     def get_phases(self) -> List[int]:
-        """Returns the phases .
-
-        :return: [description]
-        :rtype: List[int]
-        """
+        """Returns the phases ."""
         return self.phases
 
     def is_enabled(self, index: int) -> bool:

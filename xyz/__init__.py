@@ -11,4 +11,4 @@ Last Modified time: 2023-06-28 14:40:59
 from .algorithms import *
 from .utils import *
 from .circuit import *
-from .qiskit_utils import *
+from .external import *

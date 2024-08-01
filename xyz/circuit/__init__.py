@@ -11,4 +11,4 @@ Last Modified time: 2023-08-12 00:02:46
 from .gate import *
 from .qcircuit import *
 from .decomposition import *
-from .utils import *
+from .to_tikz import *
