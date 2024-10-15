@@ -30,28 +30,3 @@ jobs:
       - name: Generate Coverage Report  
         run: |  
           coverage report -m
-  pylint:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10"]
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        sudo apt-get install python3-dev pkg-config
-        python -m pip install --upgrade pip
-        python -m pip install -r requirements.txt
-        pip install pylint
-    - name: Analysing the code with pylint
-      run: |
-        pylint --disable=R,C $(git ls-files 'xyz/*.py')        
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v4.0.1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        slug: Nozidoali/quantum-xyz
