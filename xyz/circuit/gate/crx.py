@@ -12,16 +12,6 @@ from .base import BasicGate, ControlledGate, QBit, QGateType, RotationGate
 
 
 class CRX(RotationGate, BasicGate, ControlledGate):
-    """Classmethod to create CRX and ControlledGate gate .
-
-    :param RotationGate: [description]
-    :type RotationGate: [type]
-    :param BasicGate: [description]
-    :type BasicGate: [type]
-    :param ControlledGate: [description]
-    :type ControlledGate: [type]
-    """
-
     def __init__(
         self, theta: float, control_qubit: QBit, phase: int, target_qubit: QBit
     ) -> None:

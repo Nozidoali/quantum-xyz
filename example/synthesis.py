@@ -1,16 +1,3 @@
-#!/usr/bin/env python
-# -*- encoding=utf8 -*-
-
-"""
-Author: Hanyu Wang
-Created time: 2023-11-16 17:06:22
-Last Modified by: Hanyu Wang
-Last Modified time: 2023-11-17 00:55:53
-"""
-
-# pylint: disable=wrong-import-position
-# pylint: skip-file
-
 import numpy as np
 
 from xyz import (

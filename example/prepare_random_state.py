@@ -1,13 +1,3 @@
-#!/usr/bin/env python
-# -*- encoding=utf8 -*-
-
-"""
-Author: Hanyu Wang
-Created time: 2024-01-19 12:03:04
-Last Modified by: Hanyu Wang
-Last Modified time: 2024-01-19 12:05:07
-"""
-
 import numpy as np
 from xyz import (
     rand_state,

@@ -1,13 +1,3 @@
-#!/usr/bin/env python
-# -*- encoding=utf8 -*-
-
-"""
-Author: Hanyu Wang
-Created time: 2024-04-25 17:33:17
-Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-25 17:53:55
-"""
-
 import numpy as np
 import xyz
 
