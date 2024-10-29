@@ -29,7 +29,6 @@ if __name__ == "__main__":
                 enable_exact_synthesis=False, enable_m_flow=True, enable_n_flow=False
             ),
         )
-
         # circuit = resynthesis(circuit)
 
     n_cnot = circuit.get_cnot_cost()

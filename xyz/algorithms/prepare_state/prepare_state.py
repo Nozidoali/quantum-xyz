@@ -30,17 +30,77 @@ from .exact_cnot_synthesis import exact_cnot_synthesis
 from .m_flow import cardinality_reduction
 from .n_flow import qubit_reduction
 from .support_reduction import support_reduction, x_reduction
-from ._stats import StatePreparationStatistics as Stats
-from ._params import StatePreparationParameters as Params
 from ._reindex import reindex_circuit
+
+
+class StatePreparationParameters:
+    EXACT_SYNTHESIS_DENSITY_THRESHOLD = 100
+    EXACT_SYNTHESIS_CNOT_LIMIT = 100
+
+    def __init__(
+        self,
+        enable_exact_synthesis: bool = True,
+        enable_n_flow: bool = False,
+        enable_m_flow: bool = True,
+        enable_decomposition: bool = False,
+        enable_compression: bool = True,
+        enable_reindex: bool = False,
+        n_qubits_max: int = 4,
+    ) -> None:
+        self.enable_exact_synthesis: bool = enable_exact_synthesis
+        self.enable_n_flow: bool = enable_n_flow
+        self.enable_m_flow: bool = enable_m_flow
+        self.enable_decomposition: bool = enable_decomposition
+        self.enable_compression: bool = enable_compression
+        self.enable_reindex: bool = enable_reindex
+        self.n_qubits_max: int = n_qubits_max
+
+
+
+class StatePreparationStatistics:
+    """Classes the StatePreparationStatistics class ."""
+
+    def __init__(self) -> None:
+        self.time_total: float = 0
+        self.num_runs_support_reduction: int = 0
+        self.num_reduced_supports: int = 0
+        self.num_reduced_density: int = 0
+        self.num_saved_gates_decision: int = 0
+        self.num_methods: dict = {}
+
+        # time
+        self.time_support_reduction: float = 0
+        self.time_exact_cnot_synthesis: float = 0
+        self.time_cardinality_reduction: float = 0
+        self.time_qubit_decomposition: float = 0
+
+    def report(self):
+        """Report the number of runs supported by the benchmark ."""
+        print("-" * 80)
+        print(f"time_total: {self.time_total}")
+        print("-" * 80)
+        print(f"num_runs_support_reduction: {self.num_runs_support_reduction}")
+        print(f"time_support_reduction: {self.time_support_reduction:0.02f} sec")
+        print(f"time_exact_cnot_synthesis: {self.time_exact_cnot_synthesis:0.02f} sec")
+        print(
+            f"time_cardinality_reduction: {self.time_cardinality_reduction:0.02f} sec"
+        )
+        print(f"time_qubit_decomposition: {self.time_qubit_decomposition:0.02f} sec")
+        print(f"num_reduced_supports: {self.num_reduced_supports}")
+        print(f"num_reduced_density: {self.num_reduced_density}")
+        print(f"num_saved_gates_decision: {self.num_saved_gates_decision}")
+        print("-" * 80)
+        for method, num in self.num_methods.items():
+            print(f"{method}: {num}")
+        print("-" * 80)
 
 
 def _prepare_state_rec(
     circuit: QCircuit,
     state: QState,
     verbose_level: int = 0,
-    param: Params = Params(),
-    stats: Stats = Stats(),
+    param: StatePreparationParameters = StatePreparationParameters(),
+    StatePreparationStatistics: StatePreparationStatistics = StatePreparationStatistics(),
 ):
     prev_supports = state.get_supports()
     prev_num_supports = len(prev_supports)
@@ -58,7 +118,7 @@ def _prepare_state_rec(
         num_cx_support_reduction = sum(
             (gate.get_cnot_cost() for gate in support_reducing_gates)
         )
-        stats.time_support_reduction += timer.time()
+        StatePreparationStatistics.time_support_reduction += timer.time()
 
     if param.enable_reindex:
         state, circuit = reindex_circuit(circuit, state)
@@ -72,9 +132,9 @@ def _prepare_state_rec(
     if verbose_level >= 3:
         print(f"state: {state}")
 
-    stats.num_runs_support_reduction += 1
-    stats.num_reduced_supports += prev_num_supports - num_supports
-    stats.num_reduced_density += prev_density - cardinality
+    StatePreparationStatistics.num_runs_support_reduction += 1
+    StatePreparationStatistics.num_reduced_supports += prev_num_supports - num_supports
+    StatePreparationStatistics.num_reduced_density += prev_density - cardinality
 
     # check for the trivial case
     if cardinality == 1:
@@ -87,7 +147,7 @@ def _prepare_state_rec(
     if (
         param.enable_exact_synthesis
         and num_supports <= param.n_qubits_max
-        and cardinality <= Params.EXACT_SYNTHESIS_DENSITY_THRESHOLD
+        and cardinality <= StatePreparationParameters.EXACT_SYNTHESIS_DENSITY_THRESHOLD
     ):
         try:
             with stopwatch("exact_cnot_synthesis") as timer:
@@ -95,10 +155,10 @@ def _prepare_state_rec(
                     circuit,
                     state,
                     verbose_level=verbose_level,
-                    cnot_limit=Params.EXACT_SYNTHESIS_CNOT_LIMIT,
+                    cnot_limit=StatePreparationParameters.EXACT_SYNTHESIS_CNOT_LIMIT,
                 )
-            if stats is not None:
-                stats.time_exact_cnot_synthesis += timer.time()
+            if StatePreparationStatistics is not None:
+                StatePreparationStatistics.time_exact_cnot_synthesis += timer.time()
             gates = exact_gates + support_reducing_gates
             num_cx_exact = sum((gate.get_cnot_cost() for gate in exact_gates))
             return gates, num_cx_exact
@@ -117,11 +177,11 @@ def _prepare_state_rec(
         num_cardinality_reduction_cx = sum(
             (gate.get_cnot_cost() for gate in cardinality_reduction_gates)
         )
-        stats.time_cardinality_reduction += timer.time()
+        StatePreparationStatistics.time_cardinality_reduction += timer.time()
         rec_gates, rec_cx = _prepare_state_rec(
             circuit,
             new_state,
-            stats=stats,
+            StatePreparationStatistics=StatePreparationStatistics,
             param=param,
             verbose_level=verbose_level,
         )
@@ -141,11 +201,11 @@ def _prepare_state_rec(
         num_qubit_reduction_cx = sum(
             (gate.get_cnot_cost() for gate in qubit_decomposition_gates)
         )
-        stats.time_qubit_decomposition += timer.time()
+        StatePreparationStatistics.time_qubit_decomposition += timer.time()
         rec_gates, rec_cx = _prepare_state_rec(
             circuit,
             new_state,
-            stats=stats,
+            StatePreparationStatistics=StatePreparationStatistics,
             param=param,
             verbose_level=verbose_level,
         )
@@ -175,9 +235,9 @@ def _prepare_state_rec(
     worst_num_gates = worst_candidate.num_gates
     best_num_gates = best_candidate.num_gates
 
-    if stats is not None:
-        stats.num_saved_gates_decision += worst_num_gates - best_num_gates
-        stats.num_methods[best_method] = stats.num_methods.get(best_method, 0) + 1
+    if StatePreparationStatistics is not None:
+        StatePreparationStatistics.num_saved_gates_decision += worst_num_gates - best_num_gates
+        StatePreparationStatistics.num_methods[best_method] = StatePreparationStatistics.num_methods.get(best_method, 0) + 1
 
     return best_gates, best_num_gates
 
@@ -186,8 +246,8 @@ def prepare_state(
     state: QState,
     map_gates: bool = True,
     verbose_level: int = 0,
-    param: Params = None,
-    stats: Stats = Stats(),
+    param: StatePreparationParameters = None,
+    StatePreparationStatistics: StatePreparationStatistics = StatePreparationStatistics(),
 ) -> QCircuit:
     """A hybrid method combining both qubit- and cardinality- reduction.
 
@@ -217,7 +277,7 @@ def prepare_state(
 
     if param is None:
         # we design the default parameters
-        param = Params()
+        param = StatePreparationParameters()
         if cardinality_reduction_cnot_estimation < qubit_reduction_cnot_estimation:
             # if the state is sparse, we enable cardinality reduction method
             # print_yellow("enable_m_flow")
@@ -238,11 +298,11 @@ def prepare_state(
             state,
             verbose_level=verbose_level,
             param=param,
-            stats=stats,
+            StatePreparationStatistics=StatePreparationStatistics,
         )
 
-    if stats is not None:
-        stats.time_total = timer.time()
+    if StatePreparationStatistics is not None:
+        StatePreparationStatistics.time_total = timer.time()
 
     circuit.add_gates(gates)
 

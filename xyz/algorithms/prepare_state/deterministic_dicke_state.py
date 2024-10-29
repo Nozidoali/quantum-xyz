@@ -161,7 +161,7 @@ def prepare_dicke_state(n: int, k: int, map_gates: bool = True):
 
     # prepare the dicke state
     for i in range(n - 1):
-        manager.print_hasVal()
+        # manager.print_hasVal()
         manager.insert_scs(circuit, n, k, i)
 
     return circuit
