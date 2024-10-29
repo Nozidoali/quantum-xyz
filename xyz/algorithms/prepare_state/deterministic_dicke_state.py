@@ -129,9 +129,7 @@ class SCSManager:
         theta = 2 * np.arccos(np.sqrt((i + 1) / (n - j)))
 
         self.add_cx(circuit, j + i + 1, j)
-
         self.add_mcry(circuit, j + i, j, j + i + 1, theta)
-
         self.add_cx(circuit, j + i + 1, j)
 
     def insert_scs(self, circuit: QCircuit, n: int, k: int, j: int):

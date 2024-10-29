@@ -1,13 +1,3 @@
-#!/usr/bin/env python
-# -*- encoding=utf8 -*-
-
-"""
-Author: Hanyu Wang
-Created time: 2024-05-11 17:49:34
-Last Modified by: Hanyu Wang
-Last Modified time: 2024-05-11 18:58:52
-"""
-
 import pickle
 from queue import PriorityQueue
 from xyz.circuit import QState, from_set

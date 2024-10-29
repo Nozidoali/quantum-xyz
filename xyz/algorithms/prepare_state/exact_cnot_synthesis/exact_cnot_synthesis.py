@@ -1,23 +1,27 @@
-#!/usr/bin/env python
-# -*- encoding=utf8 -*-
-
-"""
-Author: Hanyu Wang
-Created time: 2023-09-01 12:51:03
-Last Modified by: Hanyu Wang
-Last Modified time: 2023-09-01 12:56:17
-"""
 
 from xyz.circuit import QCircuit
 from xyz.circuit import QState
 
-from ._astar import AStarCost
-from ._backtrace import backtrace
 from .state_transitions import get_state_transitions
-from .explorer import Explorer
+from .explorer import Explorer, AStarCost
 
 N_FRONT_MAX = 1e7
 N_ENQUEUED_MAX = 1e6
+
+
+def backtrace(state: QState, record: dict):
+    gates = []
+    backtraced_states: set = set()
+    curr_hash = hash(state)
+    while curr_hash in record:
+        if curr_hash in backtraced_states:
+            raise ValueError("Loop found")
+        backtraced_states.add(curr_hash)
+        prev_hash, _gates = record[curr_hash]
+        gates += _gates
+        curr_hash = prev_hash
+
+    return gates
 
 
 def exact_cnot_synthesis(

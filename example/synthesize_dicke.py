@@ -11,13 +11,12 @@ from xyz import (
 )
 
 if __name__ == "__main__":
-    state_vector = D_state(8, 2)
+    state_vector = D_state(4, 2)
     target_state = quantize_state(state_vector)
 
     # synthesize the state
     with stopwatch("synthesis", verbose=True) as timer:
         circuit = prepare_state(target_state, map_gates=True, verbose_level=0)
-        # circuit = prepare_dicke_state(8, 2)
         circuit = resynthesis(circuit, verbose_level=0)
     n_cnot = circuit.get_cnot_cost()
 

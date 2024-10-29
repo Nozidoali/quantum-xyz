@@ -1,13 +1,3 @@
-#!/usr/bin/env python
-# -*- encoding=utf8 -*-
-
-"""
-Author: Hanyu Wang
-Created time: 2024-05-11 10:47:24
-Last Modified by: Hanyu Wang
-Last Modified time: 2024-05-11 11:11:21
-"""
-
 import numpy as np
 
 from xyz.circuit import QCircuit, QState, CX, CRY
