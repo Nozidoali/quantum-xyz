@@ -8,7 +8,6 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-08-12 00:02:46
 """
 
-from .gate import *
+from .qstate import *
+from .qgate import *
 from .qcircuit import *
-from .decomposition import *
-from .to_tikz import *

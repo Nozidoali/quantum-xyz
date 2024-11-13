@@ -1,4 +1,6 @@
 import numpy as np
+from qiskit import qasm2
+from qiskit.quantum_info import Statevector
 from xyz import (
     D_state,
     quantize_state,
@@ -11,13 +13,23 @@ from xyz import (
 )
 
 if __name__ == "__main__":
-    state_vector = D_state(4, 2)
-    target_state = quantize_state(state_vector)
+    # state_vector = D_state(5, 2)
+    # target_state = quantize_state(state_vector)
+    
+    qc = qasm2.load('dicke.qasm')
+    # qc = resynthesis(qc, verbose_level=0)
+    state_vector_act = Statevector(qc).data
+    state_vector_act[np.abs(state_vector_act) < 1e-10] = 0
+    print(f"actual state: {quantize_state(state_vector_act)}")
+    # print(qc)
+    exit()
 
     # synthesize the state
+    state_vector = D_state(5, 2)
     with stopwatch("synthesis", verbose=True) as timer:
-        circuit = prepare_state(target_state, map_gates=True, verbose_level=0)
-        circuit = resynthesis(circuit, verbose_level=0)
+        circuit = prepare_dicke_state(5, 2, map_gates=False)
+        # circuit = prepare_state(state_vector, map_gates=False, verbose_level=0)
+        # circuit = resynthesis(circuit, verbose_level=0)
     n_cnot = circuit.get_cnot_cost()
 
     # now we measure the distance between the target state and the actual state
@@ -27,5 +39,7 @@ if __name__ == "__main__":
 
     qc = to_qiskit(circuit)
     print("CNOT count: ", n_cnot)
-    # print("target state: ", quantize_state(state_vector))
-    # print("actual state: ", quantize_state(state_vector_act))
+    print(qc)
+    qasm2.dump(qc, 'dicke.qasm')
+    print("target state: ", quantize_state(state_vector))
+    print("actual state: ", quantize_state(state_vector_act))

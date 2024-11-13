@@ -1,20 +1,6 @@
-#!/usr/bin/env python
-# -*- encoding=utf8 -*-
-
-"""
-Author: Hanyu Wang
-Created time: 2023-09-08 12:59:35
-Last Modified by: Hanyu Wang
-Last Modified time: 2023-09-10 17:52:33
-"""
-
 import numpy as np
 
-from xyz.circuit.gate.cx import CX
-from xyz.circuit.gate.mcry import MCRY
-from xyz.circuit.qcircuit import QCircuit
-
-from xyz.circuit import QState
+from xyz.circuit import QState, QCircuit, CX, MCRY
 from .support_reduction import x_reduction
 
 
@@ -68,12 +54,6 @@ def _maximize_difference_once(state: QState, indices: set, diff_lit: dict):
 
 
 def cardinality_reduction(circuit: QCircuit, state: QState, verbose_level: int = 0):
-    """Select indices for the QState .
-
-    :param state: [description]
-    :type state: QState
-    """
-
     diff_qubits = []
     diff_values = []
 

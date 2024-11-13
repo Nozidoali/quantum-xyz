@@ -12,25 +12,12 @@ import threading
 from typing import List
 import numpy as np
 
-from xyz.circuit import QGate, QGateType, QBit, CX, CRY
-from xyz.circuit.gate.mcmy import MCMY
-from xyz.circuit.gate.mcry import MCRY
-from xyz.circuit.gate.ry import RY
-
-from xyz.circuit.qcircuit import QCircuit
-from xyz.circuit import QState
+from xyz.circuit import QGate, QState, QCircuit, QGateType, QBit, CX, CRY, MCRY, RY, MCMY
 from .exact_cnot_synthesis import exact_cnot_synthesis
 from .support_reduction import support_reduction
 
 
 def to_controlled_gate(gate: QGate, control_qubit: QBit, control_phase: bool):
-    """Return a controlled gate .
-
-    :param gate: [description]
-    :type gate: QGate
-    :return: [description]
-    :rtype: [type]
-    """
     assert control_qubit != gate.get_target_qubit()
     match gate.get_qgate_type():
         case QGateType.X:
@@ -49,14 +36,12 @@ def to_controlled_gate(gate: QGate, control_qubit: QBit, control_phase: bool):
             return MCRY(
                 gate.get_theta(), control_qubits, phases, gate.get_target_qubit()
             )
-
         case QGateType.MCRY:
             control_qubits = [control_qubit] + gate.get_control_qubits()
             phases = [control_phase] + gate.get_phases()
             return MCRY(
                 gate.get_theta(), control_qubits, phases, gate.get_target_qubit()
             )
-
         case _:
             raise NotImplementedError(
                 f"Controlled gate {gate.get_qgate_type()} is not implemented"
@@ -65,13 +50,6 @@ def to_controlled_gate(gate: QGate, control_qubit: QBit, control_phase: bool):
 
 def select_pivot_qubit(state: QState, supports: set):
     """Selects the pivot of the given state .
-
-    :param state: [description]
-    :type state: QState
-    :param supports: [description]
-    :type supports: set
-    :return: [description]
-    :rtype: [type]
     """
     max_difference: int = -1
     best_qubit = None
@@ -108,13 +86,6 @@ def select_pivot_qubit(state: QState, supports: set):
 
 def select_informative_qubit(state: QState, supports: set):
     """Selects the smallest qubit in the given state .
-
-    :param state: [description]
-    :type state: QState
-    :param supports: [description]
-    :type supports: set
-    :return: [description]
-    :rtype: [type]
     """
     best_qubit = None
 
@@ -264,15 +235,6 @@ def qubit_decomposition(
     cnot_limit: int = None,
 ):
     """Decompose a circuit into a sequence of single qubit gates and CNOT gates .
-
-    :param circuit: [description]
-    :type circuit: QCircuit
-    :param state: [description]
-    :type state: QState
-    :param optimality_level: [description]
-    :type optimality_level: int
-    :return: [description]
-    :rtype: [type]
     """
 
     gates = []
@@ -351,20 +313,9 @@ def qubit_reduction(
     supports: set,
 ):
     """Composes a circuit decomposition for a circuit .
-
     the main difference is that, in this implementation:
         1. we do not synthesize the truth table
-
     to further improve, maybe we can check the actual supports
-
-    :param circuit: [description]
-    :type circuit: QCircuit
-    :param state: [description]
-    :type state: QState
-    :param supports: [description]
-    :type supports: set
-    :return: [description]
-    :rtype: [type]
     """
     # we randomly select a pivot qubit
     pivot = select_informative_qubit(state, supports)

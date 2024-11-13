@@ -1,15 +1,4 @@
-#!/usr/bin/env python
-# -*- encoding=utf8 -*-
-
-"""
-Author: Hanyu Wang
-Created time: 2023-11-21 12:51:01
-Last Modified by: Hanyu Wang
-Last Modified time: 2023-11-21 12:59:21
-"""
-
-from typing import List
-
+from typing import List, Dict
 import numpy as np
 from xyz.circuit import QState
 
@@ -41,7 +30,7 @@ def get_ry_angles(state: QState, qubit_index: int) -> List[float]:
     return thetas
 
 
-def get_rotation_table(state: QState, qubit_index: int) -> dict:
+def get_rotation_table(state: QState, qubit_index: int) -> Dict[int, float]:
     """Return the projection of the state .
 
     The keys in the dictionary are the indices (we make sure that all the values of pivot qubit is 0 in the indices)
