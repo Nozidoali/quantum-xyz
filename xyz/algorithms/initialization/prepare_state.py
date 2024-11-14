@@ -20,8 +20,7 @@ from collections import namedtuple
 from typing import List
 import numpy as np
 
-from xyz.circuit import QCircuit, QGate
-from xyz.circuit import QState, quantize_state
+from xyz.circuit import QCircuit, QGate, QState, quantize_state
 from xyz.utils import stopwatch
 from xyz.utils import global_stopwatch_report
 

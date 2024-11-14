@@ -1,9 +1,7 @@
 import numpy as np
 
-from xyz.circuit import QCircuit, QState, CX, CRY
+from xyz.circuit import QCircuit, QState, CX, CRY, get_ap_cry_angles
 from ..support_reduction import support_reduction
-from ..rotation_angles import get_ap_cry_angles
-
 
 def get_state_transitions(circuit: QCircuit, curr_state: QState, supports: list = None):
     if supports is None:

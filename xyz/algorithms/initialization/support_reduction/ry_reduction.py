@@ -1,16 +1,5 @@
-#!/usr/bin/env python
-# -*- encoding=utf8 -*-
-
-"""
-Author: Hanyu Wang
-Created time: 2024-04-23 08:31:29
-Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-23 09:08:48
-"""
-
 import copy
-from xyz.circuit import RY, QCircuit, QState
-from ..rotation_angles import get_ap_ry_angles
+from xyz.circuit import RY, QCircuit, QState, get_ap_ry_angles
 
 
 def ry_reduction(circuit: QCircuit, state: QState):
