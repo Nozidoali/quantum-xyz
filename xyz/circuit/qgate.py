@@ -176,6 +176,10 @@ class ControlledGate:
     def get_control_qubit(self) -> QBit:
         """Returns the control qubit ."""
         return self.control_qubit
+      
+    def get_control_qubits(self) -> List[QBit]:
+        """Returns the control qubits ."""
+        return [self.control_qubit]
 
     def get_phase(self) -> int:
         """Returns the phase ."""
@@ -224,30 +228,15 @@ class BasicGate(QGate):
         self.target_qubit: QBit = target_qubit
 
     def get_target_qubit(self) -> QBit:
-        """Returns the target qubit .
-
-        :return: [description]
-        :rtype: QBit
-        """
         return self.target_qubit
 
     def apply(self, qstate: "QState") -> "QState":
-        """Returns the qstate .
-
-        :param qstate: [description]
-        :type qstate: [type]
-        :return: [description]
-        :rtype: [type]
-        """
         raise NotImplementedError("This method is not implemented")
 
+    def get_cnot_cost(self) -> int:
+        raise NotImplementedError("This method is not implemented")
 
 class AdvancedGate(QGate):
-    """Class method that creates a AdvancedGate class .
-
-    :param QGate: [description]
-    :type QGate: [type]
-    """
 
     def __init__(self, qgate_type: QGateType) -> None:
         QGate.__init__(self, qgate_type)
@@ -275,11 +264,6 @@ class CRX(RotationGate, BasicGate, ControlledGate):
         return f"CRX({self.theta:0.02f}, {self.control_qubit}[{self.phase}])"
 
     def get_cnot_cost(self) -> int:
-        """Returns the cost of the cost of the gate.
-
-        :return: [description]
-        :rtype: int
-        """
         return 2
 
     def apply(self, qstate: "QState") -> "QState":
@@ -328,15 +312,6 @@ class CRY(RotationGate, BasicGate, ControlledGate):
 
 
 class CRZ(RotationGate, BasicGate, ControlledGate):
-    """Classmethod to create CRZ and ControlledGate gate .
-
-    :param RotationGate: [description]
-    :type RotationGate: [type]
-    :param BasicGate: [description]
-    :type BasicGate: [type]
-    :param ControlledGate: [description]
-    :type ControlledGate: [type]
-    """
 
     def __init__(
         self, theta: float, control_qubit: QBit, phase: int, target_qubit: QBit
@@ -349,11 +324,6 @@ class CRZ(RotationGate, BasicGate, ControlledGate):
         return f"CRZ({self.theta:0.02f}, {self.control_qubit}[{self.phase}])"
 
     def get_cnot_cost(self) -> int:
-        """Returns the cost of the cost of the gate.
-
-        :return: [description]
-        :rtype: int
-        """
         return 2
 
     def apply(self, qstate: "QState") -> "QState":
@@ -361,13 +331,6 @@ class CRZ(RotationGate, BasicGate, ControlledGate):
 
 
 class CU(BasicGate, UnitaryGate, ControlledGate):
-    """Classmethod to create a CU and ControlledGate .
-
-    :param BasicGate: [description]
-    :type BasicGate: [type]
-    :param ControlledGate: [description]
-    :type ControlledGate: [type]
-    """
 
     def __init__(
         self, unitary: np.ndarray, control_qubit: QBit, phase: int, target_qubit: QBit
@@ -381,11 +344,6 @@ class CU(BasicGate, UnitaryGate, ControlledGate):
         return f"C({phase_str}{self.control_qubit})U({self.target_qubit})"
 
     def get_cnot_cost(self) -> int:
-        """Returns the cost of the cost of the gate.
-
-        :return: [description]
-        :rtype: int
-        """
         return 2
 
     def apply(self, qstate: "QState") -> "QState":
@@ -393,13 +351,6 @@ class CU(BasicGate, UnitaryGate, ControlledGate):
 
 
 class CX(BasicGate, ControlledGate):
-    """Classmethod to create a CX and ControlledGate .
-
-    :param BasicGate: [description]
-    :type BasicGate: [type]
-    :param ControlledGate: [description]
-    :type ControlledGate: [type]
-    """
 
     def __init__(self, control_qubit: QBit, phase: int, target_qubit: QBit) -> None:
         BasicGate.__init__(self, QGateType.CX, target_qubit)
@@ -410,19 +361,9 @@ class CX(BasicGate, ControlledGate):
         return f"C({phase_str}{self.control_qubit})X({self.target_qubit})"
 
     def get_cnot_cost(self) -> int:
-        """Returns the cost of the cost of the gate.
-
-        :return: [description]
-        :rtype: int
-        """
         return 1
 
     def conjugate(self) -> "CX":
-        """Return the conjugate of the gate .
-
-        :return: [description]
-        :rtype: CX
-        """
         return CX(self.control_qubit, self.phase, self.target_qubit)
 
     def apply(self, qstate: QState) -> QState:
@@ -437,11 +378,6 @@ class CX(BasicGate, ControlledGate):
 
 
 class MCMY(AdvancedGate):
-    """Returns a multi-controlled mux Y class .
-
-    :param AdvancedGate: [description]
-    :type AdvancedGate: [type]
-    """
 
     def __init__(
         self,
@@ -463,11 +399,6 @@ class MCMY(AdvancedGate):
         return f"MCMY({control_qubit_str})"
 
     def get_cnot_cost(self) -> int:
-        """Returns the cost of the cost of the gate.
-
-        :return: [description]
-        :rtype: int
-        """
         return 1 << len(self.control_qubits)
 
     def apply(self, qstate: "QState") -> "QState":
@@ -508,15 +439,6 @@ MCRY_CNOT_COST = {
 
 
 class MCRY(RotationGate, BasicGate, MultiControlledGate):
-    """Classmethod to create a multi-controlled  gate .
-
-    :param RotationGate: [description]
-    :type RotationGate: [type]
-    :param BasicGate: [description]
-    :type BasicGate: [type]
-    :param MultiControlledGate: [description]
-    :type MultiControlledGate: [type]
-    """
 
     def __init__(
         self,
@@ -536,7 +458,7 @@ class MCRY(RotationGate, BasicGate, MultiControlledGate):
                 for qubit, phase in zip(self.control_qubits, self.phases)
             ]
         )
-        return f"MCRY({self.target_qubit.index}:{self.theta:0.02f}, {control_str})"
+        return f"MCRY({self.target_qubit.index},{self.theta:0.02f}, {control_str})"
 
     def get_cnot_cost(self) -> int:
         """Returns the cost of the cost of the gate."""
@@ -573,11 +495,6 @@ class MCRY(RotationGate, BasicGate, MultiControlledGate):
 
 
 class MULTIPLEXY(AdvancedGate):
-    """Returns a DanceXRULTI class .
-
-    :param AdvancedGate: [description]
-    :type AdvancedGate: [type]
-    """
 
     def __init__(
         self, theta0: float, theta1: float, control_qubit: QBit, target_qubit: QBit
@@ -596,11 +513,6 @@ class MULTIPLEXY(AdvancedGate):
         return f"MULTIPLEXY({self.theta0}, {self.theta1}, {self.control_qubit}, {self.target_qubit})"
 
     def get_cnot_cost(self) -> int:
-        """Returns the cost of the cost of the gate.
-
-        :return: [description]
-        :rtype: int
-        """
         return 2
 
     def apply(self, qstate: "QState") -> "QState":
@@ -608,13 +520,6 @@ class MULTIPLEXY(AdvancedGate):
 
 
 class RX(RotationGate, BasicGate):
-    """Constructs a RX gate .
-
-    :param RotationGate: [description]
-    :type RotationGate: [type]
-    :param BasicGate: [description]
-    :type BasicGate: [type]
-    """
 
     def __init__(self, theta: float, target_qubit: QBit) -> None:
         BasicGate.__init__(self, QGateType.RX, target_qubit)
@@ -624,11 +529,6 @@ class RX(RotationGate, BasicGate):
         return f"RX({self.theta:0.02f})"
 
     def get_cnot_cost(self) -> int:
-        """Returns the cost of the cost of the gate.
-
-        :return: [description]
-        :rtype: int
-        """
         return 0
 
     def apply(self, qstate: "QState") -> "QState":
@@ -636,35 +536,18 @@ class RX(RotationGate, BasicGate):
 
 
 class RY(RotationGate, BasicGate):
-    """Constructs a RYYY gate .
-
-    :param RotationGate: [description]
-    :type RotationGate: [type]
-    :param BasicGate: [description]
-    :type BasicGate: [type]
-    """
 
     def __init__(self, theta: float, target_qubit: QBit) -> None:
         BasicGate.__init__(self, QGateType.RY, target_qubit)
         RotationGate.__init__(self, theta)
 
     def __str__(self) -> str:
-        return f"RY({self.target_qubit}:{self.theta:0.02f})"
+        return f"RY({self.target_qubit}, {self.theta:0.02f})"
 
     def get_cnot_cost(self) -> int:
-        """Returns the cost of the cost of the gate.
-
-        :return: [description]
-        :rtype: int
-        """
         return 0
 
     def conjugate(self) -> "RY":
-        """Conjugate the gate .
-
-        :return: [description]
-        :rtype: RY
-        """
         return RY(-self.theta, self.target_qubit)
 
     def apply(self, qstate: QState) -> QState:
@@ -683,14 +566,6 @@ class RY(RotationGate, BasicGate):
 
 
 class RZ(RotationGate, BasicGate):
-    """Constructs a RZ gate .
-
-    :param RotationGate: [description]
-    :type RotationGate: [type]
-    :param BasicGate: [description]
-    :type BasicGate: [type]
-    """
-
     def __init__(self, theta: float, target_qubit: QBit) -> None:
         BasicGate.__init__(self, QGateType.RZ, target_qubit)
         RotationGate.__init__(self, theta)
@@ -699,11 +574,6 @@ class RZ(RotationGate, BasicGate):
         return f"RZ({self.theta:0.02f})"
 
     def get_cnot_cost(self) -> int:
-        """Returns the cost of the cost of the gate.
-
-        :return: [description]
-        :rtype: int
-        """
         return 0
 
     def apply(self, qstate: "QState") -> "QState":
@@ -711,14 +581,6 @@ class RZ(RotationGate, BasicGate):
 
 
 class U(UnitaryGate, BasicGate):
-    """Constructs a Unitary gate .
-
-    :param RotationGate: [description]
-    :type RotationGate: [type]
-    :param BasicGate: [description]
-    :type BasicGate: [type]
-    """
-
     def __init__(self, unitary: np.ndarray, target_qubit: QBit) -> None:
         BasicGate.__init__(self, QGateType.U, target_qubit)
         UnitaryGate.__init__(self, unitary)
@@ -727,11 +589,6 @@ class U(UnitaryGate, BasicGate):
         return "U"
 
     def get_cnot_cost(self) -> int:
-        """Returns the cost of the cost of the gate.
-
-        :return: [description]
-        :rtype: int
-        """
         return 0
 
     def apply(self, qstate: "QState") -> "QState":
@@ -739,12 +596,6 @@ class U(UnitaryGate, BasicGate):
 
 
 class X(BasicGate):
-    """Class method for creating a X gate class .
-
-    :param BasicGate: [description]
-    :type BasicGate: [type]
-    """
-
     def __init__(self, target_qubit: QBit) -> None:
         BasicGate.__init__(self, QGateType.X, target_qubit)
 
@@ -752,11 +603,6 @@ class X(BasicGate):
         return f"X({self.target_qubit})"
 
     def get_cnot_cost(self) -> int:
-        """Returns the cost of the cost of the gate.
-
-        :return: [description]
-        :rtype: int
-        """
         return 0
 
     def apply(self, qstate: QState) -> QState:
@@ -768,11 +614,6 @@ class X(BasicGate):
 
 
 class Z(BasicGate):
-    """Classmethod to create a Gate class .
-
-    :param BasicGate: [description]
-    :type BasicGate: [type]
-    """
 
     def __init__(self, target_qubit: QBit) -> None:
         BasicGate.__init__(self, QGateType.Z, target_qubit)
@@ -781,11 +622,6 @@ class Z(BasicGate):
         return f"Z({self.target_qubit})"
 
     def get_cnot_cost(self) -> int:
-        """Returns the cost of the cost of the gate.
-
-        :return: [description]
-        :rtype: int
-        """
         return 0
 
     def apply(self, qstate: "QState") -> "QState":
@@ -852,7 +688,6 @@ def find_thetas(alphas):
 
 def decompose_mcry(rotation_table: list):
     num_controls = int(np.log2(len(rotation_table)))
-
     assert num_controls > 0, "The number of controls must be greater than 0"
 
     alphas = rotation_table[:]
@@ -860,10 +695,7 @@ def decompose_mcry(rotation_table: list):
 
     # return a list of control sequences
     control_sequence: list = []
-
     prev_gray_code = 0
-
-    # print(f"num_controls: {num_controls}, thetas: {thetas}")
 
     for i, theta in enumerate(thetas):
         # get the bit that changed in the i of gray code

@@ -166,14 +166,14 @@ def cardinality_reduction(circuit: QCircuit, state: QState, verbose_level: int =
     return new_state, gates[::-1]
 
 
-def sparse_state_synthesis(state: QState, verbose_level: int = 0):
+def sparse_state_synthesis(state: QState, map_gates: bool = False, verbose_level: int = 0):
     """This function is used to synthesis sparse state.
 
     reference: https://github.com/qclib/qclib/blob/master/qclib/state_preparation/merge.py
 
     """
 
-    circuit = QCircuit(state.num_qubits)
+    circuit = QCircuit(state.num_qubits, map_gates=map_gates)
 
     # deep copy
     curr_state = QState(state.index_to_weight, state.num_qubits)
