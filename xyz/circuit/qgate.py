@@ -176,7 +176,7 @@ class ControlledGate:
     def get_control_qubit(self) -> QBit:
         """Returns the control qubit ."""
         return self.control_qubit
-      
+
     def get_control_qubits(self) -> List[QBit]:
         """Returns the control qubits ."""
         return [self.control_qubit]
@@ -217,7 +217,12 @@ class MultiControlledGate:
             if (index >> control_qubit.index) & 1 != phase:
                 return False
         return True
-
+    
+    def set_control_qubits(self, control_qubits: List[QBit]) -> None:
+        self.control_qubits = control_qubits
+    
+    def set_phases(self, phases: List[int]) -> None:
+        self.phases = phases
 
 class BasicGate(QGate):
     def __init__(self, qgate_type: QGateType, target_qubit: QBit) -> None:
@@ -668,7 +673,6 @@ def map_mcry(gate: QGate) -> List[QGate]:
     control_sequence = decompose_mcry(rotation_table)
     gates = control_sequence_to_gates(control_sequence, control_qubits, target_qubit)
     return gates
-
 
 # decomposition
 def find_thetas(alphas):

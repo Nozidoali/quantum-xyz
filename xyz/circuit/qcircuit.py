@@ -9,6 +9,7 @@ class QCircuit:
         self, num_qubits: int, map_gates: bool = False, qubits: list = None
     ) -> None:
         self.__gates: List[QGate] = []
+        self.__last_gate_target_on_qubit = [-1] * num_qubits
 
         if qubits is not None:
             self.__qubits: List[QBit] = qubits[:]
@@ -44,9 +45,26 @@ class QCircuit:
 
     def append_gate(self, gate: QGate):
         self.__gates.append(gate)
+        if issubclass(type(gate), BasicGate):
+            self.__last_gate_target_on_qubit[gate.target_qubit.index] = len(self.__gates) - 1
+            
+    def last_gate_on_qubit(self, qubit: QBit) -> QGate:
+        idx = qubit.index if isinstance(qubit, QBit) else qubit
+        return self.__last_gate_target_on_qubit[idx]
+    
+    def gate_at(self, index: int) -> QGate:
+        return self.__gates[index]
+    
+    def remove_gate(self, index: int) -> None:
+        self.__gates.pop(index)
+        for i in range(index, len(self.__gates)):
+            gate = self.__gates[i]
+            if issubclass(type(gate), BasicGate):
+                self.__last_gate_target_on_qubit[gate.target_qubit.index] = i
 
     def append_gates(self, gates: List[QGate]):
-        self.__gates.extend(gates)
+        for gate in gates:
+            self.append_gate(gate)
 
     def add_qubit(self, qubit: QBit):
         self.__qubits.append(qubit)
@@ -158,7 +176,13 @@ class QCircuit:
         """
         for gate in gates:
             self.add_gate_optimized(gate)
-            
+    
+    def trim(self, start, end) -> 'QCircuit':
+        qubits = [qubit for qubit in self.__qubits]
+        gates = [gate for gate in self.__gates[start:end]]
+        new_circuit = QCircuit(len(qubits), map_gates=self.map_gates, qubits=qubits)
+        new_circuit.append_gates(gates)
+        return new_circuit
 
 def to_qasm(circuit: QCircuit) -> str:
     return circuit.to_qasm()
