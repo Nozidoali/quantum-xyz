@@ -175,9 +175,7 @@ def mapping(circuit: QCircuit) -> QCircuit:
             # print the control qubits and the levels
             print("-" * 80)
             print(f"gate {gate}")
-
             mapper.dynamic_mapping(gate)
-        
         new_circuit.add_gate(new_gate)
     
     mapper.toGraph("mapping.dot")
@@ -191,22 +189,19 @@ def mapping_debug(circuit: QCircuit, reorder: bool = False) -> QCircuit:
 
     # for each gate, we randomly permute the control qubits and run the decomposition
     num_qubit: int = circuit.get_num_qubits()
-    
     new_circuit = QCircuit(num_qubit, map_gates=True)
-    
     for i, gate in enumerate(circuit.get_gates()):
-        
         if reorder == True and issubclass(type(gate), MultiControlledGate):
-            # we randomly permute the control qubits
             control_qubits, phases = gate.get_control_qubits(), gate.get_phases()
             n = len(control_qubits)
-            perm = np.random.permutation(n)
+
+            # sort the control qubits and phases according to new_circuit.get_level_on_qubit(control_qubits)
+            ctrls = zip(control_qubits, phases)
+            ctrls = sorted(ctrls, key=lambda x: new_circuit.get_level_on_qubit(x[0]))
+            control_qubits, phases = zip(*ctrls)
             
-            new_control_qubits = [control_qubits[perm[j]] for j in range(n)]
-            new_phases = [phases[perm[j]] for j in range(n)]
-            
-            gate.set_control_qubits(new_control_qubits)
-            gate.set_phases(new_phases)
+            gate.set_control_qubits(control_qubits)
+            gate.set_phases(phases)
             new_circuit.add_gate(gate)
         else:
             new_circuit.add_gate(gate)

@@ -10,6 +10,7 @@ class QCircuit:
     ) -> None:
         self.__gates: List[QGate] = []
         self.__last_gate_target_on_qubit = [-1] * num_qubits
+        self.__last_gate_time = [0] * num_qubits
 
         if qubits is not None:
             self.__qubits: List[QBit] = qubits[:]
@@ -45,8 +46,22 @@ class QCircuit:
 
     def append_gate(self, gate: QGate):
         self.__gates.append(gate)
+        qubits = []
         if issubclass(type(gate), BasicGate):
             self.__last_gate_target_on_qubit[gate.target_qubit.index] = len(self.__gates) - 1
+            qubits.append(gate.target_qubit)
+            if issubclass(type(gate), ControlledGate):
+                qubits.append(gate.control_qubit)
+        gate_time = max(self.__last_gate_time[qubit.index] for qubit in qubits) 
+        for qubit in qubits:
+            self.__last_gate_time[qubit.index] = gate_time + 1
+            
+    def get_level(self) -> int:
+        return max(self.__last_gate_time)
+    
+    def get_level_on_qubit(self, qubit: QBit) -> int:
+        return self.__last_gate_time[qubit.index]
+    
             
     def last_gate_on_qubit(self, qubit: QBit) -> QGate:
         idx = qubit.index if isinstance(qubit, QBit) else qubit
