@@ -1,25 +1,9 @@
-#!/usr/bin/env python
-# -*- encoding=utf8 -*-
-
-"""
-Author: Hanyu Wang
-Created time: 2024-03-18 18:02:05
-Last Modified by: Hanyu Wang
-Last Modified time: 2024-03-18 19:13:28
-"""
-
 import random
-from itertools import combinations
 
 import numpy as np
 import pytest
 
-from xyz import QState, quantize_state
-from xyz import simulate_circuit
-from xyz import prepare_state
-from xyz import StatePreparationParameters
-from xyz import rand_state
-
+from xyz import *
 N_TESTS = 10
 
 
@@ -46,14 +30,8 @@ def test_one_state(state_vectors):
         # print("target state: ", target_state)
         circuit = prepare_state(
             target_state,
-            verbose_level=0,
-            param=StatePreparationParameters(
-                enable_m_flow=False,
-                enable_exact_synthesis=False,
-                enable_n_flow=True,
-            ),
+            verbose_level=0
         )
-
         # now we measure the distance between the target state and the actual state
         state_vector_act = simulate_circuit(circuit)
         dist = np.linalg.norm(np.abs(state_vector_act) - np.abs(state_vector_exp))
@@ -64,5 +42,4 @@ def test_one_state(state_vectors):
                 f"distance is {dist_strict**2}, state_exp = {state_vector_exp}, state_act = {state_vector_act}"
             )
             assert False
-
         assert dist**2 < 1e-4  # make sure the distance is small
