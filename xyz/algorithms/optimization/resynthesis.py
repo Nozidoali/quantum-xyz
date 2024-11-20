@@ -10,7 +10,18 @@ Last Modified time: 2024-03-18 02:25:07
 
 import numpy as np
 from typing import List
-from xyz.circuit import QCircuit, QBit, QState, RY, CX, CRY, MCRY, is_equal, get_rotation_table
+from xyz.circuit import (
+    QCircuit,
+    QBit,
+    QState,
+    RY,
+    CX,
+    CRY,
+    MCRY,
+    is_equal,
+    get_rotation_table,
+)
+
 
 class LstSqSolverVar:
     def __init__(self, index: int = None) -> None:
@@ -190,6 +201,7 @@ def get_candidate_controls(rotation_table: dict, num_qubits: int) -> List[int]:
 
     return list(selected)
 
+
 def resub0(
     target_qubit: QBit,
     window_old: list,
@@ -357,7 +369,8 @@ def resubN(
 
     control_phases = [
         # seq for seq in product((True, False), repeat=len(cnot_configuration))
-        [False] * len(cnot_configuration)
+        [False]
+        * len(cnot_configuration)
     ]
     for control_phase in control_phases:
         success, thetas = try_resub(
@@ -518,6 +531,7 @@ def resynthesize_window(
 
     return new_window
 
+
 def extract_windows_naive(circuit: QCircuit):
     gates = circuit.get_gates()
     is_taken = [False] * len(gates)
@@ -615,7 +629,7 @@ def resynthesis(
         windows = extract_windows(circuit)
     else:
         windows = extract_windows_naive(circuit)
-    new_circuit = QCircuit(circuit.get_num_qubits())
+    new_circuit = QCircuit(circuit.get_num_qubits(), map_gates=circuit.map_gates)
 
     for target_qubit, window, state_begin, state_end in windows:
         new_window = resynthesize_window(

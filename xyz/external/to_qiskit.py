@@ -1,18 +1,8 @@
-#!/usr/bin/env python
-# -*- encoding=utf8 -*-
-
-"""
-Author: Hanyu Wang
-Created time: 2023-06-22 13:24:31
-Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-22 23:39:10
-"""
-
 # standard library
 from typing import List
 
 # third party library
-from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
+from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, transpile
 
 # my own library
 from ..circuit import QBit, QGate, QGateType, QCircuit
@@ -131,3 +121,9 @@ def to_qiskit(qcircuit: QCircuit, with_measurement: bool = False) -> QuantumCirc
         circuit.measure(quantum_registers, classical_registers)
 
     return circuit
+
+def qiskit_depth_evaluation(circuit: QCircuit) -> int:
+    qc = to_qiskit(circuit)
+    qc = transpile(qc, basis_gates=["cx", "u3"])
+    cnot_depth = qc.depth(lambda x: x.name in ["cx"])
+    return cnot_depth

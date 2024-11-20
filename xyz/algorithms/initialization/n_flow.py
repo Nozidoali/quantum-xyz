@@ -12,7 +12,18 @@ import threading
 from typing import List
 import numpy as np
 
-from xyz.circuit import QGate, QState, QCircuit, QGateType, QBit, CX, CRY, MCRY, RY, MCMY
+from xyz.circuit import (
+    QGate,
+    QState,
+    QCircuit,
+    QGateType,
+    QBit,
+    CX,
+    CRY,
+    MCRY,
+    RY,
+    MCMY,
+)
 from .exact_cnot_synthesis import exact_cnot_synthesis
 from .support_reduction import support_reduction
 
@@ -49,8 +60,7 @@ def to_controlled_gate(gate: QGate, control_qubit: QBit, control_phase: bool):
 
 
 def select_pivot_qubit(state: QState, supports: set):
-    """Selects the pivot of the given state .
-    """
+    """Selects the pivot of the given state ."""
     max_difference: int = -1
     best_qubit = None
 
@@ -85,8 +95,7 @@ def select_pivot_qubit(state: QState, supports: set):
 
 
 def select_informative_qubit(state: QState, supports: set):
-    """Selects the smallest qubit in the given state .
-    """
+    """Selects the smallest qubit in the given state ."""
     best_qubit = None
 
     indices = state.index_set
@@ -234,8 +243,7 @@ def qubit_decomposition(
     verbose_level: int,
     cnot_limit: int = None,
 ):
-    """Decompose a circuit into a sequence of single qubit gates and CNOT gates .
-    """
+    """Decompose a circuit into a sequence of single qubit gates and CNOT gates ."""
 
     gates = []
 

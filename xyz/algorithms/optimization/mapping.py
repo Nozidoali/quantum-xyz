@@ -1,7 +1,8 @@
-from typing import Generator, List, Tuple
+from typing import Generator, List, Tuple, Set
 from dataclasses import dataclass
 from collections import deque
 from xyz.circuit import *
+
 
 class QNode:
     def __init__(self, gate: QGate, dist: float = 0.0) -> None:
@@ -9,39 +10,50 @@ class QNode:
         self.dist = dist
         self.gate: QGate = gate if isinstance(gate, QGate) else None
 
+
 class QNetwork:
     def __init__(self, num_qubits: int) -> None:
         self.__nodes: List[QNode] = []
         self.__edges: List[Tuple[int, int]] = []
         self.__node_fanins: List[List[int]] = []
         self.initialize(num_qubits)
-        
+
     def initialize(self, num_qubits: int) -> None:
         self.__last_gate_on_qubit: List[int] = [-1] * num_qubits
         self.num_qubits = num_qubits
         for qubit in range(num_qubits):
             nodeIdx = self.add_node(QNode(f"q_{qubit}"))
             self.__last_gate_on_qubit[qubit] = nodeIdx
-            
+
     def add_node(self, node: QNode) -> int:
         self.__nodes.append(node)
         return len(self.__nodes) - 1
-    
+
     def add_gate(self, gate: QGate) -> int:
         nodeIdx = -1
         if issubclass(type(gate), BasicGate):
             nodeIdx = self.add_node(QNode(gate, gate.get_cnot_cost()))
-            self.add_edge(self.__last_gate_on_qubit[gate.target_qubit.index], nodeIdx, label=f"q_{gate.target_qubit.index}")
+            self.add_edge(
+                self.__last_gate_on_qubit[gate.target_qubit.index],
+                nodeIdx,
+                label=f"q_{gate.target_qubit.index}",
+            )
             self.__last_gate_on_qubit[gate.target_qubit.index] = nodeIdx
-            if issubclass(type(gate), ControlledGate) or issubclass(type(gate), MultiControlledGate):
+            if issubclass(type(gate), ControlledGate) or issubclass(
+                type(gate), MultiControlledGate
+            ):
                 for control_qubit in gate.get_control_qubits():
-                    self.add_edge(self.__last_gate_on_qubit[control_qubit.index], nodeIdx, label=f"q_{control_qubit.index}")
+                    self.add_edge(
+                        self.__last_gate_on_qubit[control_qubit.index],
+                        nodeIdx,
+                        label=f"q_{control_qubit.index}",
+                    )
                     self.__last_gate_on_qubit[gate.target_qubit.index] = nodeIdx
         return nodeIdx
-        
+
     def add_edge(self, source: int, target: int, label: str = "") -> None:
         self.__edges.append((source, target, label))
-        
+
     def to_dot(self) -> pydot.Dot:
         graph = pydot.Dot(graph_type="digraph")
         for idx, node in enumerate(self.__nodes):
@@ -53,21 +65,21 @@ class QNetwork:
         for source, target, label in self.__edges:
             graph.add_edge(pydot.Edge(f"g_{source}", f"g_{target}", label=label))
         return graph
-    
+
     def __dfs(self, node: int) -> None:
         for child in self.__node_fanins[node]:
             if not self.visited[child]:
                 self.__dfs(child)
         self.__topological_order.append(node)
         self.visited[node] = True
-    
+
     def traverse(self):
         self.__node_fanins = [[] for _ in range(len(self.__nodes))]
         self.__node_fanouts = [[] for _ in range(len(self.__nodes))]
         for u, v, _ in self.__edges:
             self.__node_fanins[v].append(u)
             self.__node_fanouts[u].append(v)
-        
+
         self.levels = [0.0] * len(self.__nodes)
         self.visited = [False] * len(self.__nodes)
         self.level = 0.0
@@ -78,8 +90,9 @@ class QNetwork:
                     self.__dfs(node)
         for node in self.__topological_order:
             for child in self.__node_fanins[node]:
-                self.levels[node] = max(self.levels[child] + self.__nodes[node].dist, self.levels[node])
-
+                self.levels[node] = max(
+                    self.levels[child] + self.__nodes[node].dist, self.levels[node]
+                )
 
     def topological_order(self) -> Generator[QGate, None, None]:
         for node in self.__topological_order:
@@ -92,18 +105,22 @@ def to_dag(circuit: QCircuit) -> QNetwork:
         q_network.add_gate(gate)
     q_network.traverse()
     return q_network
+
+
 class ChoiceType(Enum):
     SWAP = 0
     GATES = 2
     START = 3
     END = 4
-    
+
+
 @dataclass
 class ChoiceNode:
     gate: QGate
-    nodeType: ChoiceType # todo define enum if necessary
+    nodeType: ChoiceType  # todo define enum if necessary
     children: List["ChoiceNode"]
     index: int = -1
+
 
 class Mapper:
 
@@ -111,27 +128,29 @@ class Mapper:
         self.__rootNode = ChoiceNode([], ChoiceType.START, [])
         self.__currNode = self.__rootNode
         self.__nodeIdx = 0
-        
+
     def getHead(self) -> ChoiceNode:
         return self.__currNode
-    
-    def createNode(self, gate: QGate, nodeType: ChoiceType, children: List[ChoiceNode]) -> ChoiceNode:
+
+    def createNode(
+        self, gate: QGate, nodeType: ChoiceType, children: List[ChoiceNode]
+    ) -> ChoiceNode:
         node = ChoiceNode(gate, nodeType, children, self.__nodeIdx)
         self.__nodeIdx += 1
         return node
-    
+
     def appendNode(self, node: ChoiceNode) -> None:
         self.__currNode.children.append(node)
         self.__currNode = node
-        
+
     def appendGate(self, gate: QGate) -> None:
         node = self.createNode(gate, ChoiceType.GATES, [])
         self.appendNode(node)
-        
+
     def createChoice(self, children: List[ChoiceNode]) -> ChoiceNode:
         node = self.createNode([], ChoiceType.CHOOSE, children)
         return node
-    
+
     def dynamic_mapping(self, gate: QGate) -> ChoiceNode:
         match gate.get_qgate_type():
             case QGateType.MCRY:
@@ -139,31 +158,36 @@ class Mapper:
             case QGateType.CRY:
                 # we have two commutable gates
                 self.appendGate(CX(gate.control_qubit, gate.phase, gate.target_qubit))
-                
-                choice1 = ChoiceNode([
-                    CX(gate.control_qubit, gate.phase, gate.target_qubit),
-                    RY(-gate.theta / 2, gate.target_qubit), 
-                    CX(gate.control_qubit, gate.phase, gate.target_qubit),
-                ], ChoiceType.GATES, [])
-                choice2 = ChoiceNode([
-                    RY(gate.theta / 2, gate.target_qubit)
-                ], ChoiceType.GATES, [])        
+
+                choice1 = ChoiceNode(
+                    [
+                        CX(gate.control_qubit, gate.phase, gate.target_qubit),
+                        RY(-gate.theta / 2, gate.target_qubit),
+                        CX(gate.control_qubit, gate.phase, gate.target_qubit),
+                    ],
+                    ChoiceType.GATES,
+                    [],
+                )
+                choice2 = ChoiceNode(
+                    [RY(gate.theta / 2, gate.target_qubit)], ChoiceType.GATES, []
+                )
                 return ChoiceNode([], ChoiceType.SWAP, [choice1, choice2])
             case _:
                 return ChoiceNode([gate], ChoiceType.GATES, [])
+
 
 def mapping(circuit: QCircuit) -> QCircuit:
     if circuit.map_gates == True:
         print(f"[WARNING] circuit has already been mapped, skipping mapping")
         return circuit
     num_qubit: int = circuit.get_num_qubits()
-    
+
     new_circuit = QCircuit(num_qubit, map_gates=False)
-    
+
     dag = to_dag(circuit)
 
     mapper = Mapper()
-    
+
     for i, gate in enumerate(dag.topological_order()):
         # skip the qubit definition gates
         if gate is None:
@@ -171,17 +195,20 @@ def mapping(circuit: QCircuit) -> QCircuit:
         assert isinstance(gate, BasicGate), f"gate {gate} is not a basic gate"
         new_gate = gate
         # update the level of the qubits
-        if issubclass(type(gate), ControlledGate) or issubclass(type(gate), MultiControlledGate):
+        if issubclass(type(gate), ControlledGate) or issubclass(
+            type(gate), MultiControlledGate
+        ):
             # print the control qubits and the levels
             print("-" * 80)
             print(f"gate {gate}")
             mapper.dynamic_mapping(gate)
         new_circuit.add_gate(new_gate)
-    
+
     mapper.toGraph("mapping.dot")
     return new_circuit
 
-def mapping_debug(circuit: QCircuit, reorder: bool = False) -> QCircuit:
+
+def mapping_debug(circuit: QCircuit, control_reorder: bool = False) -> QCircuit:
     # just to test if this makes sense
     if circuit.map_gates == True:
         print(f"[WARNING] circuit has already been mapped, skipping mapping")
@@ -191,7 +218,7 @@ def mapping_debug(circuit: QCircuit, reorder: bool = False) -> QCircuit:
     num_qubit: int = circuit.get_num_qubits()
     new_circuit = QCircuit(num_qubit, map_gates=True)
     for i, gate in enumerate(circuit.get_gates()):
-        if reorder == True and issubclass(type(gate), MultiControlledGate):
+        if control_reorder == True and issubclass(type(gate), MultiControlledGate):
             control_qubits, phases = gate.get_control_qubits(), gate.get_phases()
             n = len(control_qubits)
 
@@ -199,11 +226,96 @@ def mapping_debug(circuit: QCircuit, reorder: bool = False) -> QCircuit:
             ctrls = zip(control_qubits, phases)
             ctrls = sorted(ctrls, key=lambda x: new_circuit.get_level_on_qubit(x[0]))
             control_qubits, phases = zip(*ctrls)
-            
+
             gate.set_control_qubits(control_qubits)
             gate.set_phases(phases)
             new_circuit.add_gate(gate)
         else:
             new_circuit.add_gate(gate)
-            
+
+    return new_circuit
+
+
+def schedule_commutable_gates(circuit: QCircuit, verbose: bool = False) -> QCircuit:
+    assert circuit.map_gates == True, f"circuit has not been mapped yet"
+    num_qubit: int = circuit.get_num_qubits()
+    new_circuit = QCircuit(num_qubit, map_gates=True)
+
+    to_skip: Set[int] = set()
+    all_gates = circuit.get_gates()
+
+    for i in range(len(all_gates)):
+        if i in to_skip:
+            continue
+
+        gate = all_gates[i]
+
+        if not issubclass(type(gate), ControlledGate):
+            new_circuit.add_gate(gate)
+            continue
+
+        curr_layer_occupancy = [False] * num_qubit
+        curr_layer_gates = []
+
+        # pop one gate
+        curr_layer_gates.append(gate)
+
+        assert issubclass(type(gate), ControlledGate)
+        control_qubit = gate.get_control_qubits()[0]
+        target_qubit = gate.target_qubit
+
+        curr_layer_occupancy[control_qubit.index] = True
+        curr_layer_occupancy[target_qubit.index] = True
+        n_occupied: int = 2
+
+        if verbose:
+            print(f"ctrl = {control_qubit.index}, target = {target_qubit.index}")
+
+        dirty_qubits = set()
+        used_qubits = set()
+
+        for j in range(i + 1, len(all_gates)):
+            if j in to_skip:
+                continue
+            if len(dirty_qubits) >= num_qubit - 2:
+                break
+            if n_occupied >= num_qubit:
+                break
+
+            next_gate = all_gates[j]
+            if not issubclass(type(next_gate), ControlledGate):
+                dirty_qubits.add(next_gate.target_qubit.index)
+                continue
+            assert issubclass(type(next_gate), ControlledGate)
+            next_control_qubit = next_gate.get_control_qubits()[0]
+            next_target_qubit = next_gate.target_qubit
+
+            if (
+                next_control_qubit.index in dirty_qubits
+                or next_target_qubit.index in dirty_qubits
+            ):
+                dirty_qubits.add(next_target_qubit.index)
+                continue
+            dirty_qubits.add(next_target_qubit.index)
+            used_qubits.add(next_control_qubit.index)
+
+            if (
+                curr_layer_occupancy[next_control_qubit.index]
+                or curr_layer_occupancy[next_target_qubit.index]
+            ):
+                continue
+
+            # we find a commutable gate
+            curr_layer_gates.append(next_gate)
+            curr_layer_occupancy[next_control_qubit.index] = True
+            curr_layer_occupancy[next_target_qubit.index] = True
+            to_skip.add(j)
+            if verbose:
+                print(
+                    f"\t ctrl = {next_control_qubit.index}, target = {next_target_qubit.index}"
+                )
+            n_occupied += 2
+
+        for gate in curr_layer_gates:
+            new_circuit.add_gate(gate)
     return new_circuit

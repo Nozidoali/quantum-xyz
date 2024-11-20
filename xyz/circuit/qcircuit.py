@@ -49,12 +49,18 @@ class QCircuit:
         qubits = []
         if issubclass(type(gate), BasicGate):
             self.__last_gate_target_on_qubit[gate.target_qubit.index] = len(self.__gates) - 1
-            qubits.append(gate.target_qubit)
             if issubclass(type(gate), ControlledGate):
+                qubits.append(gate.target_qubit)
                 qubits.append(gate.control_qubit)
-        gate_time = max(self.__last_gate_time[qubit.index] for qubit in qubits) 
-        for qubit in qubits:
-            self.__last_gate_time[qubit.index] = gate_time + 1
+                gate_time = max(self.__last_gate_time[qubit.index] for qubit in qubits) 
+                for qubit in qubits:
+                    self.__last_gate_time[qubit.index] = gate_time + gate.get_cnot_cost()
+            elif issubclass(type(gate), MultiControlledGate):
+                qubits.append(gate.target_qubit)
+                qubits.extend(gate.control_qubits)
+                gate_time = max(self.__last_gate_time[qubit.index] for qubit in qubits) 
+                for qubit in qubits:
+                    self.__last_gate_time[qubit.index] = gate_time + gate.get_cnot_cost()
             
     def get_level(self) -> int:
         return max(self.__last_gate_time)
@@ -198,6 +204,12 @@ class QCircuit:
         new_circuit = QCircuit(len(qubits), map_gates=self.map_gates, qubits=qubits)
         new_circuit.append_gates(gates)
         return new_circuit
+    
+def reverse_circuit(circuit: QCircuit) -> QCircuit:
+    new_circuit = QCircuit(circuit.get_num_qubits(), map_gates=circuit.map_gates)
+    for gate in reversed(circuit.get_gates()):
+        new_circuit.add_gate(gate)
+    return new_circuit
 
 def to_qasm(circuit: QCircuit) -> str:
     return circuit.to_qasm()

@@ -219,10 +219,10 @@ class MultiControlledGate:
         return True
     
     def set_control_qubits(self, control_qubits: List[QBit]) -> None:
-        self.control_qubits = control_qubits
+        self.control_qubits = list(control_qubits)
     
     def set_phases(self, phases: List[int]) -> None:
-        self.phases = phases
+        self.phases = list(phases)
 
 class BasicGate(QGate):
     def __init__(self, qgate_type: QGateType, target_qubit: QBit) -> None:
@@ -247,13 +247,6 @@ class AdvancedGate(QGate):
         QGate.__init__(self, qgate_type)
 
     def apply(self, qstate: "QState") -> "QState":
-        """Returns the qstate .
-
-        :param qstate: [description]
-        :type qstate: [type]
-        :return: [description]
-        :rtype: [type]
-        """
         raise NotImplementedError("This method is not implemented")
 
 

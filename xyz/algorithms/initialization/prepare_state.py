@@ -1,12 +1,4 @@
-#!/usr/bin/env python
-# -*- encoding=utf8 -*-
-
 """
-Author: Hanyu Wang
-Created time: 2023-09-15 13:14:21
-Last Modified by: Hanyu Wang
-Last Modified time: 2023-09-15 14:32:11
-
 Reference:
     @article{wang2024quantum,
         title={Quantum State Preparation Using an Exact CNOT Synthesis Formulation},
@@ -25,7 +17,7 @@ from xyz.utils import stopwatch
 from xyz.utils import global_stopwatch_report
 
 from .exact_cnot_synthesis import exact_cnot_synthesis
-from .m_flow import cardinality_reduction
+from .sparse_state_synthesis import cardinality_reduction
 from .n_flow import qubit_reduction
 from .support_reduction import support_reduction, x_reduction
 from ._reindex import reindex_circuit
@@ -49,6 +41,7 @@ class __Params:
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+
 
 @dataclass
 class __Stats:
@@ -105,7 +98,7 @@ def _prepare_state_rec(
 
     support_reducing_gates = []
     num_cx_support_reduction = 0
-    
+
     # check the parameters
     param = __Params()
     param.update(**kwargs)
