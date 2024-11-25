@@ -1,13 +1,3 @@
-#!/usr/bin/env python
-# -*- encoding=utf8 -*-
-
-"""
-Author: Hanyu Wang
-Created time: 2023-09-08 13:40:10
-Last Modified by: Hanyu Wang
-Last Modified time: 2023-09-10 14:32:59
-"""
-
 # pylint: skip-file
 
 from math import ceil
