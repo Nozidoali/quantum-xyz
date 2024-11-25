@@ -3,7 +3,6 @@ import pydot
 
 if __name__ == "__main__":
     state_vector = rand_state(7, 7, uniform=True)
-    # state_vector = D_state(7,2)
     state = quantize_state(state_vector)
     qc = sparse_state_synthesis(state, map_gates=False, depth_opt=False, verbose_level=0)
     qc_map = mapping_debug(qc, control_reorder=False)
@@ -15,8 +14,7 @@ if __name__ == "__main__":
     
     qc_ours = parallel_sparse_state_synthesis(state, verbose_level=0)
     qc_ours = resynthesis(qc_ours)
-    # print(qc_ours.get_level())
-    # qc_ours = mapping_debug(qc_ours, control_reorder=True)
+
     print(f"area = {qc_ours.get_cnot_cost()}, depth = {qc_ours.get_level()}")
     
     qc_ours = schedule_commutable_gates(qc_ours)
