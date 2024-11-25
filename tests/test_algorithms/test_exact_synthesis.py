@@ -1,13 +1,3 @@
-#!/usr/bin/env python
-# -*- encoding=utf8 -*-
-
-"""
-Author: Hanyu Wang
-Created time: 2023-08-18 20:05:51
-Last Modified by: Hanyu Wang
-Last Modified time: 2023-08-18 21:09:09
-"""
-
 import random
 from itertools import combinations
 
