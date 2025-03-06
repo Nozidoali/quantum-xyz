@@ -16,7 +16,7 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 click = "^8.1.7"
 more-itertools = "^10.3.0"
 llist = "0.7.1"
@@ -99,7 +99,7 @@ recursive = true
 pre-summary-newline = true
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 warn_unused_configs = true
 check_untyped_defs = true
 
