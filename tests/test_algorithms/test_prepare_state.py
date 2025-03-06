@@ -2,7 +2,7 @@ import numpy as np
 import xyz
 import pytest
 
-# skip 
+# skip
 @pytest.mark.skip(reason="Takes too long")
 def test_qsp_1():
     state = "0.41*|001000> + 0.41*|010001> + 0.41*|010100> + 0.41*|011100> + 0.41*|101111> + 0.41*|111100>"

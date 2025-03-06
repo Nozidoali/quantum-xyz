@@ -1,30 +1,103 @@
-[build-system]
-requires = ["setuptools >= 61.0"]
-build-backend = "setuptools.build_meta"
-
-[project]
-name="xyz"
-version="0.1.0"
-dependencies = [
-    "llist==0.7.1",
-    "matplotlib==3.7.1",
-    "numpy>=1.23.5",
-    "qiskit>=1.0",
-    "scipy>=1.13.1"
-]
-requires-python = ">=3.10"
-authors = [
-  {name = "Hanyu Wang"},
-]
+[tool.poetry]
+name = "xyz"
+version = "0.1.0"
 description = "A quantum circuit synthesis library"
+authors = ["Hanyu Wang"]
 readme = "README.md"
-license = {file = "LICENSE.txt"}
 keywords = ["quantum computing", "eda"]
-classifiers=[
+classifiers = [
+    "Private :: Do not Upload",
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
 
-[project.urls]
-Documentation = "https://quantum-xyz.readthedocs.io/en/latest/"
-Repository = "https://github.com/Nozidoali/quantum-xyz.git"
+[tool.poetry.dependencies]
+python = "^3.9"
+click = "^8.1.7"
+more-itertools = "^10.3.0"
+llist = "0.7.1"
+matplotlib = "3.7.1"
+numpy = "^1.23.5"
+qiskit = "^1.0"
+scipy = "^1.13.1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.4.2"
+flake8 = "^7.1.0"
+flake8-bugbear = "^24.4.26"
+flake8-pyproject = "^1.2.3"
+mypy = "^1.9.0"
+pytest = "^8.2.2"
+usort = "^1.0.8.post1"
+docformatter = "^1.7.5"
+coverage = "^7.6.1"
+mock = "^5.1.0"
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.4.7"
+sphinx-autoapi = "^3.2.1"
+
+[tool.black]
+line-length = 88
+skip-string-normalization = 1
+
+[tool.flake8]
+max-line-length = 88
+statistics = true
+count = true
+show-source = true
+select = [
+    "E711",
+    "E74",
+    "E9",
+    "F401",
+    "F406",
+    "F407",
+    "F5",
+    "F6",
+    "F7",
+    "F82",
+    "F83",
+    "F84",
+    "F9",
+    "N80",
+    "N818"
+]
+exclude = [
+    ".git",
+    ".github",
+    "__pycache__",
+    ".mypy_cache",
+    ".pytest_cache",
+    "venv",
+    ".venv"
+]
+extend-select = [
+    "B950"
+]
+extend-ignore = [
+    "F632",
+    # Following three are disabled for compatibility with black.
+    # https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#flake8
+    "E203",
+    "E501",
+    "E701"
+]
+
+[tool.usort]
+merge_imports = true
+
+[tool.docformatter]
+black = true
+blank = true
+recursive = true
+pre-summary-newline = true
+
+[tool.mypy]
+python_version = "3.9"
+warn_unused_configs = true
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+ignore_missing_imports = true
+module = ["pysat.*", "pebble.*", "mockturtle_wrapper.*", "graphviz.*"]
+

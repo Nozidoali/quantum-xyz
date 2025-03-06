@@ -1,13 +1,3 @@
-#!/usr/bin/env python
-# -*- encoding=utf8 -*-
-
-"""
-Author: Hanyu Wang
-Created time: 2024-04-23 09:43:34
-Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-23 09:45:22
-"""
-
 import xyz
 
 

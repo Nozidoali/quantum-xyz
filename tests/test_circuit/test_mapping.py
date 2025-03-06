@@ -37,7 +37,7 @@ def test_mapping():
         assert gate.get_qgate_type() in [
             xyz.QGateType.CX,
             xyz.QGateType.X,
-            xyz.QGateType.RY
+            xyz.QGateType.RY,
         ]
 
     # circuit = circuit.to_qiskit()

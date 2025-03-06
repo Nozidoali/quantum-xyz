@@ -211,10 +211,6 @@ def reverse_circuit(circuit: QCircuit) -> QCircuit:
         new_circuit.add_gate(gate)
     return new_circuit
 
-def to_qasm(circuit: QCircuit) -> str:
-    return circuit.to_qasm()
-
-
 def to_figure(circuit_str: str) -> str:
     return (
         """
@@ -321,3 +317,4 @@ def to_tikz(circuit: QCircuit) -> str:
 
     tikz_str = " \\\\\n".join([" & ".join(qubit) for qubit in qubit_str])
     return to_figure(tikz_str)
+

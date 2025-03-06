@@ -2,6 +2,8 @@ import numpy as np
 import pytest
 import xyz
 
+# these are the results from the original implementation
+# the heuristic synthesis algorithm is not guaranteed to produce the same results
 dicke_qsp_results: list = [
     [3, 1, 4],
     [4, 1, 7],

@@ -160,3 +160,5 @@ tests/*.csv
 *.pkl
 *.txt
 
+# poetry
+poetry.lock
