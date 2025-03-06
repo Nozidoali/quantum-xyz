@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
-
 """
 Author: Hanyu Wang
 Created time: 2023-08-18 20:05:51
@@ -29,12 +28,14 @@ from xyz import StatePreparationStatistics
 
 
 def rand_state(num_qubit: int, sparsity: int, uniform: bool = True) -> QState:
-    """Generate a random state .
+    """
+    Generate a random state .
 
     :param num_qubit: [description]
     :type num_qubit: int
     :return: [description]
     :rtype: QState
+
     """
 
     if uniform:
@@ -54,7 +55,8 @@ def rand_state(num_qubit: int, sparsity: int, uniform: bool = True) -> QState:
 
 
 def place_ones(size, count):
-    """Place one or more lists into one .
+    """
+    Place one or more lists into one .
 
     :param size: [description]
     :type size: [type]
@@ -62,6 +64,7 @@ def place_ones(size, count):
     :type count: [type]
     :yield: [description]
     :rtype: [type]
+
     """
     for positions in combinations(range(size), count):
         p = [0] * size
@@ -71,7 +74,8 @@ def place_ones(size, count):
 
 
 def all_states(num_qubit: int, sparsity: int) -> QState:
-    """Return a QState with all states of the given number of qubit .
+    """
+    Return a QState with all states of the given number of qubit .
 
     :param num_qubit: [description]
     :type num_qubit: int
@@ -79,6 +83,7 @@ def all_states(num_qubit: int, sparsity: int) -> QState:
     :type sparsity: int
     :return: [description]
     :rtype: QState
+
     """
     for perm in place_ones(2**num_qubit, sparsity):
         yield perm[:]

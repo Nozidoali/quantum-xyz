@@ -75,7 +75,8 @@ def run_dd_based_method(state: np.ndarray):
 
 
 def run_sparse_state_synthesis(state: np.ndarray, skip_verify=False):
-    """Run the baseline pipeline .
+    """
+    Run the baseline pipeline .
 
     reference:
 
@@ -84,6 +85,7 @@ def run_sparse_state_synthesis(state: np.ndarray, skip_verify=False):
 
     :param state: [description]
     :type state: [type]
+
     """
 
     state_dict = build_state_dict_fixed(state)
