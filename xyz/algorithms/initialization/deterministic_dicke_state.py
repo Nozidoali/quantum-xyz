@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
-
 """
 Author: Hanyu Wang
 Created time: 2024-06-11 21:29:55
@@ -8,9 +7,11 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2024-06-11 21:52:54
 """
 
+from enum import auto, Enum
+
 import numpy as np
-from enum import Enum, auto
-from xyz.circuit import QCircuit, CX, CRY, MCRY, X, RY
+
+from xyz.circuit import CRY, CX, MCRY, QCircuit, RY, X
 
 
 # Reference:
@@ -133,9 +134,7 @@ class SCSManager:
         self.add_cx(circuit, j + i + 1, j)
 
     def insert_scs(self, circuit: QCircuit, n: int, k: int, j: int):
-        """
-        insert_scs insert the split and cyclic shift gates into the circuit.
-        """
+        """insert_scs insert the split and cyclic shift gates into the circuit."""
         assert k >= 1, "k should be greater than or equal to 1"
 
         # if j >= k - 1:

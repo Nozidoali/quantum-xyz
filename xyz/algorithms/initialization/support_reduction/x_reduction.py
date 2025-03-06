@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
-
 """
 Author: Hanyu Wang
 Created time: 2024-04-23 08:36:42
@@ -9,7 +8,8 @@ Last Modified time: 2024-04-23 09:14:59
 """
 
 import copy
-from xyz.circuit import X, CX, QCircuit, QState
+
+from xyz.circuit import CX, QCircuit, QState, X
 
 
 def x_reduction(circuit: QCircuit, state: QState, enable_cnot: bool = True):

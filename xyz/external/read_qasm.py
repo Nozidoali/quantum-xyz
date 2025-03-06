@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
-
 """
 Author: Hanyu Wang
 Created time: 2024-04-22 17:42:50
@@ -8,8 +7,9 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2024-04-22 17:53:19
 """
 
-from ..circuit import QCircuit, QGate, QBit, X, RY, CX
 from qiskit import qasm2
+
+from ..circuit import CX, QBit, QCircuit, QGate, RY, X
 
 
 def read_qasm(filename: str) -> QCircuit:

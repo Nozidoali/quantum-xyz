@@ -1,5 +1,6 @@
 import copy
-from xyz.circuit import RY, QCircuit, QState, get_ap_ry_angles
+
+from xyz.circuit import get_ap_ry_angles, QCircuit, QState, RY
 
 
 def ry_reduction(circuit: QCircuit, state: QState):

@@ -2,15 +2,16 @@
 from typing import List
 
 # third party library
-from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, transpile
+from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, transpile
 
 # my own library
-from ..circuit import QBit, QGate, QGateType, QCircuit
+from ..circuit import QBit, QCircuit, QGate, QGateType
 from .special_gates import SpecialGates
 
 
 def to_qiskit(qcircuit: QCircuit, with_measurement: bool = False) -> QuantumCircuit:
-    """Convert this circuit to a QuantumCircuit .
+    """
+    Convert this circuit to a QuantumCircuit .
 
     :param with_measurement: [description], defaults to True
     :type with_measurement: bool, optional
@@ -18,6 +19,7 @@ def to_qiskit(qcircuit: QCircuit, with_measurement: bool = False) -> QuantumCirc
     :type with_tomography: bool, optional
     :return: [description]
     :rtype: QuantumCircuit
+
     """
     num_qubits = qcircuit.get_num_qubits()
 
@@ -29,12 +31,14 @@ def to_qiskit(qcircuit: QCircuit, with_measurement: bool = False) -> QuantumCirc
         circuit = QuantumCircuit(quantum_registers)
 
     def _to_register(qubit: QBit | List[QBit]) -> QuantumRegister:
-        """Converts a single bit value to a register .
+        """
+        Converts a single bit value to a register .
 
         :param qubit: [description]
         :type qubit: QBit
         :return: [description]
         :rtype: QuantumRegister
+
         """
         nonlocal quantum_registers
         if isinstance(qubit, QBit):
@@ -121,6 +125,7 @@ def to_qiskit(qcircuit: QCircuit, with_measurement: bool = False) -> QuantumCirc
         circuit.measure(quantum_registers, classical_registers)
 
     return circuit
+
 
 def qiskit_depth_evaluation(circuit: QCircuit) -> int:
     qc = to_qiskit(circuit)

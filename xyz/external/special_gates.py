@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
-
 """
 Author: Hanyu Wang
 Created time: 2023-06-22 14:14:19
@@ -8,12 +7,13 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-22 15:01:37
 """
 
+from qiskit.circuit.library import UnitaryGate
+
 # pylint: disable=C0103
 
 from qiskit.circuit.library.standard_gates import RYGate
-from qiskit.circuit.library import UnitaryGate
 
-from xyz.circuit import U, CU, MCRY
+from xyz.circuit import CU, MCRY, U
 
 
 class SpecialGates:
@@ -24,12 +24,14 @@ class SpecialGates:
 
     @staticmethod
     def mcry(gate: MCRY):
-        """Convert a MCRY gate into a RYZ gate .
+        """
+        Convert a MCRY gate into a RYZ gate .
 
         :param gate: [description]
         :type gate: MCRY
         :return: [description]
         :rtype: [type]
+
         """
         num_control_qubits = len(gate.control_qubits)
 
@@ -43,22 +45,26 @@ class SpecialGates:
 
     @staticmethod
     def u(gate: U):
-        """Creates a CU gate .
+        """
+        Creates a CU gate .
 
         :param gate: [description]
         :type gate: U
         :return: [description]
         :rtype: [type]
+
         """
 
         return UnitaryGate(gate.get_unitary())
 
     @staticmethod
     def cu(gate: CU):
-        """Creates a CU gate .
+        """
+        Creates a CU gate .
 
         :param gate: [description]
         :type gate: CU
+
         """
 
         num_control_qubits = 1

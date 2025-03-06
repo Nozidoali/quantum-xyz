@@ -1,9 +1,10 @@
 import json
-
-from typing import List, Tuple, Dict
-import numpy as np
 import random
 from itertools import combinations
+
+from typing import Dict, List, Tuple
+
+import numpy as np
 
 # the merge uncertainty, if the difference between the two angles is less than
 # this value, we consider them to be the same
@@ -15,7 +16,7 @@ DISABLE_ASTAR = True
 
 
 class QState:
-    """Class method for QState"""
+    """Class method for QState."""
 
     def __init__(self, index_to_weight: dict, num_qubit: int) -> None:
         self.num_qubits = num_qubit
@@ -175,10 +176,12 @@ class QState:
 
 
 def load_state(filename: str):
-    """Loads the state of a given file .
+    """
+    Loads the state of a given file .
 
     :param filename: [description]
     :type filename: str
+
     """
 
     # read the dict from the file
@@ -199,12 +202,14 @@ def load_state(filename: str):
 
 
 def from_val(val: int, num_qubits: int) -> QState:
-    """Return the state from the vector representation .
+    """
+    Return the state from the vector representation .
 
     :param state_vector: [description]
     :type state_vector: np.ndarray
     :return: [description]
     :rtype: QState
+
     """
 
     assert 0 < val < 2 ** (2**num_qubits)
@@ -229,10 +234,12 @@ def from_set(index_set: set, num_qubits: int) -> QState:
 
 
 def index_to_str(index_to_weight: dict, num_qubits: int):
-    """Prints the index_to_weight dictionary.
+    """
+    Prints the index_to_weight dictionary.
 
     :param index_to_weight: [description]
     :type index_to_weight: dict
+
     """
 
     index_str = ""
@@ -274,10 +281,12 @@ def is_equal(qstate1: QState, qstate2: QState) -> bool:
 
 
 def quantize_state(state_vector: np.ndarray):
-    """Quantize a state to the number of qubits .
+    """
+    Quantize a state to the number of qubits .
 
     :param state_vector: a vector with 2**n entries, where n is the number of qubits.
     :type state_vector: np.ndarray
+
     """
 
     if isinstance(state_vector, QState):
@@ -315,7 +324,7 @@ def quantize_state(state_vector: np.ndarray):
 
 
 def D_state(num_qubits: int, num_bits: int) -> np.ndarray:
-    """dicke state."""
+    """Dicke state."""
     state = np.zeros(2**num_qubits)
 
     ones: float = 0
@@ -382,7 +391,7 @@ def all_states(num_qubit: int, sparsity: int):
 
 
 def W_state(num_qubits: int) -> np.ndarray:
-    """W state"""
+    """W state."""
     state = np.zeros(2**num_qubits)
 
     for i in range(num_qubits):
@@ -419,15 +428,18 @@ def get_ry_angles(state: QState, qubit_index: int) -> List[float]:
 
 
 def get_rotation_table(state: QState, qubit_index: int) -> Dict[int, float]:
-    """Return the projection of the state .
+    """
+    Return the projection of the state .
 
-    The keys in the dictionary are the indices (we make sure that all the values of pivot qubit is 0 in the indices)
-    The values in the dictionary are the rotation angles
+    The keys in the dictionary are the indices (we make sure that all the values of
+    pivot qubit is 0 in the indices) The values in the dictionary are the rotation
+    angles
 
     :param qubit_index: the target qubit index (the pivot)
     :type qubit_index: int
     :return: the dictionary
     :rtype: dict
+
     """
     thetas = {}
     for idx in state.index_set:
@@ -562,12 +574,14 @@ def get_ap_cry_angles(
 
 
 def get_most_frequent_theta(state: QState, qubit_index: int) -> float:
-    """Return the projection of the state .
+    """
+    Return the projection of the state .
 
     :param qubit_index: [description]
     :type qubit_index: int
     :return: [description]
     :rtype: List[float]
+
     """
     thetas = get_ry_angles(state, qubit_index)
 

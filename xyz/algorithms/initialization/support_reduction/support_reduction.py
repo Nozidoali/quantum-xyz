@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
-
 """
 Author: Hanyu Wang
 Created time: 2023-09-10 19:24:34
@@ -10,8 +9,7 @@ Last Modified time: 2023-09-10 22:25:33
 
 import copy
 
-from xyz.circuit import QCircuit
-from xyz.circuit import QState
+from xyz.circuit import QCircuit, QState
 from .ry_reduction import ry_reduction
 from .x_reduction import x_reduction
 

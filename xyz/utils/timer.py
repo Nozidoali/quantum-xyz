@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
-
 """
 Author: Hanyu Wang
 Created time: 2023-02-28 07:43:53
@@ -17,10 +16,12 @@ from .colors import print_green
 
 
 class stopwatch:
-    """Create a new Stopwatch class .
+    """
+    Create a new Stopwatch class .
 
     :return: [description]
     :rtype: [type]
+
     """
 
     # name the functions run inside this context
@@ -68,10 +69,12 @@ GLOBAL_STOPWATCHES = {}
 
 
 class GlobalStopwatch:
-    """A class decorator that creates a global stopwatch .
+    """
+    A class decorator that creates a global stopwatch .
 
     :return: [description]
     :rtype: [type]
+
     """
 
     # name the functions run inside this context
@@ -114,10 +117,12 @@ class GlobalStopwatch:
 
 
 def call_with_global_timer(func):
-    """Call function with global timer .
+    """
+    Call function with global timer .
 
     :param func: [description]
     :type func: [type]
+
     """
 
     def timed_func(*args, **kwargs):
@@ -128,12 +133,14 @@ def call_with_global_timer(func):
 
 
 def get_time(name: str):
-    """Get the current stop time for a given name .
+    """
+    Get the current stop time for a given name .
 
     :param name: [description]
     :type name: str
     :return: [description]
     :rtype: [type]
+
     """
     if name not in GLOBAL_STOPWATCHES:
         return 0

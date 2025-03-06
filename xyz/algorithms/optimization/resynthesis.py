@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
-
 """
 Author: Hanyu Wang
 Created time: 2024-03-17 22:24:18
@@ -8,18 +7,20 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2024-03-18 02:25:07
 """
 
-import numpy as np
 from typing import List
+
+import numpy as np
+
 from xyz.circuit import (
-    QCircuit,
+    CRY,
+    CX,
+    get_rotation_table,
+    is_equal,
+    MCRY,
     QBit,
+    QCircuit,
     QState,
     RY,
-    CX,
-    CRY,
-    MCRY,
-    is_equal,
-    get_rotation_table,
 )
 
 
@@ -450,8 +451,8 @@ def resynthesize_window(
     verbose_level: int = 0,
 ):
     """
-    resynthesize_window
-    return the new gates that can be used to replace the current window
+    resynthesize_window return the new gates that can be used to replace the current
+    window.
 
     :param state_begin: start state of the window
     :type state_begin: QState
@@ -461,6 +462,7 @@ def resynthesize_window(
     :type target_qubit: QBit
     :param n_cnots_max: the maximum number of CNOTs allowed in the resynthesized circuit
     :type n_cnots_max: int
+
     """
 
     if verbose_level >= 1:
@@ -619,10 +621,12 @@ def resynthesis(
     circuit: QCircuit, use_advanced_windowing: bool = False, verbose_level: int = 0
 ) -> QCircuit:
     """
-    Extract windows from the given circuit
-    The idea is similar to rip-up and reroute in VLSI design. We extract windows from the circuit and resynthesize each window to minimize the number of CNOTs.
+    Extract windows from the given circuit The idea is similar to rip-up and reroute in
+    VLSI design. We extract windows from the circuit and resynthesize each window to
+    minimize the number of CNOTs.
 
     TODO: maximize the size of each window
+
     """
 
     if use_advanced_windowing:

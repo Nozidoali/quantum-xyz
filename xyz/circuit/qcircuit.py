@@ -1,8 +1,8 @@
 from typing import List
+
 import numpy as np
-import pydot
 from .qgate import *
-from queue import Queue
+
 
 class QCircuit:
     def __init__(
@@ -48,34 +48,39 @@ class QCircuit:
         self.__gates.append(gate)
         qubits = []
         if issubclass(type(gate), BasicGate):
-            self.__last_gate_target_on_qubit[gate.target_qubit.index] = len(self.__gates) - 1
+            self.__last_gate_target_on_qubit[gate.target_qubit.index] = (
+                len(self.__gates) - 1
+            )
             if issubclass(type(gate), ControlledGate):
                 qubits.append(gate.target_qubit)
                 qubits.append(gate.control_qubit)
-                gate_time = max(self.__last_gate_time[qubit.index] for qubit in qubits) 
+                gate_time = max(self.__last_gate_time[qubit.index] for qubit in qubits)
                 for qubit in qubits:
-                    self.__last_gate_time[qubit.index] = gate_time + gate.get_cnot_cost()
+                    self.__last_gate_time[qubit.index] = (
+                        gate_time + gate.get_cnot_cost()
+                    )
             elif issubclass(type(gate), MultiControlledGate):
                 qubits.append(gate.target_qubit)
                 qubits.extend(gate.control_qubits)
-                gate_time = max(self.__last_gate_time[qubit.index] for qubit in qubits) 
+                gate_time = max(self.__last_gate_time[qubit.index] for qubit in qubits)
                 for qubit in qubits:
-                    self.__last_gate_time[qubit.index] = gate_time + gate.get_cnot_cost()
-            
+                    self.__last_gate_time[qubit.index] = (
+                        gate_time + gate.get_cnot_cost()
+                    )
+
     def get_level(self) -> int:
         return max(self.__last_gate_time)
-    
+
     def get_level_on_qubit(self, qubit: QBit) -> int:
         return self.__last_gate_time[qubit.index]
-    
-            
+
     def last_gate_on_qubit(self, qubit: QBit) -> QGate:
         idx = qubit.index if isinstance(qubit, QBit) else qubit
         return self.__last_gate_target_on_qubit[idx]
-    
+
     def gate_at(self, index: int) -> QGate:
         return self.__gates[index]
-    
+
     def remove_gate(self, index: int) -> None:
         self.__gates.pop(index)
         for i in range(index, len(self.__gates)):
@@ -192,24 +197,24 @@ class QCircuit:
                 self.add_gate_mapped(gate)
 
     def add_gates_optimized(self, gates: List[QGate]) -> None:
-        """
-        Add a list of gates to the circuit, with optimization
-        """
+        """Add a list of gates to the circuit, with optimization."""
         for gate in gates:
             self.add_gate_optimized(gate)
-    
+
     def trim(self, start, end) -> 'QCircuit':
         qubits = [qubit for qubit in self.__qubits]
         gates = [gate for gate in self.__gates[start:end]]
         new_circuit = QCircuit(len(qubits), map_gates=self.map_gates, qubits=qubits)
         new_circuit.append_gates(gates)
         return new_circuit
-    
+
+
 def reverse_circuit(circuit: QCircuit) -> QCircuit:
     new_circuit = QCircuit(circuit.get_num_qubits(), map_gates=circuit.map_gates)
     for gate in reversed(circuit.get_gates()):
         new_circuit.add_gate(gate)
     return new_circuit
+
 
 def to_figure(circuit_str: str) -> str:
     return (
@@ -317,4 +322,3 @@ def to_tikz(circuit: QCircuit) -> str:
 
     tikz_str = " \\\\\n".join([" & ".join(qubit) for qubit in qubit_str])
     return to_figure(tikz_str)
-

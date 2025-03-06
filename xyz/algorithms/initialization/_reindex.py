@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
-
 """
 Author: Hanyu Wang
 Created time: 2024-04-22 21:53:17
@@ -8,8 +7,7 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2024-04-22 21:55:27
 """
 
-from xyz.circuit import QState
-from xyz.circuit import QCircuit
+from xyz.circuit import QCircuit, QState
 
 
 def reindex_circuit(circuit: QCircuit, state: QState) -> tuple:

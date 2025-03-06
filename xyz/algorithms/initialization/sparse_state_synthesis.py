@@ -1,6 +1,6 @@
 import numpy as np
 
-from xyz.circuit import QState, QCircuit, CX, MCRY, reverse_circuit
+from xyz.circuit import CX, MCRY, QCircuit, QState, reverse_circuit
 from .support_reduction import x_reduction
 
 
@@ -302,8 +302,11 @@ def sparse_state_synthesis(
     depth_opt: bool = False,
     verbose_level: int = 0,
 ):
-    """This function is used to synthesis sparse state.
+    """
+    This function is used to synthesis sparse state.
+
     reference: https://github.com/qclib/qclib/blob/master/qclib/state_preparation/merge.py
+
     """
     circuit = QCircuit(state.num_qubits, map_gates=map_gates)
 

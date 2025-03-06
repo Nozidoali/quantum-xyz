@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
-
 """
 Author: Hanyu Wang
 Created time: 2023-09-01 12:48:05
@@ -10,19 +9,20 @@ Last Modified time: 2023-09-01 13:05:14
 
 import threading
 from typing import List
+
 import numpy as np
 
 from xyz.circuit import (
-    QGate,
-    QState,
-    QCircuit,
-    QGateType,
-    QBit,
-    CX,
     CRY,
-    MCRY,
-    RY,
+    CX,
     MCMY,
+    MCRY,
+    QBit,
+    QCircuit,
+    QGate,
+    QGateType,
+    QState,
+    RY,
 )
 from .exact_cnot_synthesis import exact_cnot_synthesis
 from .support_reduction import support_reduction
@@ -320,10 +320,13 @@ def qubit_reduction(
     state: QState,
     supports: set,
 ):
-    """Composes a circuit decomposition for a circuit .
+    """
+    Composes a circuit decomposition for a circuit .
+
     the main difference is that, in this implementation:
         1. we do not synthesize the truth table
     to further improve, maybe we can check the actual supports
+
     """
     # we randomly select a pivot qubit
     pivot = select_informative_qubit(state, supports)

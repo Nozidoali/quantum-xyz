@@ -1,6 +1,6 @@
-from typing import Generator, List, Tuple, Set
+import pydot
 from dataclasses import dataclass
-from collections import deque
+from typing import Generator, List, Set, Tuple
 from xyz.circuit import *
 
 

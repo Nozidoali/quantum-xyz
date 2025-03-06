@@ -9,20 +9,20 @@ Reference:
 """
 
 from collections import namedtuple
+
+from dataclasses import dataclass
 from typing import List
+
 import numpy as np
 
 from xyz.circuit import QCircuit, QGate, QState, quantize_state
-from xyz.utils import stopwatch
-from xyz.utils import global_stopwatch_report
-
-from .exact_cnot_synthesis import exact_cnot_synthesis
-from .sparse_state_synthesis import cardinality_reduction
-from .n_flow import qubit_reduction
-from .support_reduction import support_reduction, x_reduction
+from xyz.utils import global_stopwatch_report, stopwatch
 from ._reindex import reindex_circuit
 
-from dataclasses import dataclass
+from .exact_cnot_synthesis import exact_cnot_synthesis
+from .n_flow import qubit_reduction
+from .sparse_state_synthesis import cardinality_reduction
+from .support_reduction import support_reduction, x_reduction
 
 
 @dataclass
@@ -243,16 +243,19 @@ def prepare_state(
     param: __Params = None,
     stats: __Stats = __Stats(),
 ) -> QCircuit:
-    """A hybrid method combining both qubit- and cardinality- reduction.
+    """
+    A hybrid method combining both qubit- and cardinality- reduction.
 
     This is a wrapper for the _prepare_state_rec function.
 
     :param state: the target state to be prepared
     :type state: QState
-    :param map_gates: map gates to {U2, CNOT}, this will take extra time, defaults to True
+    :param map_gates: map gates to {U2, CNOT}, this will take extra time, defaults to
+        True
     :type map_gates: bool, optional
     :return: a quantum circuit
     :rtype: QCircuit
+
     """
 
     # check the input state

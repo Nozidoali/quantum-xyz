@@ -1,7 +1,9 @@
-from queue import PriorityQueue
 import pickle
+from queue import PriorityQueue
+
 import numpy as np
-from xyz.circuit import QState, from_set, QCircuit, CX, CRY, get_ap_cry_angles
+
+from xyz.circuit import CRY, CX, from_set, get_ap_cry_angles, QCircuit, QState
 from .support_reduction import support_reduction
 
 

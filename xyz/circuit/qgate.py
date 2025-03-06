@@ -1,10 +1,12 @@
-from enum import Enum, auto
-import numpy as np
-from typing import List, Tuple, Dict
-from .qstate import QState
-from numpy.linalg import det
-import scipy as sp
 from collections import namedtuple
+from enum import auto, Enum
+from typing import Dict, List, Tuple
+
+import numpy as np
+import scipy as sp
+from numpy.linalg import det
+
+from .qstate import QState
 
 
 class QGateType(Enum):
@@ -64,9 +66,7 @@ def to_special_unitary(matrix: np.ndarray) -> np.ndarray:
 
 
 def unitary_zyz_decomposition(matrix: np.ndarray):
-    """
-    Returns the Euler Z-Y-Z decomposition of a local 1-qubit gate.
-    """
+    """Returns the Euler Z-Y-Z decomposition of a local 1-qubit gate."""
     U = to_special_unitary(matrix)
     if abs(U[0, 0]) > abs(U[1, 0]):
         theta1 = 2 * np.arccos(min(abs(U[0, 0]), 1))
@@ -217,12 +217,13 @@ class MultiControlledGate:
             if (index >> control_qubit.index) & 1 != phase:
                 return False
         return True
-    
+
     def set_control_qubits(self, control_qubits: List[QBit]) -> None:
         self.control_qubits = list(control_qubits)
-    
+
     def set_phases(self, phases: List[int]) -> None:
         self.phases = list(phases)
+
 
 class BasicGate(QGate):
     def __init__(self, qgate_type: QGateType, target_qubit: QBit) -> None:
@@ -240,6 +241,7 @@ class BasicGate(QGate):
 
     def get_cnot_cost(self) -> int:
         raise NotImplementedError("This method is not implemented")
+
 
 class AdvancedGate(QGate):
 
@@ -666,6 +668,7 @@ def map_mcry(gate: QGate) -> List[QGate]:
     control_sequence = decompose_mcry(rotation_table)
     gates = control_sequence_to_gates(control_sequence, control_qubits, target_qubit)
     return gates
+
 
 # decomposition
 def find_thetas(alphas):

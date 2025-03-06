@@ -1,9 +1,10 @@
 # pylint: skip-file
 
-from math import ceil
-import subprocess
-import re
 import random
+import re
+import subprocess
+from math import ceil
+
 import numpy as np
 from qiskit import QuantumCircuit, QuantumRegister, transpile
 

@@ -1,6 +1,7 @@
 import numpy as np
-import xyz
 import pytest
+import xyz
+
 
 # skip
 @pytest.mark.skip(reason="Takes too long")
