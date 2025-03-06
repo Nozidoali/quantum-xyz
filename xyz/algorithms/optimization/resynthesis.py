@@ -210,7 +210,7 @@ def resub0(
     state_end: QState,
     verbose_level: int = 0,
 ):
-    assert target_qubit.index != None
+    assert target_qubit.index is not None
     assert state_begin.num_qubits == state_end.num_qubits
     assert verbose_level >= 0
 
@@ -276,7 +276,7 @@ def resub1(
     state_end: QState,
     verbose_level: int = 0,
 ):
-    assert target_qubit.index != None
+    assert target_qubit.index is not None
     assert verbose_level >= 0
 
     n_cnots_old = sum((g.get_cnot_cost() for g in window_old))

@@ -1,6 +1,7 @@
-import pydot
 from dataclasses import dataclass
 from typing import Generator, List, Set, Tuple
+
+import pydot
 from xyz.circuit import *
 
 
@@ -178,7 +179,7 @@ class Mapper:
 
 def mapping(circuit: QCircuit) -> QCircuit:
     if circuit.map_gates == True:
-        print(f"[WARNING] circuit has already been mapped, skipping mapping")
+        print("[WARNING] circuit has already been mapped, skipping mapping")
         return circuit
     num_qubit: int = circuit.get_num_qubits()
 
@@ -211,7 +212,7 @@ def mapping(circuit: QCircuit) -> QCircuit:
 def mapping_debug(circuit: QCircuit, control_reorder: bool = False) -> QCircuit:
     # just to test if this makes sense
     if circuit.map_gates == True:
-        print(f"[WARNING] circuit has already been mapped, skipping mapping")
+        print("[WARNING] circuit has already been mapped, skipping mapping")
         return circuit
 
     # for each gate, we randomly permute the control qubits and run the decomposition
@@ -237,7 +238,7 @@ def mapping_debug(circuit: QCircuit, control_reorder: bool = False) -> QCircuit:
 
 
 def schedule_commutable_gates(circuit: QCircuit, verbose: bool = False) -> QCircuit:
-    assert circuit.map_gates == True, f"circuit has not been mapped yet"
+    assert circuit.map_gates == True, "circuit has not been mapped yet"
     num_qubit: int = circuit.get_num_qubits()
     new_circuit = QCircuit(num_qubit, map_gates=True)
 

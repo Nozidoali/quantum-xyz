@@ -12,7 +12,7 @@ class StabilizerState:
             self.regularize()
 
     def __hash__(self) -> int:
-        return hash(''.join(map(str, self.patterns)))
+        return hash("".join(map(str, self.patterns)))
 
     def is_final(self) -> bool:
         for i, p in enumerate(self.patterns):
@@ -31,26 +31,26 @@ class StabilizerState:
     def __str__(self):
         return str(self.patterns)
 
-    def __lt__(self, other: 'StabilizerState') -> bool:
+    def __lt__(self, other: "StabilizerState") -> bool:
         return hash(self) < hash(other)
 
-    def apply_cx(self, cx: dict) -> 'StabilizerState':
+    def apply_cx(self, cx: dict) -> "StabilizerState":
         next_state = StabilizerState(
             self.num_qubits, self.num_stabilizers, self.patterns
         )
-        next_state.patterns[cx['target']] ^= next_state.patterns[cx['control']]
+        next_state.patterns[cx["target"]] ^= next_state.patterns[cx["control"]]
         if PERM_INVARIANT:
             next_state.regularize()
         return next_state
 
 
 def _to_int(pattern: str) -> int:
-    return int(pattern.replace('-', '0'), 2)
+    return int(pattern.replace("-", "0"), 2)
 
 
 from queue import PriorityQueue
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # patterns = list(map(
     #     lambda x: _to_int(x), [
     #         '11-------',
@@ -79,10 +79,10 @@ if __name__ == '__main__':
     # ]
 
     perm = [
-        '-1--',
-        '--1-',
-        '---1',
-        '1---',
+        "-1--",
+        "--1-",
+        "---1",
+        "1---",
     ]
 
     patterns = list(map(lambda x: _to_int(x), perm))
@@ -115,7 +115,7 @@ if __name__ == '__main__':
             for j in range(state.num_qubits):
                 if i == j:
                     continue
-                next_state = state.apply_cx({'control': i, 'target': j})
+                next_state = state.apply_cx({"control": i, "target": j})
                 if (
                     hash(next_state) in visited
                     or next_state in enqueued

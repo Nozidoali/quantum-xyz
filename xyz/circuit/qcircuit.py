@@ -201,7 +201,7 @@ class QCircuit:
         for gate in gates:
             self.add_gate_optimized(gate)
 
-    def trim(self, start, end) -> 'QCircuit':
+    def trim(self, start, end) -> "QCircuit":
         qubits = [qubit for qubit in self.__qubits]
         gates = [gate for gate in self.__gates[start:end]]
         new_circuit = QCircuit(len(qubits), map_gates=self.map_gates, qubits=qubits)

@@ -10,5 +10,5 @@ def _format_project():
     return any([usort_rc, docformatter_rc, black_rc])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     exit(_format_project())

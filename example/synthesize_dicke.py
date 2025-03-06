@@ -1,5 +1,6 @@
 import numpy as np
 from qiskit import qasm2
+import argparse
 from xyz import (
     D_state,
     quantize_state,
@@ -9,10 +10,16 @@ from xyz import (
     to_qiskit
 )
 
+parser = argparse.ArgumentParser(description='Synthesize Dicke state.')
+parser.add_argument('--num_qubits', type=int, default=4, help='Number of qubits')
+parser.add_argument('--k', type=int, default=2, help='Number of excitations')
+args = parser.parse_args()
+
 if __name__ == "__main__":
 
     # synthesize the state
-    state_vector = D_state(4, 2)
+    state_vector = D_state(args.num_qubits, args.k)
+    
     with stopwatch("synthesis", verbose=True) as timer:
         circuit = prepare_state(state_vector, verbose_level=0)
     n_cnot = circuit.get_cnot_cost()

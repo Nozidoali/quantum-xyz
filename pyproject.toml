@@ -44,7 +44,6 @@ sphinx-autoapi = "^3.2.1"
 
 [tool.black]
 line-length = 88
-skip-string-normalization = true
 
 [tool.flake8]
 max-line-length = 88
@@ -58,6 +57,7 @@ select = [
     "F401",
     "F406",
     "F407",
+    "F541",
     "F5",
     "F6",
     "F7",
