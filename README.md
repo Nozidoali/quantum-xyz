@@ -17,6 +17,12 @@ cd example
 python synthesize_dicke.py
 ```
 
+## Installation
+ 
+1. Install poetry (`>=2.0.0`), see [official instruction](https://python-poetry.org/docs/)
+2. Build dist locally by running `poetry build`
+3. Setup the environment by running `poetry install`
+4. Run example using `poetry run python example/synthesize_dicke.py`
 
 ## Quantum State Preparation Using an Exact CNOT Synthesis Formulation
 See [xyz/algorithms/prepare_state](xyz/algorithms/prepare_state)
