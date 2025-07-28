@@ -26,7 +26,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class __Params:
+class StatePreparationParameters:
     EXACT_SYNTHESIS_DENSITY_THRESHOLD: int = 100
     EXACT_SYNTHESIS_CNOT_LIMIT: int = 100
     enable_exact_synthesis: bool = True
@@ -100,7 +100,7 @@ def _prepare_state_rec(
     num_cx_support_reduction = 0
 
     # check the parameters
-    param = __Params()
+    param = StatePreparationParameters()
     param.update(**kwargs)
 
     if param.enable_compression:
@@ -240,7 +240,7 @@ def prepare_state(
     state: QState,
     map_gates: bool = True,
     verbose_level: int = 0,
-    param: __Params = None,
+    param: StatePreparationParameters = None,
     stats: __Stats = __Stats(),
 ) -> QCircuit:
     """A hybrid method combining both qubit- and cardinality- reduction.
@@ -271,7 +271,7 @@ def prepare_state(
 
     if param is None:
         # we design the default parameters
-        param = __Params()
+        param = StatePreparationParameters()
         if cardinality_reduction_cnot_estimation < qubit_reduction_cnot_estimation:
             # if the state is sparse, we enable cardinality reduction method
             param.enable_n_flow = False

@@ -7,10 +7,11 @@ name="xyz"
 version="0.1.0"
 dependencies = [
     "llist==0.7.1",
-    "matplotlib==3.7.1",
-    "numpy>=1.23.5",
+    "matplotlib",
+    "numpy",
     "qiskit>=1.0",
-    "scipy>=1.13.1"
+    "scipy>=1.13.1",
+    "pydot"
 ]
 requires-python = ">=3.10"
 authors = [
