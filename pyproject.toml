@@ -1,6 +1,22 @@
-[tool.poetry]
-name = "xyz"
-version = "0.1.0"
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name="xyz"
+version="0.1.0"
+dependencies = [
+    "llist==0.7.1",
+    "matplotlib",
+    "numpy",
+    "qiskit>=1.0",
+    "scipy>=1.13.1",
+    "pydot"
+]
+requires-python = ">=3.10"
+authors = [
+  {name = "Hanyu Wang"},
+]
 description = "A quantum circuit synthesis library"
 authors = ["Hanyu Wang"]
 readme = "README.md"

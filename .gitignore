@@ -162,3 +162,6 @@ tests/*.csv
 
 # poetry
 poetry.lock
+
+
+.DS_Store
