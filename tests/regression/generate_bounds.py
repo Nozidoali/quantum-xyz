@@ -28,10 +28,17 @@ def measure_case(vec: np.ndarray, param=None) -> int:
 
 
 def main() -> None:
-    rng = np.random.default_rng(SEED)
     measured: dict[str, int] = {}
 
-    for case_id, vec in dense_cases(rng) + sparse_cases(rng):
+    # Each group uses a fresh RNG seeded from SEED — mirrors the per-file
+    # fixtures in the test suite, so generator and tests see the same
+    # vectors.
+    for case_id, vec in dense_cases(np.random.default_rng(SEED)):
+        cnot = measure_case(vec)
+        print(f"{case_id:40s} cnot={cnot}")
+        measured[case_id] = cnot
+
+    for case_id, vec in sparse_cases(np.random.default_rng(SEED)):
         cnot = measure_case(vec)
         print(f"{case_id:40s} cnot={cnot}")
         measured[case_id] = cnot
