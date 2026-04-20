@@ -234,8 +234,9 @@ heuristic, creates the engine, and runs it.
    never `None`. Removed.
 6. **`enable_reindex=True` raises inside `_prepare_state_rec`** — the branch
    calls `reindex_circuit(circuit, state)` then unconditionally raises
-   `NotImplementedError`. Changed to raise early with a clear message (or
-   remove entirely if no caller enables it).
+   `NotImplementedError`. The flag stays on `StatePreparationParameters` (default
+   `False`) but Phase 1 moves the raise to the top of the branch before any
+   side-effect call, with a message pointing at the unimplemented status.
 
 Each fix gets a dedicated unit test.
 
@@ -371,7 +372,7 @@ and such a change is called out explicitly in its commit message.
 
 ```python
 @pytest.mark.parametrize("gate_cls",
-    [RX, RY, RZ, X, Z, U, CX, CRX, CRY, CRZ, CU, MCRY, MCMY])
+    [RX, RY, RZ, X, Z, U, CX, CRX, CRY, CRZ, CU, MCRY, MCMY, MULTIPLEXY])
 def test_apply_matches_qiskit(gate_cls):
     state = random_qstate(seed=...)
     gate = random_instance(gate_cls)
