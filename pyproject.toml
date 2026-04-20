@@ -1,7 +1,3 @@
-[build-system]
-requires = ["setuptools >= 61.0"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name="xyz"
 version="0.1.0"
@@ -18,7 +14,6 @@ authors = [
   {name = "Hanyu Wang"},
 ]
 description = "A quantum circuit synthesis library"
-authors = ["Hanyu Wang"]
 readme = "README.md"
 keywords = ["quantum computing", "eda"]
 classifiers = [
