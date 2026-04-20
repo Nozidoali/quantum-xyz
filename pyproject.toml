@@ -2,13 +2,23 @@
 requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.poetry]
+[project]
 name="xyz"
 version="0.1.0"
-description = "A quantum circuit synthesis library"
+dependencies = [
+    "llist==0.7.1",
+    "matplotlib",
+    "numpy",
+    "qiskit>=1.0",
+    "scipy>=1.13.1",
+    "pydot"
+]
+requires-python = ">=3.10"
 authors = [
   {name = "Hanyu Wang"},
 ]
+description = "A quantum circuit synthesis library"
+authors = ["Hanyu Wang"]
 readme = "README.md"
 keywords = ["quantum computing", "eda"]
 classifiers = [
@@ -16,7 +26,10 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-requires-python = ">=3.10"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.10"
