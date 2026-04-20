@@ -17,7 +17,7 @@ Only when a phase deliberately changes resource characteristics and the
 change is called out in its commit message.
 
 ```
-python tests/regression/generate_bounds.py
+python -m tests.regression.generate_bounds
 ```
 
 This overwrites `tests/regression/golden_bounds.json` with measured CNOT

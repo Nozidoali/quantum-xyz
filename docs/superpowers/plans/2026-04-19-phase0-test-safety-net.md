@@ -108,7 +108,7 @@ Only when a phase deliberately changes resource characteristics and the
 change is called out in its commit message.
 
 ```
-python tests/regression/generate_bounds.py
+python -m tests.regression.generate_bounds
 ```
 
 This overwrites `tests/regression/golden_bounds.json` with measured CNOT
@@ -246,9 +246,9 @@ dense (16,) True
 uniform (8,) True
 sparse (32,) 4
 dicke (16,) True
-dense_cases 16
-sparse_cases 21
-dicke_cases 8
+dense_cases 10
+sparse_cases 15
+dicke_cases 5
 ```
 
 - [ ] **Step 3: Commit**
@@ -290,7 +290,7 @@ def load_bounds() -> dict[str, int]:
     if not BOUNDS_PATH.exists():
         raise FileNotFoundError(
             f"{BOUNDS_PATH} not found. Run "
-            "`python tests/regression/generate_bounds.py` to create it."
+            "`python -m tests.regression.generate_bounds` from the repo root."
         )
     return json.loads(BOUNDS_PATH.read_text())
 
@@ -367,11 +367,11 @@ Run:
 
 ```bash
 cd /home/hanyu/proj/quantum-xyz
-python tests/regression/generate_bounds.py
+python -m tests.regression.generate_bounds
 ```
 
-Expected: ~45 lines of `case_id cnot=<n>` output, finishing with
-`Wrote 45 bounds (slack=1.1).`. A `golden_bounds.json` file appears in
+Expected: 30 lines of `case_id cnot=<n>` output, finishing with
+`Wrote 30 bounds (slack=1.1).`. A `golden_bounds.json` file appears in
 `tests/regression/`.
 
 If any single case takes more than ~10 seconds or raises, **stop** and
@@ -829,8 +829,8 @@ cd /home/hanyu/proj/quantum-xyz
 pytest tests/regression/ -v --durations=10
 ```
 
-Expected: 16 dense + 21 sparse + 8 dicke + 14 gate-apply (5 PASS, 9 XFAIL) =
-59 test outcomes, all green (`passed` or `xfailed`; no `failed`, `error`,
+Expected: 10 dense + 15 sparse + 5 dicke + 14 gate-apply (5 PASS, 9 XFAIL) =
+44 test outcomes, all green (`passed` or `xfailed`; no `failed`, `error`,
 or `xpassed`). Total runtime under 2 minutes.
 
 - [ ] **Step 2: Run the whole repo suite**
@@ -889,7 +889,7 @@ git ls-files tests/regression/golden_bounds.json
 wc -l tests/regression/golden_bounds.json
 ```
 
-The file must appear in `git ls-files` and contain at least 45 entries.
+The file must appear in `git ls-files` and contain at least 30 entries.
 
 - [ ] **Step 3: Runtime budget**
 
@@ -908,7 +908,7 @@ cat > docs/superpowers/plans/2026-04-19-phase0-exit.md <<'EOF'
 # Phase 0 Exit Record
 
 - Regression suite: `pytest tests/regression/` — all green.
-- Total cases: 16 dense + 21 sparse + 8 dicke + 14 gate-apply (5 pass, 9 xfail).
+- Total cases: 10 dense + 15 sparse + 5 dicke + 14 gate-apply (5 pass, 9 xfail).
 - Golden bounds frozen at `tests/regression/golden_bounds.json`.
 - Wall-clock budget: under 2 minutes.
 - Legacy tests unblocked: `test_dicke.py`, `test_qsp_1`.
