@@ -9,7 +9,19 @@ Safety net for the in-progress refactor. See
 pytest tests/regression/ -v
 ```
 
-Expected runtime: under 2 minutes.
+Expected runtime: under 2 minutes for the fast subset (the default).
+
+Slower, heavier cases are marked `@pytest.mark.slow` and skipped by default.
+To include them:
+
+```
+pytest tests/regression/ -v  # with slow if you pass -m "slow or not slow"
+pytest tests/ -v             # run everything, including slow legacy tests
+```
+
+On this repo the full suite (`pytest tests/`) can take 30+ minutes because
+`xyz.prepare_state` is expensive for dense n=4+ and for certain sparse
+topologies. Run the slow suite on a compute node (slurm), not the headnode.
 
 ## Regenerating golden bounds
 
