@@ -32,9 +32,9 @@ def test_state_transitions_2():
         new_state = gate.apply(new_state)
 
     assert (
-        sum([gate.get_cnot_cost() for gate in gates]) == 1
-    ), "sum([gate.get_cnot_cost() for gate in gates]) = %s" % sum(
-        [gate.get_cnot_cost() for gate in gates]
+        sum([gate.cnot_cost() for gate in gates]) == 1
+    ), "sum([gate.cnot_cost() for gate in gates]) = %s" % sum(
+        [gate.cnot_cost() for gate in gates]
     )
 
     assert np.linalg.norm(state.to_vector() - new_state.to_vector()) < 1e-6, (
