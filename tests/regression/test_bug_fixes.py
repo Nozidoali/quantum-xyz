@@ -74,3 +74,27 @@ def test_prepare_state_respects_explicit_param():
         f"expected support_reduction disabled, saw time_support_reduction="
         f"{stats.time_support_reduction}"
     )
+
+
+def test_Z_apply_flips_target_phase():
+    """Bug 3: Z.apply populates a dict then raises unconditionally.
+
+    Expected behavior: flip the sign of every amplitude whose target-qubit
+    bit is 1. A basis state |01> on (q0=low, q1=high), with target=q0, is
+    unchanged in magnitude but flipped in sign if the q0 bit is 1.
+    """
+    from xyz.circuit.qgate import QBit, Z
+
+    # |01> in the xyz convention uses bit index = qubit index.
+    # index 1 = binary 01 = q0 set, q1 clear.
+    state = xyz.quantize_state(np.array([0.0, 1.0, 0.0, 0.0]))
+    z0 = Z(QBit(0))
+    out = z0.apply(state)
+    vec = out.to_vector()
+    assert np.allclose(vec, [0.0, -1.0, 0.0, 0.0]), f"got {vec}"
+
+    # Z on a qubit whose bit is 0 for every nonzero amplitude → no sign flip.
+    z1 = Z(QBit(1))
+    out = z1.apply(state)
+    vec = out.to_vector()
+    assert np.allclose(vec, [0.0, 1.0, 0.0, 0.0]), f"got {vec}"

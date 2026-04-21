@@ -624,12 +624,14 @@ class Z(BasicGate):
     def get_cnot_cost(self) -> int:
         return 0
 
-    def apply(self, qstate: "QState") -> "QState":
+    def apply(self, qstate: QState) -> QState:
         index_to_weight = {}
-        for idx in qstate.index_set:
+        for idx, weight in qstate.index_to_weight.items():
             if idx & (1 << self.target_qubit.index):
-                index_to_weight[idx] = -qstate.index_to_weight[idx]
-        raise NotImplementedError("Z gate not implemented")
+                index_to_weight[idx] = -weight
+            else:
+                index_to_weight[idx] = weight
+        return QState(index_to_weight, qstate.num_qubits)
 
 
 def map_muxy(gate: MULTIPLEXY) -> List[QGate]:
