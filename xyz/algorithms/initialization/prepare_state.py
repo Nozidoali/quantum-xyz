@@ -152,8 +152,7 @@ def _prepare_state_rec(
                     verbose_level=verbose_level,
                     cnot_limit=param.EXACT_SYNTHESIS_CNOT_LIMIT,
                 )
-            if stats is not None:
-                stats.time_exact_cnot_synthesis += timer.time()
+            stats.time_exact_cnot_synthesis += timer.time()
             gates = exact_gates + support_reducing_gates
             num_cx_exact = sum((gate.get_cnot_cost() for gate in exact_gates))
             return gates, num_cx_exact
@@ -300,8 +299,7 @@ def prepare_state(
             stats=stats,
         )
 
-    if stats is not None:
-        stats.time_total = timer.time()
+    stats.time_total = timer.time()
 
     circuit.add_gates(gates)
 

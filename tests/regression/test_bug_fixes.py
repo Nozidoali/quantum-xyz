@@ -115,3 +115,14 @@ def test_map_muxy_does_not_raise_attribute_error():
     )
     mapped = map_muxy(gate)  # must not raise
     assert len(mapped) > 0, "map_muxy produced an empty gate list"
+
+
+def test_prepare_state_with_stats_none_still_works():
+    """Bug 5 companion: `stats is not None` guards inside prepare_state and
+    _prepare_state_rec were dead after Task 1's fix. Removing them is
+    behavior-preserving only if the functions correctly initialize stats
+    when the caller passes None. This test pins that behavior.
+    """
+    circuit = xyz.prepare_state(_trivial_state(), map_gates=True, stats=None)
+    # A cardinality-1 trivial state produces a valid circuit with 0 CNOTs.
+    assert circuit.get_cnot_cost() == 0
