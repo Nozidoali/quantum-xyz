@@ -27,6 +27,10 @@ def test_prepare_state_default_stats_is_none():
 
     Checking the signature directly is the clearest demonstration: a
     Stats instance default is the bug, None is the fix.
+
+    Note: _prepare_state_rec was removed in Phase 4 Task 5 when the
+    SynthesisEngine replaced it. Only the outer prepare_state facade
+    signature is checked here.
     """
     import inspect
 
@@ -35,14 +39,6 @@ def test_prepare_state_default_stats_is_none():
     assert outer_default is None, (
         f"prepare_state stats default is {type(outer_default).__name__}; "
         "expected None to avoid mutable-default sharing across calls"
-    )
-
-    from xyz.algorithms.initialization.prepare_state import _prepare_state_rec
-    sig_inner = inspect.signature(_prepare_state_rec)
-    inner_default = sig_inner.parameters["stats"].default
-    assert inner_default is None, (
-        f"_prepare_state_rec stats default is {type(inner_default).__name__}; "
-        "expected None"
     )
 
 
@@ -132,32 +128,24 @@ def test_prepare_state_with_stats_none_still_works():
 
 
 def test_enable_reindex_raises_before_side_effect():
-    """Bug 6: enable_reindex=True path calls reindex_circuit(), then raises
-    NotImplementedError unconditionally. The reindex call should NOT happen
-    at all — the raise must come first.
+    """Bug 6: enable_reindex=True must raise NotImplementedError and must
+    never trigger support_reduction as a side-effect.
+
+    In Phase 4 Task 5 the guard was moved to SynthesisEngine.run(), which
+    fires before Phase 1 (support_reduction). We verify: (a) NotImplementedError
+    is raised, and (b) the engine stats show zero support_reduction runs,
+    confirming the guard fires before any work is done.
     """
+    from xyz.algorithms.initialization.params import Stats
+
     param = StatePreparationParameters()
     param.enable_reindex = True
+    stats = Stats()
 
-    # Patch reindex_circuit to record whether it was called. The fix means
-    # NotImplementedError must be raised before the call site is reached.
-    import sys
-    prepare_mod = sys.modules["xyz.algorithms.initialization.prepare_state"]
+    with pytest.raises(NotImplementedError):
+        xyz.prepare_state(_trivial_state(), map_gates=True, param=param, stats=stats)
 
-    called = {"n": 0}
-    original = prepare_mod.reindex_circuit
-
-    def spy(*args, **kwargs):
-        called["n"] += 1
-        return original(*args, **kwargs)
-
-    prepare_mod.reindex_circuit = spy
-    try:
-        with pytest.raises(NotImplementedError):
-            xyz.prepare_state(_trivial_state(), map_gates=True, param=param)
-    finally:
-        prepare_mod.reindex_circuit = original
-
-    assert called["n"] == 0, (
-        f"reindex_circuit was called {called['n']} time(s) before the raise"
+    assert stats.num_runs_support_reduction == 0, (
+        f"support_reduction ran {stats.num_runs_support_reduction} time(s) "
+        "before the NotImplementedError raise"
     )
