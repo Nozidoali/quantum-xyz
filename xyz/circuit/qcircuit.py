@@ -10,7 +10,25 @@ __all__ = [
 from typing import List
 
 import numpy as np
-from xyz.gates import *
+from xyz.gates import (
+    BasicGate,
+    ControlledGate,
+    ControlledTrait,
+    CRY,
+    CU,
+    CX,
+    Gate,
+    MCMY,
+    MCRY,
+    MultiControlledGate,
+    MultiControlledTrait,
+    QBit,
+    QGate,
+    QGateType,
+    RY,
+    UnitaryTrait,
+    X,
+)
 from xyz.decomposition.mcry import (
     map_muxy, map_mcry, map_mcmy, map_mcry_linear,
 )

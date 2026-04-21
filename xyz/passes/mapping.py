@@ -15,7 +15,20 @@ from enum import Enum
 from typing import Generator, List, Set, Tuple
 
 import pydot
-from xyz.circuit import *
+from xyz.circuit import (
+    BasicGate,
+    ControlledGate,
+    ControlledTrait,
+    CRY,
+    CX,
+    MCRY,
+    MultiControlledGate,
+    MultiControlledTrait,
+    QCircuit,
+    QGate,
+    QGateType,
+    RY,
+)
 
 
 class QNode:

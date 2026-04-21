@@ -1,12 +1,7 @@
-#!/usr/bin/env python
-# -*- encoding=utf8 -*-
-"""
-Author: Hanyu Wang
-Created time: 2024-04-23 09:34:47
-Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-23 09:35:10
-"""
+"""Support-reduction preprocessing for state preparation."""
 
-from .x_reduction import *
-from .ry_reduction import *
-from .support_reduction import *
+from xyz.synthesis.support_reduction.x_reduction import x_reduction
+from xyz.synthesis.support_reduction.ry_reduction import ry_reduction
+from xyz.synthesis.support_reduction.support_reduction import support_reduction
+
+__all__ = ["x_reduction", "ry_reduction", "support_reduction"]
