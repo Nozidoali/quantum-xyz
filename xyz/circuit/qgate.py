@@ -269,7 +269,26 @@ class MCMY(AdvancedGate):
                       key=lambda q: q.index)
 
     def apply(self, qstate: "QState") -> "QState":
-        raise NotImplementedError("MCMY gate is not implemented yet")
+        # Pattern k (binary over controls) triggers RY(rotation_table[k])
+        # on the target qubit.
+        index_to_weight = {idx: 0.0 for idx in qstate.index_set}
+        for idx, weight in qstate.index_to_weight.items():
+            pattern = 0
+            for i, ctrl in enumerate(self.control_qubits):
+                pattern |= ((idx >> ctrl.index) & 1) << i
+            theta = self.rotation_table[pattern]
+            c = np.cos(theta / 2)
+            s = np.sin(theta / 2)
+            rdx = idx ^ (1 << self.target_qubit.index)
+            if rdx not in qstate.index_set:
+                index_to_weight[rdx] = 0.0
+            if (idx >> self.target_qubit.index) & 1 == 0:
+                index_to_weight[idx] += weight * c
+                index_to_weight[rdx] += weight * s
+            else:
+                index_to_weight[idx] += weight * c
+                index_to_weight[rdx] += -weight * s
+        return QState(index_to_weight, qstate.num_qubits)
 
 
 MCRY_CNOT_COST = {
@@ -392,7 +411,22 @@ class MULTIPLEXY(AdvancedGate):
                       key=lambda q: q.index)
 
     def apply(self, qstate: "QState") -> "QState":
-        raise NotImplementedError("MULTIPLEXY gate is not implemented yet")
+        ctrl = self.control_qubits[0]
+        index_to_weight = {idx: 0.0 for idx in qstate.index_set}
+        for idx, weight in qstate.index_to_weight.items():
+            theta = self.theta1 if (idx >> ctrl.index) & 1 else self.theta0
+            c = np.cos(theta / 2)
+            s = np.sin(theta / 2)
+            rdx = idx ^ (1 << self.target_qubit.index)
+            if rdx not in qstate.index_set:
+                index_to_weight[rdx] = 0.0
+            if (idx >> self.target_qubit.index) & 1 == 0:
+                index_to_weight[idx] += weight * c
+                index_to_weight[rdx] += weight * s
+            else:
+                index_to_weight[idx] += weight * c
+                index_to_weight[rdx] += -weight * s
+        return QState(index_to_weight, qstate.num_qubits)
 
 
 class RX(RotationGate, BasicGate):

@@ -20,7 +20,7 @@ from tests.regression.builders import random_real_state
 from tests.regression.conftest import SEED
 
 # Gates whose apply() is not implemented today.
-UNIMPLEMENTED_APPLY = {"MCMY", "MULTIPLEXY"}
+UNIMPLEMENTED_APPLY = set()
 
 
 def _random_unitary_2x2(rng: np.random.Generator) -> np.ndarray:
@@ -93,6 +93,26 @@ def _apply_on_qiskit(qc: QuantumCircuit, gate) -> None:
     if name == "MCRY":
         controls = [q.index for q in gate.control_qubits]
         qc.mcry(gate.theta, controls, t)
+        return
+    if name == "MCMY":
+        # MCMY applies RY(rotation_table[k]) when the control pattern
+        # reads k in binary. Emulate by looping: for each k, flip the
+        # "zero" controls with X, apply mcry, flip back.
+        controls = [q.index for q in gate.control_qubits]
+        for k, theta in enumerate(gate.rotation_table):
+            phases = [(k >> i) & 1 for i in range(len(controls))]
+            for i, p in enumerate(phases):
+                if p == 0:
+                    qc.x(controls[i])
+            qc.mcry(theta, controls, t)
+            for i, p in enumerate(phases):
+                if p == 0:
+                    qc.x(controls[i])
+        return
+    if name == "MULTIPLEXY":
+        c = gate.control_qubits[0].index
+        qc.x(c); qc.cry(gate.theta0, c, t); qc.x(c)
+        qc.cry(gate.theta1, c, t)
         return
     raise AssertionError(
         f"no qiskit equivalent wired for {name}; extend _apply_on_qiskit "
