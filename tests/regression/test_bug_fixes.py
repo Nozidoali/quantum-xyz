@@ -44,3 +44,33 @@ def test_prepare_state_default_stats_is_none():
         f"_prepare_state_rec stats default is {type(inner_default).__name__}; "
         "expected None"
     )
+
+
+def test_prepare_state_respects_explicit_param():
+    """Bug 2: caller-supplied `param` is dropped inside `_prepare_state_rec`.
+
+    If we pass a StatePreparationParameters that disables compression
+    (support_reduction), the stats counter for support_reduction runs
+    must reflect that, not the default-enabled behavior.
+    """
+    from xyz.algorithms.initialization.prepare_state import __Stats as Stats
+
+    param = StatePreparationParameters()
+    param.enable_compression = False
+    param.enable_exact_synthesis = False
+    param.enable_m_flow = False
+    param.enable_n_flow = False
+
+    stats = Stats()
+    # A cardinality-1 state short-circuits on the trivial path before m/n-flow
+    # are consulted, so disabling all methods is safe here — the assertion
+    # exercises only the compression toggle.
+    xyz.prepare_state(_trivial_state(), map_gates=True, param=param, stats=stats)
+
+    # With enable_compression=False, support_reduction never runs.
+    # Today (buggy) the param is discarded and compression runs anyway,
+    # so this assertion fails.
+    assert stats.time_support_reduction == 0, (
+        f"expected support_reduction disabled, saw time_support_reduction="
+        f"{stats.time_support_reduction}"
+    )

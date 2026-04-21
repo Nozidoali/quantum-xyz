@@ -90,20 +90,19 @@ def _prepare_state_rec(
     state: QState,
     verbose_level: int = 0,
     stats: "__Stats | None" = None,
-    **kwargs,
+    param: "StatePreparationParameters | None" = None,
 ):
     if stats is None:
         stats = __Stats()
+    if param is None:
+        param = StatePreparationParameters()
+
     prev_supports = state.get_supports()
     prev_num_supports = len(prev_supports)
     prev_density = state.get_sparsity()
 
     support_reducing_gates = []
     num_cx_support_reduction = 0
-
-    # check the parameters
-    param = StatePreparationParameters()
-    param.update(**kwargs)
 
     if param.enable_compression:
         # first, run support reduction
