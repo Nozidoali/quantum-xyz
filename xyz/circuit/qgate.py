@@ -388,7 +388,13 @@ class RX(RotationGate, BasicGate):
         return [self.target_qubit]
 
     def apply(self, qstate: "QState") -> "QState":
-        raise NotImplementedError("This method is not implemented")
+        # Real projection of RX(θ) on a real-amplitude state is scalar
+        # multiplication by cos(θ/2). See Phase 2 plan Task 5 math note.
+        scale = float(np.cos(self.theta / 2))
+        return QState(
+            {idx: w * scale for idx, w in qstate.index_to_weight.items()},
+            qstate.num_qubits,
+        )
 
 
 class RY(RotationGate, BasicGate):
@@ -439,7 +445,13 @@ class RZ(RotationGate, BasicGate):
         return [self.target_qubit]
 
     def apply(self, qstate: "QState") -> "QState":
-        raise NotImplementedError("This method is not implemented")
+        # RZ's real projection on a real-amplitude state matches RX's:
+        # both reduce to cos(θ/2)·ψ. See Phase 2 plan Task 5 math note.
+        scale = float(np.cos(self.theta / 2))
+        return QState(
+            {idx: w * scale for idx, w in qstate.index_to_weight.items()},
+            qstate.num_qubits,
+        )
 
 
 class U(UnitaryGate, BasicGate):
@@ -457,7 +469,21 @@ class U(UnitaryGate, BasicGate):
         return [self.target_qubit]
 
     def apply(self, qstate: "QState") -> "QState":
-        raise NotImplementedError("This method is not implemented")
+        # Apply Re(U) as a 2×2 real matrix on the two-amplitude subspace
+        # indexed by the target qubit's bit.
+        m = np.real(self.unitary)
+        index_to_weight = {idx: 0.0 for idx in qstate.index_set}
+        for idx, weight in qstate.index_to_weight.items():
+            rdx = idx ^ (1 << self.target_qubit.index)
+            if rdx not in qstate.index_set:
+                index_to_weight[rdx] = 0.0
+            if (idx >> self.target_qubit.index) & 1 == 0:
+                index_to_weight[idx] += weight * m[0, 0]
+                index_to_weight[rdx] += weight * m[1, 0]
+            else:
+                index_to_weight[idx] += weight * m[1, 1]
+                index_to_weight[rdx] += weight * m[0, 1]
+        return QState(index_to_weight, qstate.num_qubits)
 
 
 class X(BasicGate):

@@ -20,7 +20,7 @@ from tests.regression.builders import random_real_state
 from tests.regression.conftest import SEED
 
 # Gates whose apply() is not implemented today.
-UNIMPLEMENTED_APPLY = {"RX", "RZ", "U", "Z", "CRX", "CRZ", "CU", "MCMY", "MULTIPLEXY"}
+UNIMPLEMENTED_APPLY = {"CRX", "CRZ", "CU", "MCMY", "MULTIPLEXY"}
 
 
 def _random_unitary_2x2(rng: np.random.Generator) -> np.ndarray:
@@ -73,8 +73,12 @@ def _apply_on_qiskit(qc: QuantumCircuit, gate) -> None:
     handle the currently-implemented list."""
     name = type(gate).__name__
     t = gate.target_qubit.index
+    if name == "RX":  qc.rx(gate.theta, t); return
     if name == "RY":  qc.ry(gate.theta, t); return
+    if name == "RZ":  qc.rz(gate.theta, t); return
     if name == "X":   qc.x(t); return
+    if name == "Z":   qc.z(t); return
+    if name == "U":   qc.unitary(gate.unitary, [t]); return
     if name == "CX":  qc.cx(gate.control_qubits[0].index, t); return
     if name == "CRY": qc.cry(gate.theta, gate.control_qubits[0].index, t); return
     if name == "MCRY":
@@ -113,6 +117,10 @@ def test_apply_matches_qiskit(gate_name):
     qc.initialize(init_vec, list(range(n)))
     _apply_on_qiskit(qc, gate)
     qiskit_result = np.real(Statevector(qc).data)
+    # Normalize qiskit result to match xyz normalization via to_vector()
+    qiskit_result_norm = np.linalg.norm(qiskit_result)
+    if qiskit_result_norm > 0:
+        qiskit_result = qiskit_result / qiskit_result_norm
 
     assert np.allclose(xyz_result, qiskit_result, atol=1e-8), (
         f"{gate_name} apply mismatch:\n  xyz   ={xyz_result}\n  qiskit={qiskit_result}"
