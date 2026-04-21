@@ -15,6 +15,7 @@ from xyz.gates.types import (
     _unitary_zyz_decomposition as _unitary_zyz_decomposition_impl,
     _to_special_unitary as _to_special_unitary_impl,
 )
+from xyz.gates.base import Gate
 
 # Phase 2: legacy trait class names. Phase 3 deletes these once all
 # concrete gates reference the Trait names directly.
@@ -26,15 +27,9 @@ to_special_unitary = _to_special_unitary_impl
 unitary_zyz_decomposition = _unitary_zyz_decomposition_impl
 
 
-class QGate:
-    def __init__(self, qgate_type: QGateType) -> None:
-        self.qgate_type = qgate_type
-
-    def __str__(self) -> str:
-        return self.qgate_type.name
-
-    def get_qgate_type(self) -> QGateType:
-        return self.qgate_type
+# Phase 2: QGate becomes an alias for the new ABC; Phase 3 deletes the
+# alias and updates callers to Gate directly.
+QGate = Gate
 
 
 
