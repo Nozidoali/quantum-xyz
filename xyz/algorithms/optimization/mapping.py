@@ -44,7 +44,7 @@ class QNetwork:
             if issubclass(type(gate), ControlledGate) or issubclass(
                 type(gate), MultiControlledGate
             ):
-                for control_qubit in gate.get_control_qubits():
+                for control_qubit in gate.control_qubits:
                     self.add_edge(
                         self.__last_gate_on_qubit[control_qubit.index],
                         nodeIdx,
@@ -62,7 +62,7 @@ class QNetwork:
             if isinstance(node.gate, str):
                 graph.add_node(pydot.Node(f"g_{idx}", label=node.gate))
             else:
-                label = f"{node.gate.get_qgate_type()}"
+                label = f"{node.gate.qgate_type}"
                 graph.add_node(pydot.Node(f"g_{idx}", label=label))
         for source, target, label in self.__edges:
             graph.add_edge(pydot.Edge(f"g_{source}", f"g_{target}", label=label))
@@ -154,18 +154,18 @@ class Mapper:
         return node
 
     def dynamic_mapping(self, gate: QGate) -> ChoiceNode:
-        match gate.get_qgate_type():
+        match gate.qgate_type:
             case QGateType.MCRY:
                 self.appendNode(ChoiceNode(gate, ChoiceType.GATES, []))
             case QGateType.CRY:
                 # we have two commutable gates
-                self.appendGate(CX(gate.control_qubit, gate.phase, gate.target_qubit))
+                self.appendGate(CX(gate.control_qubits[0], gate.phase, gate.target_qubit))
 
                 choice1 = ChoiceNode(
                     [
-                        CX(gate.control_qubit, gate.phase, gate.target_qubit),
+                        CX(gate.control_qubits[0], gate.phase, gate.target_qubit),
                         RY(-gate.theta / 2, gate.target_qubit),
-                        CX(gate.control_qubit, gate.phase, gate.target_qubit),
+                        CX(gate.control_qubits[0], gate.phase, gate.target_qubit),
                     ],
                     ChoiceType.GATES,
                     [],
@@ -221,7 +221,7 @@ def mapping_debug(circuit: QCircuit, control_reorder: bool = False) -> QCircuit:
     new_circuit = QCircuit(num_qubit, map_gates=True)
     for i, gate in enumerate(circuit.get_gates()):
         if control_reorder == True and issubclass(type(gate), MultiControlledGate):
-            control_qubits, phases = gate.get_control_qubits(), gate.get_phases()
+            control_qubits, phases = gate.control_qubits, gate.phases
             n = len(control_qubits)
 
             # sort the control qubits and phases according to new_circuit.get_level_on_qubit(control_qubits)
@@ -263,7 +263,7 @@ def schedule_commutable_gates(circuit: QCircuit, verbose: bool = False) -> QCirc
         curr_layer_gates.append(gate)
 
         assert issubclass(type(gate), ControlledGate)
-        control_qubit = gate.get_control_qubits()[0]
+        control_qubit = gate.control_qubits[0]
         target_qubit = gate.target_qubit
 
         curr_layer_occupancy[control_qubit.index] = True
@@ -289,7 +289,7 @@ def schedule_commutable_gates(circuit: QCircuit, verbose: bool = False) -> QCirc
                 dirty_qubits.add(next_gate.target_qubit.index)
                 continue
             assert issubclass(type(next_gate), ControlledGate)
-            next_control_qubit = next_gate.get_control_qubits()[0]
+            next_control_qubit = next_gate.control_qubits[0]
             next_target_qubit = next_gate.target_qubit
 
             if (

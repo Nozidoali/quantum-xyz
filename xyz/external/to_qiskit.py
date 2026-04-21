@@ -48,7 +48,7 @@ def to_qiskit(qcircuit: QCircuit, with_measurement: bool = False) -> QuantumCirc
 
     gate: QGate
     for gate in qcircuit.get_gates():
-        match gate.get_qgate_type():
+        match gate.qgate_type:
             case QGateType.U:
                 special_gate = SpecialGates.cu(gate)
                 circuit.append(
@@ -60,7 +60,7 @@ def to_qiskit(qcircuit: QCircuit, with_measurement: bool = False) -> QuantumCirc
                 special_gate = SpecialGates.cu(gate)
                 circuit.append(
                     special_gate,
-                    _to_register([gate.control_qubit, gate.target_qubit]),
+                    _to_register([gate.control_qubits[0], gate.target_qubit]),
                 )
 
             case QGateType.MCRY:
@@ -72,7 +72,7 @@ def to_qiskit(qcircuit: QCircuit, with_measurement: bool = False) -> QuantumCirc
 
             case QGateType.CX:
                 circuit.cx(
-                    _to_register(gate.control_qubit),
+                    _to_register(gate.control_qubits[0]),
                     _to_register(gate.target_qubit),
                     ctrl_state=gate.phase,
                 )
@@ -95,7 +95,7 @@ def to_qiskit(qcircuit: QCircuit, with_measurement: bool = False) -> QuantumCirc
             case QGateType.CRX:
                 circuit.crx(
                     gate.theta,
-                    _to_register(gate.control_qubit),
+                    _to_register(gate.control_qubits[0]),
                     _to_register(gate.target_qubit),
                     ctrl_state=gate.phase,
                 )
@@ -103,7 +103,7 @@ def to_qiskit(qcircuit: QCircuit, with_measurement: bool = False) -> QuantumCirc
             case QGateType.CRY:
                 circuit.cry(
                     gate.theta,
-                    _to_register(gate.control_qubit),
+                    _to_register(gate.control_qubits[0]),
                     _to_register(gate.target_qubit),
                     ctrl_state=gate.phase,
                 )
@@ -111,14 +111,14 @@ def to_qiskit(qcircuit: QCircuit, with_measurement: bool = False) -> QuantumCirc
             case QGateType.CRZ:
                 circuit.crz(
                     gate.theta,
-                    _to_register(gate.control_qubit),
+                    _to_register(gate.control_qubits[0]),
                     _to_register(gate.target_qubit),
                     ctrl_state=gate.phase,
                 )
 
             case _:
                 raise NotImplementedError(
-                    f"Gate type {gate.get_qgate_type()} is not supported yet\n Consider toggle map_gates to True"
+                    f"Gate type {gate.qgate_type} is not supported yet\n Consider toggle map_gates to True"
                 )
 
     if with_measurement:

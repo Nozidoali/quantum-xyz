@@ -29,33 +29,33 @@ from .support_reduction import support_reduction
 
 
 def to_controlled_gate(gate: QGate, control_qubit: QBit, control_phase: bool):
-    assert control_qubit != gate.get_target_qubit()
-    match gate.get_qgate_type():
+    assert control_qubit != gate.target_qubit
+    match gate.qgate_type:
         case QGateType.X:
-            return CX(control_qubit, control_phase, gate.get_target_qubit())
+            return CX(control_qubit, control_phase, gate.target_qubit)
         case QGateType.RY:
             return CRY(
-                gate.get_theta(), control_qubit, control_phase, gate.get_target_qubit()
+                gate.theta, control_qubit, control_phase, gate.target_qubit
             )
         case QGateType.CX:
-            control_qubits = [control_qubit, gate.get_control_qubit()]
-            phases = [control_phase, gate.get_phase()]
-            return MCRY(np.pi, control_qubits, phases, gate.get_target_qubit())
+            control_qubits = [control_qubit, gate.control_qubits[0]]
+            phases = [control_phase, gate.phase]
+            return MCRY(np.pi, control_qubits, phases, gate.target_qubit)
         case QGateType.CRY:
-            control_qubits = [control_qubit, gate.get_control_qubit()]
-            phases = [control_phase, gate.get_phase()]
+            control_qubits = [control_qubit, gate.control_qubits[0]]
+            phases = [control_phase, gate.phase]
             return MCRY(
-                gate.get_theta(), control_qubits, phases, gate.get_target_qubit()
+                gate.theta, control_qubits, phases, gate.target_qubit
             )
         case QGateType.MCRY:
-            control_qubits = [control_qubit] + gate.get_control_qubits()
-            phases = [control_phase] + gate.get_phases()
+            control_qubits = [control_qubit] + gate.control_qubits
+            phases = [control_phase] + gate.phases
             return MCRY(
-                gate.get_theta(), control_qubits, phases, gate.get_target_qubit()
+                gate.theta, control_qubits, phases, gate.target_qubit
             )
         case _:
             raise NotImplementedError(
-                f"Controlled gate {gate.get_qgate_type()} is not implemented"
+                f"Controlled gate {gate.qgate_type} is not implemented"
             )
 
 

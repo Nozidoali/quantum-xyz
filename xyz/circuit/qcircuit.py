@@ -53,7 +53,7 @@ class QCircuit:
             )
             if issubclass(type(gate), ControlledGate):
                 qubits.append(gate.target_qubit)
-                qubits.append(gate.control_qubit)
+                qubits.append(gate.control_qubits[0])
                 gate_time = max(self.__last_gate_time[qubit.index] for qubit in qubits)
                 for qubit in qubits:
                     self.__last_gate_time[qubit.index] = (
@@ -106,7 +106,7 @@ class QCircuit:
         if gate_type is None:
             return len(self.__gates)
         return len(
-            [gate for gate in self.__gates if gate.get_qgate_type() == gate_type]
+            [gate for gate in self.__gates if gate.qgate_type == gate_type]
         )
 
     def get_cnot_cost(self) -> int:
@@ -128,7 +128,7 @@ class QCircuit:
                 self.append_gates(gates)
 
             case QGateType.MCRY:
-                if len(gate.get_control_qubits()) >= 8:
+                if len(gate.control_qubits) >= 8:
                     gates = map_mcry_linear(gate)
                 else:
                     gates = map_mcry(gate)
@@ -149,21 +149,21 @@ class QCircuit:
                 self.append_gate(gate)
 
     def add_gate_optimized(self, gate: QGate) -> None:
-        match gate.get_qgate_type():
+        match gate.qgate_type:
             case QGateType.CU:
                 if gate.is_z_trivial():
                     reduced_gate = CRY(
-                        gate.get_beta(),
-                        gate.control_qubit,
-                        gate.get_phase(),
+                        gate.beta,
+                        gate.control_qubits[0],
+                        gate.phase,
                         gate.target_qubit,
                     )
                     self.add_gate_optimized(reduced_gate)
                 elif gate.is_z_trivial_not():
                     reduced_gate = CRY(
-                        -gate.get_beta(),
-                        gate.control_qubit,
-                        gate.get_phase(),
+                        -gate.beta,
+                        gate.control_qubits[0],
+                        gate.phase,
                         gate.target_qubit,
                     )
                     self.add_gate_optimized(reduced_gate)
@@ -284,7 +284,7 @@ def to_tikz(circuit: QCircuit) -> str:
 
     for j, gate in enumerate(circuit.get_gates()):
         i = j + 1
-        match gate.get_qgate_type():
+        match gate.qgate_type:
             case QGateType.X:
                 qubit_str[gate.target_qubit.index][i] = "\\gate{{X}}"
             case QGateType.RY:
@@ -293,16 +293,16 @@ def to_tikz(circuit: QCircuit) -> str:
             case QGateType.CX:
                 gate: CX
                 control_type = "ctrl" if gate.phase else "ctrlo"
-                control_dist = -gate.control_qubit.index + gate.target_qubit.index
-                qubit_str[gate.control_qubit.index][
+                control_dist = -gate.control_qubits[0].index + gate.target_qubit.index
+                qubit_str[gate.control_qubits[0].index][
                     i
                 ] = f"\\{control_type}{{{control_dist}}}"
                 qubit_str[gate.target_qubit.index][i] = "\\targ"
             case QGateType.CRY:
                 gate: CRY
                 control_type = "ctrl" if gate.phase else "ctrlo"
-                control_dist = -gate.control_qubit.index + gate.target_qubit.index
-                qubit_str[gate.control_qubit.index][
+                control_dist = -gate.control_qubits[0].index + gate.target_qubit.index
+                qubit_str[gate.control_qubits[0].index][
                     i
                 ] = f"\\{control_type}{{{control_dist}}}"
                 qubit_str[gate.target_qubit.index][i] = ry_box(theta=gate.theta)
@@ -318,7 +318,7 @@ def to_tikz(circuit: QCircuit) -> str:
                     ] = f"\\{control_type}{{{control_dist}}}"
                 qubit_str[gate.target_qubit.index][i] = ry_box(theta=gate.theta)
             case _:
-                raise ValueError(f"Unsupported gate type {gate.get_qgate_type()}")
+                raise ValueError(f"Unsupported gate type {gate.qgate_type}")
 
     tikz_str = " \\\\\n".join([" & ".join(qubit) for qubit in qubit_str])
     return to_figure(tikz_str)

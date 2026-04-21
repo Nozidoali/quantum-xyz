@@ -39,7 +39,7 @@ class SpecialGates:
         # because the qiskit's control gate is in the reverse order
         control_str = "".join([str(int(phase)) for phase in gate.phases])[::-1]
 
-        return RYGate(gate.get_theta()).control(
+        return RYGate(gate.theta).control(
             num_control_qubits, ctrl_state=control_str
         )
 
@@ -55,7 +55,7 @@ class SpecialGates:
 
         """
 
-        return UnitaryGate(gate.get_unitary())
+        return UnitaryGate(gate.unitary)
 
     @staticmethod
     def cu(gate: CU):
@@ -73,6 +73,6 @@ class SpecialGates:
         # because the qiskit's control gate is in the reverse order
         control_str = str(int(gate.phase))
 
-        return UnitaryGate(gate.get_unitary()).control(
+        return UnitaryGate(gate.unitary).control(
             num_control_qubits, ctrl_state=control_str
         )

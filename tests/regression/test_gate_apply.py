@@ -75,8 +75,8 @@ def _apply_on_qiskit(qc: QuantumCircuit, gate) -> None:
     t = gate.target_qubit.index
     if name == "RY":  qc.ry(gate.theta, t); return
     if name == "X":   qc.x(t); return
-    if name == "CX":  qc.cx(gate.control_qubit.index, t); return
-    if name == "CRY": qc.cry(gate.theta, gate.control_qubit.index, t); return
+    if name == "CX":  qc.cx(gate.control_qubits[0].index, t); return
+    if name == "CRY": qc.cry(gate.theta, gate.control_qubits[0].index, t); return
     if name == "MCRY":
         controls = [q.index for q in gate.control_qubits]
         qc.mcry(gate.theta, controls, t)

@@ -53,9 +53,6 @@ class BasicGate(QGate):
         assert isinstance(target_qubit, QBit)
         self.target_qubit: QBit = target_qubit
 
-    def get_target_qubit(self) -> QBit:
-        return self.target_qubit
-
     def apply(self, qstate: "QState") -> "QState":
         raise NotImplementedError("This method is not implemented")
 
@@ -84,7 +81,7 @@ class CRX(RotationGate, BasicGate, ControlledGate):
         ControlledGate.__init__(self, control_qubit, phase)
 
     def __str__(self) -> str:
-        return f"CRX({self.theta:0.02f}, {self.control_qubit}[{self.phase}])"
+        return f"CRX({self.theta:0.02f}, {self.control_qubits[0]}[{self.phase}])"
 
     def cnot_cost(self) -> int:
         return 2
@@ -109,7 +106,7 @@ class CRY(RotationGate, BasicGate, ControlledGate):
 
     def __str__(self) -> str:
         control_str = "" if self.phase == 1 else "~"
-        return f"C({control_str}{self.control_qubit})RY({self.target_qubit}:{self.theta:0.02f})"
+        return f"C({control_str}{self.control_qubits[0]})RY({self.target_qubit}:{self.theta:0.02f})"
 
     def cnot_cost(self) -> int:
         """Returns the cost of the cost of the gate."""
@@ -120,7 +117,7 @@ class CRY(RotationGate, BasicGate, ControlledGate):
                       key=lambda q: q.index)
 
     def conjugate(self) -> "CRY":
-        return CRY(-self.theta, self.control_qubit, self.phase, self.target_qubit)
+        return CRY(-self.theta, self.control_qubits[0], self.phase, self.target_qubit)
 
     def apply(self, qstate: QState) -> QState:
         index_to_weight = {idx: 0 for idx in qstate.index_set}
@@ -152,7 +149,7 @@ class CRZ(RotationGate, BasicGate, ControlledGate):
         ControlledGate.__init__(self, control_qubit, phase)
 
     def __str__(self) -> str:
-        return f"CRZ({self.theta:0.02f}, {self.control_qubit}[{self.phase}])"
+        return f"CRZ({self.theta:0.02f}, {self.control_qubits[0]}[{self.phase}])"
 
     def cnot_cost(self) -> int:
         return 2
@@ -176,7 +173,7 @@ class CU(BasicGate, UnitaryGate, ControlledGate):
 
     def __str__(self) -> str:
         phase_str = "" if self.phase == 1 else "~"
-        return f"C({phase_str}{self.control_qubit})U({self.target_qubit})"
+        return f"C({phase_str}{self.control_qubits[0]})U({self.target_qubit})"
 
     def cnot_cost(self) -> int:
         return 2
@@ -197,7 +194,7 @@ class CX(BasicGate, ControlledGate):
 
     def __str__(self) -> str:
         phase_str = "" if self.phase == 1 else "~"
-        return f"C({phase_str}{self.control_qubit})X({self.target_qubit})"
+        return f"C({phase_str}{self.control_qubits[0]})X({self.target_qubit})"
 
     def cnot_cost(self) -> int:
         return 1
@@ -207,7 +204,7 @@ class CX(BasicGate, ControlledGate):
                       key=lambda q: q.index)
 
     def conjugate(self) -> "CX":
-        return CX(self.control_qubit, self.phase, self.target_qubit)
+        return CX(self.control_qubits[0], self.phase, self.target_qubit)
 
     def apply(self, qstate: QState) -> QState:
         index_to_weight = {}
@@ -519,14 +516,14 @@ def map_muxy(gate: MULTIPLEXY) -> List[QGate]:
 
 
 def map_mcry(gate: QGate) -> List[QGate]:
-    match gate.get_qgate_type():
+    match gate.qgate_type:
         case QGateType.MCRY:
             control_qubits = gate.control_qubits
             phases = gate.phases
             target_qubit = gate.target_qubit
 
         case QGateType.CRY:
-            control_qubits = [gate.control_qubit]
+            control_qubits = [gate.control_qubits[0]]
             phases = [gate.phase]
             target_qubit = gate.target_qubit
 
@@ -638,7 +635,7 @@ def unitary_convert(unitary: np.ndarray, coef: float, signal: int):
 
 
 def map_mcry_linear(mcry_gate: MCRY) -> List[QGate]:
-    assert mcry_gate.get_qgate_type() == QGateType.MCRY
+    assert mcry_gate.qgate_type == QGateType.MCRY
 
     # we first preprocess the relavant qubits
     qubit_list = mcry_gate.control_qubits + [mcry_gate.target_qubit]
@@ -703,11 +700,11 @@ def map_mcry_linear(mcry_gate: MCRY) -> List[QGate]:
 
         return gates
 
-    unitary = theta_to_unitary(mcry_gate.get_theta())
+    unitary = theta_to_unitary(mcry_gate.theta)
 
     gates = []
     # frist we consider the control phases
-    for phase, control_qubit in zip(mcry_gate.get_phases(), mcry_gate.control_qubits):
+    for phase, control_qubit in zip(mcry_gate.phases, mcry_gate.control_qubits):
         if phase == 0:
             gate = X(control_qubit)
             gates.append(gate)
@@ -727,7 +724,7 @@ def map_mcry_linear(mcry_gate: MCRY) -> List[QGate]:
         gates.append(gate)
 
     # frist we consider the control phases
-    for phase, control_qubit in zip(mcry_gate.get_phases(), mcry_gate.control_qubits):
+    for phase, control_qubit in zip(mcry_gate.phases, mcry_gate.control_qubits):
         if phase == 0:
             gate = X(control_qubit)
             gates.append(gate)

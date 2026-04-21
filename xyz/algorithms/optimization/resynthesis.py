@@ -294,9 +294,9 @@ def resub1(
     all_control_qubits = set()
     for gate in window_old:
         if isinstance(gate, CX):
-            all_control_qubits.add(gate.control_qubit.index)
+            all_control_qubits.add(gate.control_qubits[0].index)
         if isinstance(gate, CRY):
-            all_control_qubits.add(gate.control_qubit.index)
+            all_control_qubits.add(gate.control_qubits[0].index)
         if isinstance(gate, MCRY):
             for control_qubit in gate.control_qubits:
                 all_control_qubits.add(control_qubit.index)
@@ -338,9 +338,9 @@ def resubN(
     all_control_qubits = set()
     for gate in window_old:
         if isinstance(gate, CX):
-            all_control_qubits.add(gate.control_qubit.index)
+            all_control_qubits.add(gate.control_qubits[0].index)
         if isinstance(gate, CRY):
-            all_control_qubits.add(gate.control_qubit.index)
+            all_control_qubits.add(gate.control_qubits[0].index)
         if isinstance(gate, MCRY):
             for control_qubit in gate.control_qubits:
                 all_control_qubits.add(control_qubit.index)
@@ -401,7 +401,7 @@ def resub2N(
     all_control_qubits = set()
     for gate in window_old:
         if isinstance(gate, CX):
-            all_control_qubits.add(gate.control_qubit.index)
+            all_control_qubits.add(gate.control_qubits[0].index)
     all_control_qubits = list(all_control_qubits)
     n_cnot_new = 2 * len(all_control_qubits) + 1
 
@@ -586,7 +586,7 @@ def extract_windows(circuit: QCircuit):
                 uncommute_qubits = set()
                 for j in range(i, len(gates)):
                     try:
-                        if gates[j].control_qubit == curr_target_qubit:
+                        if gates[j].control_qubits[0] == curr_target_qubit:
                             break
                     except AttributeError:
                         pass
@@ -595,7 +595,7 @@ def extract_windows(circuit: QCircuit):
                         uncommute_qubits.add(gates[j].target_qubit)
                     else:
                         try:
-                            if gates[j].control_qubit in uncommute_qubits:
+                            if gates[j].control_qubits[0] in uncommute_qubits:
                                 break
                         except AttributeError:
                             pass

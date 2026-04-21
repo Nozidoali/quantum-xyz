@@ -67,9 +67,6 @@ class RotationTrait:
     def is_pi(self) -> bool:
         return np.isclose(self.theta, np.pi) or np.isclose(self.theta, -np.pi)
 
-    def get_theta(self) -> float:
-        return self.theta
-
 
 class UnitaryTrait:
     """Concrete gates parameterized by a 2×2 unitary matrix, with its
@@ -78,18 +75,6 @@ class UnitaryTrait:
     def __init__(self, unitary: np.ndarray) -> None:
         self.unitary = unitary
         self.alpha, self.beta, self.gamma = _unitary_zyz_decomposition(unitary)
-
-    def get_unitary(self) -> np.ndarray:
-        return self.unitary
-
-    def get_alpha(self) -> float:
-        return self.alpha
-
-    def get_beta(self) -> float:
-        return self.beta
-
-    def get_gamma(self) -> float:
-        return self.gamma
 
     def is_z_trivial(self) -> bool:
         is_alpha_trivial = np.isclose(self.alpha, 0) or np.isclose(
@@ -116,23 +101,6 @@ class ControlledTrait:
         self.control_qubits: List[QBit] = [control_qubit]
         self.phase = phase
 
-    @property
-    def control_qubit(self) -> QBit:
-        """Returns the (single) control qubit for backwards compatibility."""
-        return self.control_qubits[0]
-
-    def get_control_qubit(self) -> QBit:
-        """Returns the control qubit."""
-        return self.control_qubits[0]
-
-    def get_control_qubits(self) -> List[QBit]:
-        """Returns the control qubits."""
-        return self.control_qubits
-
-    def get_phase(self) -> int:
-        """Returns the phase."""
-        return self.phase
-
     def is_enabled(self, index: int) -> bool:
         q = self.control_qubits[0]
         return (index >> q.index) & 1 == self.phase
@@ -151,25 +119,11 @@ class MultiControlledTrait:
     def has_one_control(self) -> bool:
         return len(self.control_qubits) == 1
 
-    def get_control_qubits(self) -> List[QBit]:
-        """Returns the control qubits."""
-        return self.control_qubits
-
-    def get_phases(self) -> List[int]:
-        """Returns the phases."""
-        return self.phases
-
     def is_enabled(self, index: int) -> bool:
         for ctrl, phase in zip(self.control_qubits, self.phases):
             if (index >> ctrl.index) & 1 != phase:
                 return False
         return True
-
-    def set_control_qubits(self, control_qubits: List[QBit]) -> None:
-        self.control_qubits = list(control_qubits)
-
-    def set_phases(self, phases: List[int]) -> None:
-        self.phases = list(phases)
 
 
 # --- ZYZ decomposition (moved out of qgate.py to break the trait / gate /
