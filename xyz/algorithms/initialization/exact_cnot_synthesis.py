@@ -242,7 +242,7 @@ class Explorer:
             for gate in gates[::-1]:
                 next_state = gate.conjugate().apply(curr_state)
 
-        cnot_cost = sum([gate.get_cnot_cost() for gate in gates])
+        cnot_cost = sum([gate.cnot_cost() for gate in gates])
         next_cost = AStarCost(
             curr_cost.cnot_cost + cnot_cost,
             self.get_lower_bound(next_state),

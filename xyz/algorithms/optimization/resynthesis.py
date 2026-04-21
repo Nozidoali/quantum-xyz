@@ -214,7 +214,7 @@ def resub0(
     assert state_begin.num_qubits == state_end.num_qubits
     assert verbose_level >= 0
 
-    n_cnots_old = sum((g.get_cnot_cost() for g in window_old))
+    n_cnots_old = sum((g.cnot_cost() for g in window_old))
 
     if n_cnots_old == 0:
         # skip the resynthesis
@@ -279,7 +279,7 @@ def resub1(
     assert target_qubit.index is not None
     assert verbose_level >= 0
 
-    n_cnots_old = sum((g.get_cnot_cost() for g in window_old))
+    n_cnots_old = sum((g.cnot_cost() for g in window_old))
 
     if n_cnots_old <= 1:
         # skip the resynthesis
@@ -348,7 +348,7 @@ def resubN(
 
     n_cnot_new = len(all_control_qubits)
 
-    n_cnots_old = sum((g.get_cnot_cost() for g in window_old))
+    n_cnots_old = sum((g.cnot_cost() for g in window_old))
 
     if n_cnots_old <= n_cnot_new:
         # skip the resynthesis
@@ -405,7 +405,7 @@ def resub2N(
     all_control_qubits = list(all_control_qubits)
     n_cnot_new = 2 * len(all_control_qubits) + 1
 
-    n_cnots_old = sum((g.get_cnot_cost() for g in window_old))
+    n_cnots_old = sum((g.cnot_cost() for g in window_old))
 
     if n_cnots_old <= n_cnot_new:
         # skip the resynthesis

@@ -34,7 +34,7 @@ class QNetwork:
     def add_gate(self, gate: QGate) -> int:
         nodeIdx = -1
         if issubclass(type(gate), BasicGate):
-            nodeIdx = self.add_node(QNode(gate, gate.get_cnot_cost()))
+            nodeIdx = self.add_node(QNode(gate, gate.cnot_cost()))
             self.add_edge(
                 self.__last_gate_on_qubit[gate.target_qubit.index],
                 nodeIdx,

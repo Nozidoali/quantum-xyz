@@ -111,7 +111,7 @@ def _prepare_state_rec(
                 circuit, state, enable_cnot=True
             )
         num_cx_support_reduction = sum(
-            (gate.get_cnot_cost() for gate in support_reducing_gates)
+            (gate.cnot_cost() for gate in support_reducing_gates)
         )
         stats.time_support_reduction += timer.time()
 
@@ -155,7 +155,7 @@ def _prepare_state_rec(
                 )
             stats.time_exact_cnot_synthesis += timer.time()
             gates = exact_gates + support_reducing_gates
-            num_cx_exact = sum((gate.get_cnot_cost() for gate in exact_gates))
+            num_cx_exact = sum((gate.cnot_cost() for gate in exact_gates))
             return gates, num_cx_exact
         except ValueError:
             # if the exact synthesis fails
@@ -170,7 +170,7 @@ def _prepare_state_rec(
                 circuit, state, verbose_level=verbose_level
             )
         num_cardinality_reduction_cx = sum(
-            (gate.get_cnot_cost() for gate in cardinality_reduction_gates)
+            (gate.cnot_cost() for gate in cardinality_reduction_gates)
         )
         stats.time_cardinality_reduction += timer.time()
         rec_gates, rec_cx = _prepare_state_rec(
@@ -194,7 +194,7 @@ def _prepare_state_rec(
                 circuit, state, supports
             )
         num_qubit_reduction_cx = sum(
-            (gate.get_cnot_cost() for gate in qubit_decomposition_gates)
+            (gate.cnot_cost() for gate in qubit_decomposition_gates)
         )
         stats.time_qubit_decomposition += timer.time()
         rec_gates, rec_cx = _prepare_state_rec(
