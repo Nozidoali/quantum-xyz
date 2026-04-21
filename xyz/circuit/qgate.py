@@ -91,7 +91,11 @@ class CRX(RotationGate, BasicGate, ControlledGate):
                       key=lambda q: q.index)
 
     def apply(self, qstate: "QState") -> "QState":
-        raise NotImplementedError("CRX gate is not implemented yet")
+        scale = float(np.cos(self.theta / 2))
+        out = {}
+        for idx, weight in qstate.index_to_weight.items():
+            out[idx] = weight * scale if self.is_enabled(idx) else weight
+        return QState(out, qstate.num_qubits)
 
 
 class CRY(RotationGate, BasicGate, ControlledGate):
@@ -159,7 +163,11 @@ class CRZ(RotationGate, BasicGate, ControlledGate):
                       key=lambda q: q.index)
 
     def apply(self, qstate: "QState") -> "QState":
-        raise NotImplementedError("CRZ gate is not implemented yet")
+        scale = float(np.cos(self.theta / 2))
+        out = {}
+        for idx, weight in qstate.index_to_weight.items():
+            out[idx] = weight * scale if self.is_enabled(idx) else weight
+        return QState(out, qstate.num_qubits)
 
 
 class CU(BasicGate, UnitaryGate, ControlledGate):
@@ -183,7 +191,22 @@ class CU(BasicGate, UnitaryGate, ControlledGate):
                       key=lambda q: q.index)
 
     def apply(self, qstate: "QState") -> "QState":
-        raise NotImplementedError("CU gate is not implemented yet")
+        m = np.real(self.unitary)
+        index_to_weight = {idx: 0.0 for idx in qstate.index_set}
+        for idx, weight in qstate.index_to_weight.items():
+            if not self.is_enabled(idx):
+                index_to_weight[idx] += weight
+                continue
+            rdx = idx ^ (1 << self.target_qubit.index)
+            if rdx not in qstate.index_set:
+                index_to_weight[rdx] = 0.0
+            if (idx >> self.target_qubit.index) & 1 == 0:
+                index_to_weight[idx] += weight * m[0, 0]
+                index_to_weight[rdx] += weight * m[1, 0]
+            else:
+                index_to_weight[idx] += weight * m[1, 1]
+                index_to_weight[rdx] += weight * m[0, 1]
+        return QState(index_to_weight, qstate.num_qubits)
 
 
 class CX(BasicGate, ControlledGate):

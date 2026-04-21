@@ -20,7 +20,7 @@ from tests.regression.builders import random_real_state
 from tests.regression.conftest import SEED
 
 # Gates whose apply() is not implemented today.
-UNIMPLEMENTED_APPLY = {"CRX", "CRZ", "CU", "MCMY", "MULTIPLEXY"}
+UNIMPLEMENTED_APPLY = {"MCMY", "MULTIPLEXY"}
 
 
 def _random_unitary_2x2(rng: np.random.Generator) -> np.ndarray:
@@ -80,7 +80,16 @@ def _apply_on_qiskit(qc: QuantumCircuit, gate) -> None:
     if name == "Z":   qc.z(t); return
     if name == "U":   qc.unitary(gate.unitary, [t]); return
     if name == "CX":  qc.cx(gate.control_qubits[0].index, t); return
+    if name == "CRX":
+        qc.crx(gate.theta, gate.control_qubits[0].index, t); return
     if name == "CRY": qc.cry(gate.theta, gate.control_qubits[0].index, t); return
+    if name == "CRZ":
+        qc.crz(gate.theta, gate.control_qubits[0].index, t); return
+    if name == "CU":
+        from qiskit.circuit.library import UnitaryGate as _UGate
+        qc.append(_UGate(gate.unitary).control(1),
+                  [gate.control_qubits[0].index, t])
+        return
     if name == "MCRY":
         controls = [q.index for q in gate.control_qubits]
         qc.mcry(gate.theta, controls, t)
