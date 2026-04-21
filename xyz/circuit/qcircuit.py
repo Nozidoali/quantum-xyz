@@ -12,7 +12,6 @@ from typing import List
 import numpy as np
 from xyz.gates import (
     BasicGate,
-    ControlledGate,
     ControlledTrait,
     CRY,
     CU,
@@ -20,10 +19,8 @@ from xyz.gates import (
     Gate,
     MCMY,
     MCRY,
-    MultiControlledGate,
     MultiControlledTrait,
     QBit,
-    QGate,
     QGateType,
     RY,
     UnitaryTrait,
@@ -38,7 +35,7 @@ class QCircuit:
     def __init__(
         self, num_qubits: int, map_gates: bool = False, qubits: list = None
     ) -> None:
-        self.__gates: List[QGate] = []
+        self.__gates: List[Gate] = []
         self.__last_gate_target_on_qubit = [-1] * num_qubits
         self.__last_gate_time = [0] * num_qubits
 
@@ -65,23 +62,23 @@ class QCircuit:
         ), f"index = {index} >= num_qubits = {self.get_num_qubits()}"
         return self.__qubits[index]
 
-    def get_gates(self) -> List[QGate]:
+    def get_gates(self) -> List[Gate]:
         return self.__gates
 
-    def add_gate(self, gate: QGate):
+    def add_gate(self, gate: Gate):
         self.add_gate_optimized(gate)
 
-    def add_gates(self, gates: List[QGate]):
+    def add_gates(self, gates: List[Gate]):
         self.add_gates_optimized(gates)
 
-    def append_gate(self, gate: QGate):
+    def append_gate(self, gate: Gate):
         self.__gates.append(gate)
         qubits = []
         if issubclass(type(gate), BasicGate):
             self.__last_gate_target_on_qubit[gate.target_qubit.index] = (
                 len(self.__gates) - 1
             )
-            if issubclass(type(gate), ControlledGate):
+            if issubclass(type(gate), ControlledTrait):
                 qubits.append(gate.target_qubit)
                 qubits.append(gate.control_qubits[0])
                 gate_time = max(self.__last_gate_time[qubit.index] for qubit in qubits)
@@ -89,7 +86,7 @@ class QCircuit:
                     self.__last_gate_time[qubit.index] = (
                         gate_time + gate.cnot_cost()
                     )
-            elif issubclass(type(gate), MultiControlledGate):
+            elif issubclass(type(gate), MultiControlledTrait):
                 qubits.append(gate.target_qubit)
                 qubits.extend(gate.control_qubits)
                 gate_time = max(self.__last_gate_time[qubit.index] for qubit in qubits)
@@ -104,11 +101,11 @@ class QCircuit:
     def get_level_on_qubit(self, qubit: QBit) -> int:
         return self.__last_gate_time[qubit.index]
 
-    def last_gate_on_qubit(self, qubit: QBit) -> QGate:
+    def last_gate_on_qubit(self, qubit: QBit) -> Gate:
         idx = qubit.index if isinstance(qubit, QBit) else qubit
         return self.__last_gate_target_on_qubit[idx]
 
-    def gate_at(self, index: int) -> QGate:
+    def gate_at(self, index: int) -> Gate:
         return self.__gates[index]
 
     def remove_gate(self, index: int) -> None:
@@ -118,7 +115,7 @@ class QCircuit:
             if issubclass(type(gate), BasicGate):
                 self.__last_gate_target_on_qubit[gate.target_qubit.index] = i
 
-    def append_gates(self, gates: List[QGate]):
+    def append_gates(self, gates: List[Gate]):
         for gate in gates:
             self.append_gate(gate)
 
@@ -147,7 +144,7 @@ class QCircuit:
         qubit_index_list_str = ",".join([str(i) for i in qubit_index_list])
         return f"Circuit({qubit_index_list_str})"
 
-    def add_gate_mapped(self, gate: QGate) -> None:
+    def add_gate_mapped(self, gate: Gate) -> None:
         if not self.map_gates:
             self.append_gate(gate)
             return
@@ -178,7 +175,7 @@ class QCircuit:
             case _:
                 self.append_gate(gate)
 
-    def add_gate_optimized(self, gate: QGate) -> None:
+    def add_gate_optimized(self, gate: Gate) -> None:
         match gate.qgate_type:
             case QGateType.CU:
                 if gate.is_z_trivial():
@@ -226,7 +223,7 @@ class QCircuit:
             case _:
                 self.add_gate_mapped(gate)
 
-    def add_gates_optimized(self, gates: List[QGate]) -> None:
+    def add_gates_optimized(self, gates: List[Gate]) -> None:
         """Add a list of gates to the circuit, with optimization."""
         for gate in gates:
             self.add_gate_optimized(gate)

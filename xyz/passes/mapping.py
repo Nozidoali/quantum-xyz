@@ -17,25 +17,23 @@ from typing import Generator, List, Set, Tuple
 import pydot
 from xyz.circuit import (
     BasicGate,
-    ControlledGate,
     ControlledTrait,
     CRY,
     CX,
+    Gate,
     MCRY,
-    MultiControlledGate,
     MultiControlledTrait,
     QCircuit,
-    QGate,
     QGateType,
     RY,
 )
 
 
 class QNode:
-    def __init__(self, gate: QGate, dist: float = 0.0) -> None:
+    def __init__(self, gate: Gate, dist: float = 0.0) -> None:
         self.name = str(gate)
         self.dist = dist
-        self.gate: QGate = gate if isinstance(gate, QGate) else None
+        self.gate: Gate = gate if isinstance(gate, Gate) else None
 
 
 class QNetwork:
@@ -56,7 +54,7 @@ class QNetwork:
         self.__nodes.append(node)
         return len(self.__nodes) - 1
 
-    def add_gate(self, gate: QGate) -> int:
+    def add_gate(self, gate: Gate) -> int:
         nodeIdx = -1
         if issubclass(type(gate), BasicGate):
             nodeIdx = self.add_node(QNode(gate, gate.cnot_cost()))
@@ -66,8 +64,8 @@ class QNetwork:
                 label=f"q_{gate.target_qubit.index}",
             )
             self.__last_gate_on_qubit[gate.target_qubit.index] = nodeIdx
-            if issubclass(type(gate), ControlledGate) or issubclass(
-                type(gate), MultiControlledGate
+            if issubclass(type(gate), ControlledTrait) or issubclass(
+                type(gate), MultiControlledTrait
             ):
                 for control_qubit in gate.control_qubits:
                     self.add_edge(
@@ -121,7 +119,7 @@ class QNetwork:
                     self.levels[child] + self.__nodes[node].dist, self.levels[node]
                 )
 
-    def topological_order(self) -> Generator[QGate, None, None]:
+    def topological_order(self) -> Generator[Gate, None, None]:
         for node in self.__topological_order:
             yield self.__nodes[node].gate
 
@@ -143,7 +141,7 @@ class ChoiceType(Enum):
 
 @dataclass
 class ChoiceNode:
-    gate: QGate
+    gate: Gate
     nodeType: ChoiceType  # todo define enum if necessary
     children: List["ChoiceNode"]
     index: int = -1
@@ -160,7 +158,7 @@ class Mapper:
         return self.__currNode
 
     def createNode(
-        self, gate: QGate, nodeType: ChoiceType, children: List[ChoiceNode]
+        self, gate: Gate, nodeType: ChoiceType, children: List[ChoiceNode]
     ) -> ChoiceNode:
         node = ChoiceNode(gate, nodeType, children, self.__nodeIdx)
         self.__nodeIdx += 1
@@ -170,7 +168,7 @@ class Mapper:
         self.__currNode.children.append(node)
         self.__currNode = node
 
-    def appendGate(self, gate: QGate) -> None:
+    def appendGate(self, gate: Gate) -> None:
         node = self.createNode(gate, ChoiceType.GATES, [])
         self.appendNode(node)
 
@@ -178,7 +176,7 @@ class Mapper:
         node = self.createNode([], ChoiceType.CHOOSE, children)
         return node
 
-    def dynamic_mapping(self, gate: QGate) -> ChoiceNode:
+    def dynamic_mapping(self, gate: Gate) -> ChoiceNode:
         match gate.qgate_type:
             case QGateType.MCRY:
                 self.appendNode(ChoiceNode(gate, ChoiceType.GATES, []))
@@ -222,8 +220,8 @@ def mapping(circuit: QCircuit) -> QCircuit:
         assert isinstance(gate, BasicGate), f"gate {gate} is not a basic gate"
         new_gate = gate
         # update the level of the qubits
-        if issubclass(type(gate), ControlledGate) or issubclass(
-            type(gate), MultiControlledGate
+        if issubclass(type(gate), ControlledTrait) or issubclass(
+            type(gate), MultiControlledTrait
         ):
             # print the control qubits and the levels
             print("-" * 80)
@@ -245,7 +243,7 @@ def mapping_debug(circuit: QCircuit, control_reorder: bool = False) -> QCircuit:
     num_qubit: int = circuit.get_num_qubits()
     new_circuit = QCircuit(num_qubit, map_gates=True)
     for i, gate in enumerate(circuit.get_gates()):
-        if control_reorder == True and issubclass(type(gate), MultiControlledGate):
+        if control_reorder == True and issubclass(type(gate), MultiControlledTrait):
             control_qubits, phases = gate.control_qubits, gate.phases
             n = len(control_qubits)
 
@@ -277,7 +275,7 @@ def schedule_commutable_gates(circuit: QCircuit, verbose: bool = False) -> QCirc
 
         gate = all_gates[i]
 
-        if not issubclass(type(gate), ControlledGate):
+        if not issubclass(type(gate), ControlledTrait):
             new_circuit.add_gate(gate)
             continue
 
@@ -287,7 +285,7 @@ def schedule_commutable_gates(circuit: QCircuit, verbose: bool = False) -> QCirc
         # pop one gate
         curr_layer_gates.append(gate)
 
-        assert issubclass(type(gate), ControlledGate)
+        assert issubclass(type(gate), ControlledTrait)
         control_qubit = gate.control_qubits[0]
         target_qubit = gate.target_qubit
 
@@ -310,10 +308,10 @@ def schedule_commutable_gates(circuit: QCircuit, verbose: bool = False) -> QCirc
                 break
 
             next_gate = all_gates[j]
-            if not issubclass(type(next_gate), ControlledGate):
+            if not issubclass(type(next_gate), ControlledTrait):
                 dirty_qubits.add(next_gate.target_qubit.index)
                 continue
-            assert issubclass(type(next_gate), ControlledGate)
+            assert issubclass(type(next_gate), ControlledTrait)
             next_control_qubit = next_gate.control_qubits[0]
             next_target_qubit = next_gate.target_qubit
 

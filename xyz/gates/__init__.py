@@ -13,14 +13,6 @@ from xyz.gates.types import (
     UnitaryTrait,
 )
 
-# Backwards-compat legacy names (Phase 2 aliased these; external scripts
-# may still import them).
-QGate = Gate
-UnitaryGate = UnitaryTrait
-RotationGate = RotationTrait
-ControlledGate = ControlledTrait
-MultiControlledGate = MultiControlledTrait
-
 __all__ = [
     "AdvancedGate", "BasicGate", "Gate", "MultiRotationGate",
     "CRX", "CRY", "CRZ", "CU", "CX",
@@ -29,7 +21,4 @@ __all__ = [
     "ControlledTrait", "MultiControlledTrait",
     "QBit", "QGateType",
     "RotationTrait", "UnitaryTrait",
-    # legacy aliases
-    "QGate",
-    "UnitaryGate", "RotationGate", "ControlledGate", "MultiControlledGate",
 ]

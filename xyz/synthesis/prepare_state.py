@@ -27,9 +27,6 @@ from xyz.synthesis.params import (
 )
 from xyz.utils import global_stopwatch_report, stopwatch
 
-# Backwards-compat alias — some tests still import the old name.
-__Stats = Stats
-
 
 def prepare_state(
     state: Union[QState, np.ndarray],

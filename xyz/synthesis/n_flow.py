@@ -23,11 +23,11 @@ import numpy as np
 from xyz.circuit import (
     CRY,
     CX,
+    Gate,
     MCMY,
     MCRY,
     QBit,
     QCircuit,
-    QGate,
     QGateType,
     QState,
     RY,
@@ -36,7 +36,7 @@ from .exact_cnot_synthesis import exact_cnot_synthesis
 from .support_reduction import support_reduction
 
 
-def to_controlled_gate(gate: QGate, control_qubit: QBit, control_phase: bool):
+def to_controlled_gate(gate: Gate, control_qubit: QBit, control_phase: bool):
     assert control_qubit != gate.target_qubit
     match gate.qgate_type:
         case QGateType.X:
@@ -135,7 +135,7 @@ def select_informative_qubit(state: QState, supports: set):
 
 def _qubit_decomposition_impl(
     circuit: QCircuit,
-    gates: List[QGate],
+    gates: List[Gate],
     state: QState,
     optimality_level: int = 3,
     multi_thread: bool = False,

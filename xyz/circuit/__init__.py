@@ -57,11 +57,6 @@ from xyz.gates import (
     QGateType,
     RotationTrait,
     UnitaryTrait,
-    QGate,
-    UnitaryGate,
-    RotationGate,
-    ControlledGate,
-    MultiControlledGate,
 )
 from xyz.decomposition.mcry import (
     map_muxy, map_mcry, map_mcmy, map_mcry_linear,
@@ -127,11 +122,6 @@ __all__ = [
     "QGateType",
     "RotationTrait",
     "UnitaryTrait",
-    "QGate",
-    "UnitaryGate",
-    "RotationGate",
-    "ControlledGate",
-    "MultiControlledGate",
     # decomposition
     "map_muxy",
     "map_mcry",

@@ -32,7 +32,7 @@ def test_mapping():
     )
 
     for gate in circuit.get_gates():
-        gate: xyz.QGate
+        gate: xyz.Gate
         assert gate.qgate_type in [
             xyz.QGateType.CX,
             xyz.QGateType.X,

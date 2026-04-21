@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 
 import xyz
+from xyz.synthesis.params import Stats
 from xyz.synthesis.prepare_state import (
     StatePreparationParameters,
 )
@@ -49,8 +50,6 @@ def test_prepare_state_respects_explicit_param():
     (support_reduction), the stats counter for support_reduction runs
     must reflect that, not the default-enabled behavior.
     """
-    from xyz.synthesis.prepare_state import __Stats as Stats
-
     param = StatePreparationParameters()
     param.enable_compression = False
     param.enable_exact_synthesis = False

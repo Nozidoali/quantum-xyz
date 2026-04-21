@@ -13,7 +13,7 @@ __all__ = [
 
 from qiskit import qasm2
 
-from ..circuit import CX, QBit, QCircuit, QGate, RY, X
+from ..circuit import CX, Gate, QBit, QCircuit, RY, X
 
 
 def read_qasm(filename: str) -> QCircuit:
@@ -31,7 +31,7 @@ def read_qasm(filename: str) -> QCircuit:
 
     for instr, qargs, _ in qc.data:
         # pylint: disable=W0212
-        gate: QGate = None
+        gate: Gate = None
 
         if instr.name == "x":
             gate = X(QBit(qargs[0]._index))

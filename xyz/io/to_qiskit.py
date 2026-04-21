@@ -10,7 +10,7 @@ from typing import List
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, transpile
 
 # my own library
-from ..circuit import QBit, QCircuit, QGate, QGateType
+from ..circuit import Gate, QBit, QCircuit, QGateType
 from .special_gates import SpecialGates
 
 
@@ -51,7 +51,7 @@ def to_qiskit(qcircuit: QCircuit, with_measurement: bool = False) -> QuantumCirc
         if isinstance(qubit, list):
             return [quantum_registers[q.index] for q in qubit]
 
-    gate: QGate
+    gate: Gate
     for gate in qcircuit.get_gates():
         match gate.qgate_type:
             case QGateType.U:
