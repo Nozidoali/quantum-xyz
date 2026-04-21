@@ -57,7 +57,7 @@ class QCircuit:
                 gate_time = max(self.__last_gate_time[qubit.index] for qubit in qubits)
                 for qubit in qubits:
                     self.__last_gate_time[qubit.index] = (
-                        gate_time + gate.get_cnot_cost()
+                        gate_time + gate.cnot_cost()
                     )
             elif issubclass(type(gate), MultiControlledGate):
                 qubits.append(gate.target_qubit)
@@ -65,7 +65,7 @@ class QCircuit:
                 gate_time = max(self.__last_gate_time[qubit.index] for qubit in qubits)
                 for qubit in qubits:
                     self.__last_gate_time[qubit.index] = (
-                        gate_time + gate.get_cnot_cost()
+                        gate_time + gate.cnot_cost()
                     )
 
     def get_level(self) -> int:
@@ -110,7 +110,7 @@ class QCircuit:
         )
 
     def get_cnot_cost(self) -> int:
-        return sum([gate.get_cnot_cost() for gate in self.__gates])
+        return sum(gate.cnot_cost() for gate in self.__gates)
 
     def __str__(self) -> str:
         qubit_index_list = [qubit.index for qubit in self.__qubits]

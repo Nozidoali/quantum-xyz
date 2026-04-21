@@ -59,7 +59,10 @@ class BasicGate(QGate):
     def apply(self, qstate: "QState") -> "QState":
         raise NotImplementedError("This method is not implemented")
 
-    def get_cnot_cost(self) -> int:
+    def cnot_cost(self) -> int:
+        raise NotImplementedError("This method is not implemented")
+
+    def qubits(self) -> List[QBit]:
         raise NotImplementedError("This method is not implemented")
 
 
@@ -83,8 +86,12 @@ class CRX(RotationGate, BasicGate, ControlledGate):
     def __str__(self) -> str:
         return f"CRX({self.theta:0.02f}, {self.control_qubit}[{self.phase}])"
 
-    def get_cnot_cost(self) -> int:
+    def cnot_cost(self) -> int:
         return 2
+
+    def qubits(self) -> List[QBit]:
+        return sorted(self.control_qubits + [self.target_qubit],
+                      key=lambda q: q.index)
 
     def apply(self, qstate: "QState") -> "QState":
         raise NotImplementedError("CRX gate is not implemented yet")
@@ -104,9 +111,13 @@ class CRY(RotationGate, BasicGate, ControlledGate):
         control_str = "" if self.phase == 1 else "~"
         return f"C({control_str}{self.control_qubit})RY({self.target_qubit}:{self.theta:0.02f})"
 
-    def get_cnot_cost(self) -> int:
+    def cnot_cost(self) -> int:
         """Returns the cost of the cost of the gate."""
         return 2
+
+    def qubits(self) -> List[QBit]:
+        return sorted(self.control_qubits + [self.target_qubit],
+                      key=lambda q: q.index)
 
     def conjugate(self) -> "CRY":
         return CRY(-self.theta, self.control_qubit, self.phase, self.target_qubit)
@@ -143,8 +154,12 @@ class CRZ(RotationGate, BasicGate, ControlledGate):
     def __str__(self) -> str:
         return f"CRZ({self.theta:0.02f}, {self.control_qubit}[{self.phase}])"
 
-    def get_cnot_cost(self) -> int:
+    def cnot_cost(self) -> int:
         return 2
+
+    def qubits(self) -> List[QBit]:
+        return sorted(self.control_qubits + [self.target_qubit],
+                      key=lambda q: q.index)
 
     def apply(self, qstate: "QState") -> "QState":
         raise NotImplementedError("CRZ gate is not implemented yet")
@@ -163,8 +178,12 @@ class CU(BasicGate, UnitaryGate, ControlledGate):
         phase_str = "" if self.phase == 1 else "~"
         return f"C({phase_str}{self.control_qubit})U({self.target_qubit})"
 
-    def get_cnot_cost(self) -> int:
+    def cnot_cost(self) -> int:
         return 2
+
+    def qubits(self) -> List[QBit]:
+        return sorted(self.control_qubits + [self.target_qubit],
+                      key=lambda q: q.index)
 
     def apply(self, qstate: "QState") -> "QState":
         raise NotImplementedError("CU gate is not implemented yet")
@@ -180,8 +199,12 @@ class CX(BasicGate, ControlledGate):
         phase_str = "" if self.phase == 1 else "~"
         return f"C({phase_str}{self.control_qubit})X({self.target_qubit})"
 
-    def get_cnot_cost(self) -> int:
+    def cnot_cost(self) -> int:
         return 1
+
+    def qubits(self) -> List[QBit]:
+        return sorted(self.control_qubits + [self.target_qubit],
+                      key=lambda q: q.index)
 
     def conjugate(self) -> "CX":
         return CX(self.control_qubit, self.phase, self.target_qubit)
@@ -218,8 +241,12 @@ class MCMY(AdvancedGate):
         control_qubit_str = ",".join([str(qubit) for qubit in self.control_qubits])
         return f"MCMY({control_qubit_str})"
 
-    def get_cnot_cost(self) -> int:
+    def cnot_cost(self) -> int:
         return 1 << len(self.control_qubits)
+
+    def qubits(self) -> List[QBit]:
+        return sorted(self.control_qubits + [self.target_qubit],
+                      key=lambda q: q.index)
 
     def apply(self, qstate: "QState") -> "QState":
         raise NotImplementedError("MCMY gate is not implemented yet")
@@ -280,7 +307,7 @@ class MCRY(RotationGate, BasicGate, MultiControlledGate):
         )
         return f"MCRY({self.target_qubit.index},{self.theta:0.02f}, {control_str})"
 
-    def get_cnot_cost(self) -> int:
+    def cnot_cost(self) -> int:
         """Returns the cost of the cost of the gate."""
         index_str = str(len(self.control_qubits))
         if index_str not in MCRY_CNOT_COST:
@@ -288,6 +315,10 @@ class MCRY(RotationGate, BasicGate, MultiControlledGate):
                 f"len(self.control_qubits) = {len(self.control_qubits)} is not supported"
             )
         return MCRY_CNOT_COST[index_str]
+
+    def qubits(self) -> List[QBit]:
+        return sorted(self.control_qubits + [self.target_qubit],
+                      key=lambda q: q.index)
 
     def conjugate(self) -> "MCRY":
         """Conjugate the gate ."""
@@ -326,14 +357,19 @@ class MULTIPLEXY(AdvancedGate):
 
         self.target_qubit: QBit = target_qubit
         self.control_qubit: QBit = control_qubit
+        self.control_qubits: List[QBit] = [control_qubit]
         self.theta0: float = theta0
         self.theta1: float = theta1
 
     def __str__(self) -> str:
         return f"MULTIPLEXY({self.theta0}, {self.theta1}, {self.control_qubit}, {self.target_qubit})"
 
-    def get_cnot_cost(self) -> int:
+    def cnot_cost(self) -> int:
         return 2
+
+    def qubits(self) -> List[QBit]:
+        return sorted(self.control_qubits + [self.target_qubit],
+                      key=lambda q: q.index)
 
     def apply(self, qstate: "QState") -> "QState":
         raise NotImplementedError("MULTIPLEXY gate is not implemented yet")
@@ -348,8 +384,11 @@ class RX(RotationGate, BasicGate):
     def __str__(self) -> str:
         return f"RX({self.theta:0.02f})"
 
-    def get_cnot_cost(self) -> int:
+    def cnot_cost(self) -> int:
         return 0
+
+    def qubits(self) -> List[QBit]:
+        return [self.target_qubit]
 
     def apply(self, qstate: "QState") -> "QState":
         raise NotImplementedError("This method is not implemented")
@@ -364,8 +403,11 @@ class RY(RotationGate, BasicGate):
     def __str__(self) -> str:
         return f"RY({self.target_qubit}, {self.theta:0.02f})"
 
-    def get_cnot_cost(self) -> int:
+    def cnot_cost(self) -> int:
         return 0
+
+    def qubits(self) -> List[QBit]:
+        return [self.target_qubit]
 
     def conjugate(self) -> "RY":
         return RY(-self.theta, self.target_qubit)
@@ -393,8 +435,11 @@ class RZ(RotationGate, BasicGate):
     def __str__(self) -> str:
         return f"RZ({self.theta:0.02f})"
 
-    def get_cnot_cost(self) -> int:
+    def cnot_cost(self) -> int:
         return 0
+
+    def qubits(self) -> List[QBit]:
+        return [self.target_qubit]
 
     def apply(self, qstate: "QState") -> "QState":
         raise NotImplementedError("This method is not implemented")
@@ -408,8 +453,11 @@ class U(UnitaryGate, BasicGate):
     def __str__(self) -> str:
         return "U"
 
-    def get_cnot_cost(self) -> int:
+    def cnot_cost(self) -> int:
         return 0
+
+    def qubits(self) -> List[QBit]:
+        return [self.target_qubit]
 
     def apply(self, qstate: "QState") -> "QState":
         raise NotImplementedError("This method is not implemented")
@@ -422,8 +470,11 @@ class X(BasicGate):
     def __str__(self) -> str:
         return f"X({self.target_qubit})"
 
-    def get_cnot_cost(self) -> int:
+    def cnot_cost(self) -> int:
         return 0
+
+    def qubits(self) -> List[QBit]:
+        return [self.target_qubit]
 
     def apply(self, qstate: QState) -> QState:
         index_to_weight = {}
@@ -441,8 +492,11 @@ class Z(BasicGate):
     def __str__(self) -> str:
         return f"Z({self.target_qubit})"
 
-    def get_cnot_cost(self) -> int:
+    def cnot_cost(self) -> int:
         return 0
+
+    def qubits(self) -> List[QBit]:
+        return [self.target_qubit]
 
     def apply(self, qstate: QState) -> QState:
         index_to_weight = {}
