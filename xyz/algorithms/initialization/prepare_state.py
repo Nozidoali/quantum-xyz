@@ -89,9 +89,11 @@ def _prepare_state_rec(
     circuit: QCircuit,
     state: QState,
     verbose_level: int = 0,
-    stats: __Stats = __Stats(),
+    stats: "__Stats | None" = None,
     **kwargs,
 ):
+    if stats is None:
+        stats = __Stats()
     prev_supports = state.get_supports()
     prev_num_supports = len(prev_supports)
     prev_density = state.get_sparsity()
@@ -241,7 +243,7 @@ def prepare_state(
     map_gates: bool = True,
     verbose_level: int = 0,
     param: StatePreparationParameters = None,
-    stats: __Stats = __Stats(),
+    stats: "__Stats | None" = None,
 ) -> QCircuit:
     """
     A hybrid method combining both qubit- and cardinality- reduction.
@@ -283,6 +285,9 @@ def prepare_state(
             # otherwise, if the state is dense, we enable the qubit reduction method
             param.enable_n_flow = True
             param.enable_m_flow = False
+
+    if stats is None:
+        stats = __Stats()
 
     # initialize a circuit and the quantum registers
     circuit = QCircuit(state.num_qubits, map_gates=map_gates)
