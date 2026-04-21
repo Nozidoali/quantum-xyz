@@ -7,6 +7,14 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-03-11 20:53:23
 """
 
+__all__ = [
+    "stopwatch",
+    "GlobalStopwatch",
+    "call_with_global_timer",
+    "get_time",
+    "global_stopwatch_report",
+]
+
 #
 # reference: https://realpython.com/python-with-statement/#writing-a-sample-class-based-context-manager
 #

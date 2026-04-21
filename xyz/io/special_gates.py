@@ -7,6 +7,10 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2023-06-22 15:01:37
 """
 
+__all__ = [
+    "SpecialGates",
+]
+
 from qiskit.circuit.library import UnitaryGate
 
 # pylint: disable=C0103

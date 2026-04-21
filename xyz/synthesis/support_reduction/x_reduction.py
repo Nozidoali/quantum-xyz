@@ -7,6 +7,10 @@ Last Modified by: Hanyu Wang
 Last Modified time: 2024-04-23 09:14:59
 """
 
+__all__ = [
+    "x_reduction",
+]
+
 import copy
 
 from xyz.circuit import CX, QCircuit, QState, X
