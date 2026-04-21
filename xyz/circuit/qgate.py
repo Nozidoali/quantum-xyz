@@ -291,39 +291,6 @@ class MCMY(AdvancedGate):
         return QState(index_to_weight, qstate.num_qubits)
 
 
-MCRY_CNOT_COST = {
-    "0": 0,
-    "1": 2,
-    "2": 4,
-    "3": 8,
-    "4": 16,
-    "5": 32,
-    "6": 64,
-    "7": 128,
-    "8": 226,
-    "9": 290,
-    "10": 362,
-    "11": 442,
-    "12": 530,
-    "13": 626,
-    "14": 730,
-    "15": 842,
-    "16": 962,
-    "17": 1090,
-    "18": 1226,
-    "19": 1370,
-    "20": 1522,
-    "21": 1682,
-    "22": 1850,
-    "23": 2026,
-    "24": 2210,
-    "25": 2402,
-    "26": 2602,
-    "27": 2810,
-    "28": 3026,
-}
-
-
 class MCRY(RotationGate, BasicGate, MultiControlledGate):
 
     def __init__(
@@ -347,13 +314,14 @@ class MCRY(RotationGate, BasicGate, MultiControlledGate):
         return f"MCRY({self.target_qubit.index},{self.theta:0.02f}, {control_str})"
 
     def cnot_cost(self) -> int:
-        """Returns the cost of the cost of the gate."""
-        index_str = str(len(self.control_qubits))
-        if index_str not in MCRY_CNOT_COST:
+        """Returns the CNOT cost of the gate."""
+        from xyz.gates.cost_tables import MCRY_CNOT_COST
+        n = len(self.control_qubits)
+        if n not in MCRY_CNOT_COST:
             raise ValueError(
-                f"len(self.control_qubits) = {len(self.control_qubits)} is not supported"
+                f"MCRY cost table has no entry for n_controls={n}"
             )
-        return MCRY_CNOT_COST[index_str]
+        return MCRY_CNOT_COST[n]
 
     def qubits(self) -> List[QBit]:
         return sorted(self.control_qubits + [self.target_qubit],
