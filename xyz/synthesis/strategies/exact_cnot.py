@@ -3,10 +3,10 @@ Wraps the existing `exact_cnot_synthesis` function."""
 
 from __future__ import annotations
 
-from xyz.algorithms.initialization.exact_cnot_synthesis import (
+from xyz.synthesis.exact_cnot_synthesis import (
     exact_cnot_synthesis,
 )
-from xyz.algorithms.initialization.strategies.base import SynthesisStrategy
+from xyz.synthesis.strategies.base import SynthesisStrategy
 from xyz.utils import stopwatch
 
 

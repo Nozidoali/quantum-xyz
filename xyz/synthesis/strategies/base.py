@@ -11,10 +11,10 @@ from typing import TYPE_CHECKING, List, Tuple
 
 if TYPE_CHECKING:
     from xyz.circuit import QCircuit
-    from xyz.circuit.qstate import QState
+    from xyz.state.qstate import QState
     from xyz.gates.base import Gate
-    from xyz.algorithms.initialization.engine import SynthesisEngine
-    from xyz.algorithms.initialization.params import (
+    from xyz.synthesis.engine import SynthesisEngine
+    from xyz.synthesis.params import (
         StatePreparationParameters,
     )
 

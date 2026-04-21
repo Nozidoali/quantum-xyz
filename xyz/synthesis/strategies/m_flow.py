@@ -5,10 +5,10 @@ recurses on the smaller state through the engine."""
 
 from __future__ import annotations
 
-from xyz.algorithms.initialization.sparse_state_synthesis import (
+from xyz.synthesis.sparse_state_synthesis import (
     cardinality_reduction,
 )
-from xyz.algorithms.initialization.strategies.base import SynthesisStrategy
+from xyz.synthesis.strategies.base import SynthesisStrategy
 from xyz.utils import stopwatch
 
 

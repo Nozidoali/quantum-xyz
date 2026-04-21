@@ -8,7 +8,7 @@ from typing import List, TYPE_CHECKING
 from xyz.gates.types import QBit, QGateType
 
 if TYPE_CHECKING:
-    from xyz.circuit.qstate import QState
+    from xyz.state.qstate import QState
 
 
 class Gate(ABC):

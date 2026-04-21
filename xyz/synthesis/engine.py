@@ -6,18 +6,18 @@ from __future__ import annotations
 
 from typing import List, Optional, Tuple
 
-from xyz.algorithms.initialization.params import (
+from xyz.synthesis.params import (
     StatePreparationParameters,
     Stats,
 )
-from xyz.algorithms.initialization.strategies.base import SynthesisStrategy
-from xyz.algorithms.initialization.strategies.exact_cnot import (
+from xyz.synthesis.strategies.base import SynthesisStrategy
+from xyz.synthesis.strategies.exact_cnot import (
     ExactCNOTStrategy,
 )
-from xyz.algorithms.initialization.strategies.m_flow import MFlowStrategy
-from xyz.algorithms.initialization.strategies.n_flow import NFlowStrategy
-from xyz.algorithms.initialization.strategies.trivial import TrivialStrategy
-from xyz.algorithms.initialization.support_reduction import support_reduction
+from xyz.synthesis.strategies.m_flow import MFlowStrategy
+from xyz.synthesis.strategies.n_flow import NFlowStrategy
+from xyz.synthesis.strategies.trivial import TrivialStrategy
+from xyz.synthesis.support_reduction import support_reduction
 from xyz.utils import stopwatch
 
 

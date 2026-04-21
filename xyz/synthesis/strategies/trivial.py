@@ -5,8 +5,8 @@ from __future__ import annotations
 
 from typing import List, Tuple
 
-from xyz.algorithms.initialization.strategies.base import SynthesisStrategy
-from xyz.algorithms.initialization.support_reduction import x_reduction
+from xyz.synthesis.strategies.base import SynthesisStrategy
+from xyz.synthesis.support_reduction import x_reduction
 
 
 class TrivialStrategy(SynthesisStrategy):

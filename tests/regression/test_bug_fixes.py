@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 
 import xyz
-from xyz.algorithms.initialization.prepare_state import (
+from xyz.synthesis.prepare_state import (
     StatePreparationParameters,
 )
 
@@ -49,7 +49,7 @@ def test_prepare_state_respects_explicit_param():
     (support_reduction), the stats counter for support_reduction runs
     must reflect that, not the default-enabled behavior.
     """
-    from xyz.algorithms.initialization.prepare_state import __Stats as Stats
+    from xyz.synthesis.prepare_state import __Stats as Stats
 
     param = StatePreparationParameters()
     param.enable_compression = False
@@ -136,7 +136,7 @@ def test_enable_reindex_raises_before_side_effect():
     is raised, and (b) the engine stats show zero support_reduction runs,
     confirming the guard fires before any work is done.
     """
-    from xyz.algorithms.initialization.params import Stats
+    from xyz.synthesis.params import Stats
 
     param = StatePreparationParameters()
     param.enable_reindex = True

@@ -4,8 +4,8 @@ Reduces the qubit count by one via qubit_reduction, then recurses."""
 
 from __future__ import annotations
 
-from xyz.algorithms.initialization.n_flow import qubit_reduction
-from xyz.algorithms.initialization.strategies.base import SynthesisStrategy
+from xyz.synthesis.n_flow import qubit_reduction
+from xyz.synthesis.strategies.base import SynthesisStrategy
 from xyz.utils import stopwatch
 
 

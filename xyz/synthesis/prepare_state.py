@@ -16,8 +16,8 @@ from typing import Optional, Union
 import numpy as np
 
 from xyz.circuit import QCircuit, QState, quantize_state
-from xyz.algorithms.initialization.engine import SynthesisEngine
-from xyz.algorithms.initialization.params import (
+from xyz.synthesis.engine import SynthesisEngine
+from xyz.synthesis.params import (
     StatePreparationParameters,
     Stats,
 )

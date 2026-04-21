@@ -6,7 +6,7 @@ from typing import List
 
 import numpy as np
 
-from xyz.circuit.qstate import QState
+from xyz.state.qstate import QState
 from xyz.gates.base import AdvancedGate, BasicGate
 from xyz.gates.types import (
     MultiControlledTrait,

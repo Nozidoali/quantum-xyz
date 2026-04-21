@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding=utf8 -*-
 
-from .qstate import *
+from xyz.state.qstate import *
 from .qcircuit import *
 from xyz.gates import *
 from xyz.decomposition.mcry import (
