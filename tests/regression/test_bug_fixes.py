@@ -83,7 +83,8 @@ def test_Z_apply_flips_target_phase():
     bit is 1. A basis state |01> on (q0=low, q1=high), with target=q0, is
     unchanged in magnitude but flipped in sign if the q0 bit is 1.
     """
-    from xyz.circuit.qgate import QBit, Z
+    from xyz.gates.types import QBit
+    from xyz.gates.single import Z
 
     # |01> in the xyz convention uses bit index = qubit index.
     # index 1 = binary 01 = q0 set, q1 clear.
@@ -105,7 +106,9 @@ def test_map_muxy_does_not_raise_attribute_error():
     MULTIPLEXY (the attribute is `qgate_type`). Today the call raises
     AttributeError before producing any gates.
     """
-    from xyz.circuit.qgate import MULTIPLEXY, QBit, map_muxy
+    from xyz.gates.multi_controlled import MULTIPLEXY
+    from xyz.gates.types import QBit
+    from xyz.decomposition.mcry import map_muxy
 
     gate = MULTIPLEXY(
         theta0=0.3,

@@ -43,11 +43,8 @@ def decompose_mcry(rotation_table: list):
 def control_sequence_to_gates(
     control_sequence: list, control_qubits: list, target_qubit
 ) -> list:
-    # Local imports to avoid a module-load cycle with xyz/gates/. After
-    # Phase 3 Tasks 5 and 6 land, RY and CX live in xyz.gates.single /
-    # xyz.gates.controlled respectively; until then they resolve via
-    # xyz.circuit.qgate which re-exports them.
-    from xyz.circuit.qgate import CX, RY
+    from xyz.gates.controlled import CX
+    from xyz.gates.single import RY
 
     gates: list = []
     for control in control_sequence:

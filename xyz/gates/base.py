@@ -47,3 +47,34 @@ class Gate(ABC):
         raise NotImplementedError(
             f"{type(self).__name__} does not define conjugate()"
         )
+
+
+from xyz.gates.types import QBit  # noqa: E402
+
+
+class BasicGate(Gate):
+    """Common base for gates that act on a single target qubit.
+
+    Still abstract — concrete subclasses must provide `apply`,
+    `cnot_cost`, `qubits`."""
+
+    def __init__(self, qgate_type, target_qubit: QBit) -> None:
+        Gate.__init__(self, qgate_type)
+        if not isinstance(target_qubit, QBit):
+            raise TypeError(f"target_qubit {target_qubit!r} is not a QBit")
+        self.target_qubit: QBit = target_qubit
+
+
+class AdvancedGate(Gate):
+    """Base for gates without a single canonical target qubit (e.g. MCMY).
+
+    Subclasses provide `apply`, `cnot_cost`, `qubits` themselves."""
+
+
+class MultiRotationGate:
+    """Container for a list of rotation angles. Not a Gate — no apply/
+    cnot_cost/qubits. Kept for backwards compat; appears unused by the
+    regression suite but may be touched by external scripts."""
+
+    def __init__(self, thetas) -> None:
+        self.thetas = list(thetas)

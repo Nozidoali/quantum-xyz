@@ -12,10 +12,10 @@ from qiskit import QuantumCircuit
 from qiskit.quantum_info import Statevector
 
 import xyz
-from xyz.circuit.qgate import (
-    CRX, CRY, CRZ, CU, CX, MCMY, MCRY, MULTIPLEXY,
-    QBit, RX, RY, RZ, U, X, Z,
-)
+from xyz.gates.controlled import CRX, CRY, CRZ, CU, CX
+from xyz.gates.multi_controlled import MCMY, MCRY, MULTIPLEXY
+from xyz.gates.single import RX, RY, RZ, U, X, Z
+from xyz.gates.types import QBit
 from tests.regression.builders import random_real_state
 from tests.regression.conftest import SEED
 

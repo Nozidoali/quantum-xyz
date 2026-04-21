@@ -1,7 +1,10 @@
 from typing import List
 
 import numpy as np
-from .qgate import *
+from xyz.gates import *
+from xyz.decomposition.mcry import (
+    map_muxy, map_mcry, map_mcmy, map_mcry_linear,
+)
 
 
 class QCircuit:

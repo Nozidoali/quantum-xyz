@@ -7,7 +7,7 @@ from typing import List
 import numpy as np
 
 from xyz.circuit.qstate import QState
-from xyz.circuit.qgate import AdvancedGate, BasicGate  # Task 8 moves these
+from xyz.gates.base import AdvancedGate, BasicGate
 from xyz.gates.types import (
     MultiControlledTrait,
     QBit,

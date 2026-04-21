@@ -85,7 +85,8 @@ def map_mcmy(gate) -> list:
 
 
 def map_mcry_linear(mcry_gate) -> list:
-    from xyz.circuit.qgate import CRX, CU, X
+    from xyz.gates.controlled import CRX, CU
+    from xyz.gates.single import X
 
     assert mcry_gate.qgate_type == QGateType.MCRY
 
@@ -93,7 +94,7 @@ def map_mcry_linear(mcry_gate) -> list:
     num_qubits = len(qubit_list)
 
     if num_qubits == 1:
-        from xyz.circuit.qgate import RY
+        from xyz.gates.single import RY
         return [RY(mcry_gate.theta, qubit_list[0])]
 
     def convert_rec(
