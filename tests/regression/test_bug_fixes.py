@@ -98,3 +98,20 @@ def test_Z_apply_flips_target_phase():
     out = z1.apply(state)
     vec = out.to_vector()
     assert np.allclose(vec, [0.0, 1.0, 0.0, 0.0]), f"got {vec}"
+
+
+def test_map_muxy_does_not_raise_attribute_error():
+    """Bug 4: `map_muxy` references gate.type which does not exist on
+    MULTIPLEXY (the attribute is `qgate_type`). Today the call raises
+    AttributeError before producing any gates.
+    """
+    from xyz.circuit.qgate import MULTIPLEXY, QBit, map_muxy
+
+    gate = MULTIPLEXY(
+        theta0=0.3,
+        theta1=0.5,
+        control_qubit=QBit(0),
+        target_qubit=QBit(1),
+    )
+    mapped = map_muxy(gate)  # must not raise
+    assert len(mapped) > 0, "map_muxy produced an empty gate list"

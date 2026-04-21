@@ -635,7 +635,7 @@ class Z(BasicGate):
 
 
 def map_muxy(gate: MULTIPLEXY) -> List[QGate]:
-    assert gate.type == QGateType.MULTIPLEX_Y
+    assert gate.qgate_type == QGateType.MULTIPLEX_Y
     rotation_table = [gate.theta0, gate.theta1]
     control_sequence = decompose_mcry(rotation_table)
     gates = control_sequence_to_gates(
