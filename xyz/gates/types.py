@@ -74,7 +74,8 @@ class UnitaryTrait:
 
     def __init__(self, unitary: np.ndarray) -> None:
         self.unitary = unitary
-        self.alpha, self.beta, self.gamma = _unitary_zyz_decomposition(unitary)
+        from xyz.decomposition.zyz import unitary_zyz_decomposition
+        self.alpha, self.beta, self.gamma = unitary_zyz_decomposition(unitary)
 
     def is_z_trivial(self) -> bool:
         is_alpha_trivial = np.isclose(self.alpha, 0) or np.isclose(
@@ -124,47 +125,3 @@ class MultiControlledTrait:
             if (index >> ctrl.index) & 1 != phase:
                 return False
         return True
-
-
-# --- ZYZ decomposition (moved out of qgate.py to break the trait / gate /
-# decomposition circular dependency; Phase 3 will re-home this to
-# xyz/decomposition/zyz.py).
-
-def _to_special_unitary(matrix: np.ndarray) -> np.ndarray:
-    from numpy.linalg import det
-    rank = matrix.shape[0]
-    return matrix / det(matrix) ** (1 / rank)
-
-
-def _unitary_zyz_decomposition(matrix: np.ndarray):
-    """Return the Euler Z-Y-Z decomposition of a 1-qubit unitary."""
-    U = _to_special_unitary(matrix)
-    if abs(U[0, 0]) > abs(U[1, 0]):
-        theta1 = 2 * np.arccos(min(abs(U[0, 0]), 1))
-    else:
-        theta1 = 2 * np.arcsin(min(abs(U[1, 0]), 1))
-    cos_halftheta1 = np.cos(theta1 / 2)
-    if not np.isclose(cos_halftheta1, 0.0):
-        phase = U[1, 1] / cos_halftheta1
-        theta0_plus_theta2 = 2 * np.arctan2(np.imag(phase), np.real(phase))
-    else:
-        theta0_plus_theta2 = 0.0
-    sin_halftheta1 = np.sin(theta1 / 2)
-    if not np.isclose(sin_halftheta1, 0.0):
-        phase = U[1, 0] / sin_halftheta1
-        theta0_sub_theta2 = 2 * np.arctan2(np.imag(phase), np.real(phase))
-    else:
-        theta0_sub_theta2 = 0.0
-    theta0 = (theta0_plus_theta2 + theta0_sub_theta2) / 2
-    theta2 = (theta0_plus_theta2 - theta0_sub_theta2) / 2
-    if np.isclose(theta1, 0.0, atol=1e-6):
-        theta2 = theta0 + theta2
-        theta1 = 0.0
-        theta0 = 0.0
-    if theta0 < 0:
-        theta0 += 2 * np.pi
-    if theta1 < 0:
-        theta1 += 2 * np.pi
-    if theta2 < 0:
-        theta2 += 2 * np.pi
-    return theta0, theta1, theta2

@@ -12,8 +12,10 @@ from xyz.gates.types import (
     UnitaryTrait,
     ControlledTrait,
     MultiControlledTrait,
-    _unitary_zyz_decomposition as _unitary_zyz_decomposition_impl,
-    _to_special_unitary as _to_special_unitary_impl,
+)
+from xyz.decomposition.zyz import (
+    to_special_unitary,
+    unitary_zyz_decomposition,
 )
 from xyz.gates.base import Gate
 
@@ -23,8 +25,6 @@ UnitaryGate = UnitaryTrait
 RotationGate = RotationTrait
 ControlledGate = ControlledTrait
 MultiControlledGate = MultiControlledTrait
-to_special_unitary = _to_special_unitary_impl
-unitary_zyz_decomposition = _unitary_zyz_decomposition_impl
 
 
 # Phase 2: QGate becomes an alias for the new ABC; Phase 3 deletes the
