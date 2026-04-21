@@ -229,9 +229,8 @@ def _prepare_state_rec(
     worst_num_gates = worst_candidate.num_gates
     best_num_gates = best_candidate.num_gates
 
-    if stats is not None:
-        stats.num_saved_gates_decision += worst_num_gates - best_num_gates
-        stats.num_methods[best_method] = stats.num_methods.get(best_method, 0) + 1
+    stats.num_saved_gates_decision += worst_num_gates - best_num_gates
+    stats.num_methods[best_method] = stats.num_methods.get(best_method, 0) + 1
 
     return best_gates, best_num_gates
 
