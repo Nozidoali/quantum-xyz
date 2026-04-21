@@ -116,8 +116,9 @@ def _prepare_state_rec(
         stats.time_support_reduction += timer.time()
 
     if param.enable_reindex:
-        state, circuit = reindex_circuit(circuit, state)
-        raise NotImplementedError("reindexing is not implemented yet")
+        raise NotImplementedError(
+            "enable_reindex is not implemented; leave the flag at its default."
+        )
 
     # get the states
     supports = state.get_supports()

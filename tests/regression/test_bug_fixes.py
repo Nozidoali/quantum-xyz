@@ -126,3 +126,35 @@ def test_prepare_state_with_stats_none_still_works():
     circuit = xyz.prepare_state(_trivial_state(), map_gates=True, stats=None)
     # A cardinality-1 trivial state produces a valid circuit with 0 CNOTs.
     assert circuit.get_cnot_cost() == 0
+
+
+def test_enable_reindex_raises_before_side_effect():
+    """Bug 6: enable_reindex=True path calls reindex_circuit(), then raises
+    NotImplementedError unconditionally. The reindex call should NOT happen
+    at all — the raise must come first.
+    """
+    param = StatePreparationParameters()
+    param.enable_reindex = True
+
+    # Patch reindex_circuit to record whether it was called. The fix means
+    # NotImplementedError must be raised before the call site is reached.
+    import sys
+    prepare_mod = sys.modules["xyz.algorithms.initialization.prepare_state"]
+
+    called = {"n": 0}
+    original = prepare_mod.reindex_circuit
+
+    def spy(*args, **kwargs):
+        called["n"] += 1
+        return original(*args, **kwargs)
+
+    prepare_mod.reindex_circuit = spy
+    try:
+        with pytest.raises(NotImplementedError):
+            xyz.prepare_state(_trivial_state(), map_gates=True, param=param)
+    finally:
+        prepare_mod.reindex_circuit = original
+
+    assert called["n"] == 0, (
+        f"reindex_circuit was called {called['n']} time(s) before the raise"
+    )
