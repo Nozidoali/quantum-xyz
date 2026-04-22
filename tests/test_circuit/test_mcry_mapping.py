@@ -2,6 +2,7 @@ import json
 
 import numpy as np
 import xyz
+from xyz.gates import MCRY
 
 
 def test_mcmy_mapping(num_qubits: int = 3):
@@ -10,7 +11,7 @@ def test_mcmy_mapping(num_qubits: int = 3):
     control_qubits = [circuit.qubit_at(i) for i in range(num_qubits - 1)]
     control_phases = [0 for i in range(num_qubits - 1)]
 
-    gate = xyz.MCRY(
+    gate = MCRY(
         0.5 * np.pi, control_qubits, control_phases, circuit.qubit_at(num_qubits - 1)
     )
 

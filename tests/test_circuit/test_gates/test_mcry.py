@@ -8,7 +8,8 @@ Last Modified time: 2024-04-23 07:30:46
 """
 
 import numpy as np
-from xyz import MCRY, QBit, QState, quantize_state
+from xyz import QState, quantize_state
+from xyz.gates import MCRY, QBit
 
 
 def test_mcry_1():

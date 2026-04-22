@@ -11,6 +11,7 @@ Last Modified time: 2023-09-13 10:11:20
 
 import numpy as np
 import xyz
+from xyz.gates import Gate, MCRY, QGateType
 
 
 def test_mapping():
@@ -18,7 +19,7 @@ def test_mapping():
     circuit = xyz.QCircuit(5, map_gates=True)
 
     circuit.add_gate(
-        xyz.MCRY(
+        MCRY(
             np.pi / 2,
             [
                 circuit.qubit_at(1),
@@ -32,11 +33,11 @@ def test_mapping():
     )
 
     for gate in circuit.get_gates():
-        gate: xyz.Gate
+        gate: Gate
         assert gate.qgate_type in [
-            xyz.QGateType.CX,
-            xyz.QGateType.X,
-            xyz.QGateType.RY,
+            QGateType.CX,
+            QGateType.X,
+            QGateType.RY,
         ]
 
     # circuit = circuit.to_qiskit()

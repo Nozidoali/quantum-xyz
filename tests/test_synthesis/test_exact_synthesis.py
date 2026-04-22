@@ -4,7 +4,8 @@ from itertools import combinations
 import numpy as np
 import pytest
 
-from xyz import prepare_state, QState, quantize_state, rand_state, simulate_circuit
+from xyz import prepare_state, QState, quantize_state, simulate_circuit
+from xyz.state import rand_state
 
 N_TESTS = 1
 

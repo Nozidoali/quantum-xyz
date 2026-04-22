@@ -9,6 +9,7 @@ Last Modified time: 2023-11-17 14:45:03
 
 import numpy as np
 import xyz
+from xyz.state import get_most_frequent_theta, get_ry_angles
 
 
 def test_thetas():
@@ -17,8 +18,8 @@ def test_thetas():
 
     state = xyz.quantize_state(state_vector)
 
-    thetas = xyz.get_ry_angles(state, 0)
-    best_theta = xyz.get_most_frequent_theta(state, 0)
+    thetas = get_ry_angles(state, 0)
+    best_theta = get_most_frequent_theta(state, 0)
 
     assert np.isclose(thetas[0], -np.pi / 2)
     assert best_theta == -np.pi / 2

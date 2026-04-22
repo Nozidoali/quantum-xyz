@@ -1,12 +1,14 @@
 import numpy as np
 import xyz
+from xyz.gates import CRY, CX
+from xyz.synthesis import get_state_transitions
 
 
 def test_state_transitions_1():
     state_vector = "0.5*|00>+0.5*|01>+0.5*|10>+0.5*|11>"
     state = xyz.quantize_state(state_vector)
     circuit = xyz.QCircuit(2)
-    transitions = xyz.get_state_transitions(circuit, state)
+    transitions = get_state_transitions(circuit, state)
 
     assert len(transitions) == 1, "len(transitions) = %s" % len(transitions)
     new_state, gates = transitions[0]
@@ -23,7 +25,7 @@ def test_state_transitions_2():
     state_vector = "0.5*|00>+0.5*|11>"
     state = xyz.quantize_state(state_vector)
     circuit = xyz.QCircuit(2)
-    transitions = xyz.get_state_transitions(circuit, state)
+    transitions = get_state_transitions(circuit, state)
 
     assert len(transitions) == 1, "len(transitions) = %s" % len(transitions)
     new_state, gates = transitions[0]
@@ -46,16 +48,16 @@ def test_state_transitions_3():
     state_vector = "0.5*|00>+0.5*|01>+0.5*|11>"
     state = xyz.quantize_state(state_vector)
     circuit = xyz.QCircuit(2)
-    transitions = xyz.get_state_transitions(circuit, state)
+    transitions = get_state_transitions(circuit, state)
 
     # assert len(transitions) == 1, "len(transitions) = %s" % len(transitions)
     cry_count: int = 0
     cx_count: int = 0
     for new_state, gates in transitions:
         for gate in gates:
-            if isinstance(gate, xyz.CRY):
+            if isinstance(gate, CRY):
                 cry_count += 1
-            elif isinstance(gate, xyz.CX):
+            elif isinstance(gate, CX):
                 cx_count += 1
 
     assert cry_count == 4, "cry_count = %s" % cry_count
