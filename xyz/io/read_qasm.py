@@ -1,12 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding=utf8 -*-
-"""
-Author: Hanyu Wang
-Created time: 2024-04-22 17:42:50
-Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-22 17:53:19
-"""
-
 __all__ = [
     "read_qasm",
 ]

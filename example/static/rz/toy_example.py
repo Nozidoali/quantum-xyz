@@ -1,12 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding=utf8 -*-
-"""
-Author: Hanyu Wang
-Created time: 2024-05-21 15:03:13
-Last Modified by: Hanyu Wang
-Last Modified time: 2024-05-21 15:14:18
-"""
-
 import xyz
 
 if __name__ == "__main__":

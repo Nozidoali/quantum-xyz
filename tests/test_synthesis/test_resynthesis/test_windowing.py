@@ -1,12 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding=utf8 -*-
-"""
-Author: Hanyu Wang
-Created time: 2024-04-23 15:26:47
-Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-23 15:56:09
-"""
-
 import numpy as np
 import xyz
 from xyz.gates import CRY, MCRY, QBit, RY, X

@@ -1,12 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding=utf8 -*-
-"""
-Author: Hanyu Wang
-Created time: 2023-06-22 14:14:19
-Last Modified by: Hanyu Wang
-Last Modified time: 2023-06-22 15:01:37
-"""
-
 __all__ = [
     "SpecialGates",
 ]

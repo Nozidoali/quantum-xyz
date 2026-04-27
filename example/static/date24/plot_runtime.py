@@ -1,12 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding=utf8 -*-
-"""
-Author: Hanyu Wang
-Created time: 2023-09-17 15:49:02
-Last Modified by: Hanyu Wang
-Last Modified time: 2023-09-17 17:33:45
-"""
-
 # pylint: skip-file
 
 import numpy as np

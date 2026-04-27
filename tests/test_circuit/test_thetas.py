@@ -1,12 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding=utf8 -*-
-"""
-Author: Hanyu Wang
-Created time: 2023-11-17 14:19:26
-Last Modified by: Hanyu Wang
-Last Modified time: 2023-11-17 14:45:03
-"""
-
 import numpy as np
 import xyz
 from xyz.state import get_most_frequent_theta, get_ry_angles

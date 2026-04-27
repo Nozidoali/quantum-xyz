@@ -1,12 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding=utf8 -*-
-"""
-Author: Hanyu Wang
-Created time: 2023-09-13 12:02:08
-Last Modified by: Hanyu Wang
-Last Modified time: 2023-09-13 12:04:42
-"""
-
 __all__ = [
     "simulate_circuit",
 ]

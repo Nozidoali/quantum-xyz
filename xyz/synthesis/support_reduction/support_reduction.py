@@ -1,12 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding=utf8 -*-
-"""
-Author: Hanyu Wang
-Created time: 2023-09-10 19:24:34
-Last Modified by: Hanyu Wang
-Last Modified time: 2023-09-10 22:25:33
-"""
-
 __all__ = [
     "support_reduction",
 ]

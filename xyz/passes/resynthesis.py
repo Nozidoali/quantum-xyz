@@ -1,12 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding=utf8 -*-
-"""
-Author: Hanyu Wang
-Created time: 2024-03-17 22:24:18
-Last Modified by: Hanyu Wang
-Last Modified time: 2024-03-18 02:25:07
-"""
-
 __all__ = [
     "LstSqSolverVar",
     "LstSqSolver",

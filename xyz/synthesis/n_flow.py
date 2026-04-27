@@ -1,12 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding=utf8 -*-
-"""
-Author: Hanyu Wang
-Created time: 2023-09-01 12:48:05
-Last Modified by: Hanyu Wang
-Last Modified time: 2023-09-01 13:05:14
-"""
-
 __all__ = [
     "to_controlled_gate",
     "select_pivot_qubit",

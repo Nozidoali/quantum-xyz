@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding=utf8 -*-
 
 from xyz.state.qstate import (
     QState,

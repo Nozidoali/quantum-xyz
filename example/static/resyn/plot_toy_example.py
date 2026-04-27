@@ -1,12 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding=utf8 -*-
-"""
-Author: Hanyu Wang
-Created time: 2024-04-24 10:16:07
-Last Modified by: Hanyu Wang
-Last Modified time: 2024-04-24 16:17:57
-"""
-
 import xyz
 import numpy as np
 
