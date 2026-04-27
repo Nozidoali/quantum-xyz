@@ -33,5 +33,5 @@ if __name__ == "__main__":
             # now we measure the distance between the target state and the actual state
             # state_vector_act = xyz.simulate_circuit(circuit)
             # print("actual state: ", xyz.quantize_state(state_vector_act))
-            n_cnots = sum((g.get_cnot_cost() for g in circuit.get_gates()))
+            n_cnots = sum((g.cnot_cost() for g in circuit.get_gates()))
             print(f"n={n}, k={k}: cnot={n_cnots}")

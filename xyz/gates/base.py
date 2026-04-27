@@ -69,12 +69,3 @@ class AdvancedGate(Gate):
     """Base for gates without a single canonical target qubit (e.g. MCMY).
 
     Subclasses provide `apply`, `cnot_cost`, `qubits` themselves."""
-
-
-class MultiRotationGate:
-    """Container for a list of rotation angles. Not a Gate — no apply/
-    cnot_cost/qubits. Kept for backwards compat; appears unused by the
-    regression suite but may be touched by external scripts."""
-
-    def __init__(self, thetas) -> None:
-        self.thetas = list(thetas)

@@ -39,7 +39,7 @@ if __name__ == "__main__":
             new_window = xyz.resynthesize_window(
                 target_qubit, window, state_begin, state_end
             )
-            n_cnot = sum((gate.get_cnot_cost() for gate in new_window))
+            n_cnot = sum((gate.cnot_cost() for gate in new_window))
 
             # if n_cnot < 2:
             #     continue
